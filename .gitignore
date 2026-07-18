@@ -49,5 +49,12 @@ desktop.ini
 *.bak
 *.old
 
+# Project docs and temporary AI files
+docs/
+jailmeet-2-docs/
+**/jailmeet-2-docs/
+prompt*.txt
+**/prompt*.txt
+
 # Local disabled Git metadata left after permission-blocked cleanup
 .git-disabled-empty-stub/
