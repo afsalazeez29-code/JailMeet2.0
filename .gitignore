@@ -65,3 +65,6 @@ jailmeet-2-docs/
 **/jailmeet-2-docs/
 prompt*.txt
 **/prompt*.txt
+
+# Legacy PHP reference files
+Frontend/**/*.php
