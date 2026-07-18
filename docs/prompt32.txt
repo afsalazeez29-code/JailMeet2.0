@@ -1,0 +1,190 @@
+You are working on the JailMeet 2.0 project.
+
+Project root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0
+
+Goal:
+Completely remove the current accidental local Git setup and restart Git safely from zero, without deleting or changing any project source files.
+
+Important safety rules:
+- Do not delete frontend, backend, docs, assets, package files, database files, or source code.
+- Do not delete the GitHub repository.
+- Remove only the local `.git` repository metadata.
+- Do not run `git add .` until `.gitignore` is created and verified.
+- Stop immediately if the current directory is not exactly the JailMeet2.0 project root.
+
+Steps:
+
+1. If a Git command is still running, stop it with Ctrl+C.
+
+2. Navigate to:
+
+cd "C:\Users\afsal\OneDrive\Desktop\JailMeet2.0"
+
+3. Confirm the current folder:
+
+Get-Location
+
+4. Check whether `.git` exists:
+
+Test-Path .git
+
+5. Show the project files before removal:
+
+Get-ChildItem -Force | Select-Object Name
+
+6. Remove only the local Git metadata:
+
+Remove-Item -Recurse -Force .git
+
+Do not remove any other folder.
+
+7. Verify the old repository is gone:
+
+Test-Path .git
+git status
+
+Expected:
+- `Test-Path .git` returns `False`
+- `git status` returns “not a git repository”
+
+8. Create or replace the root `.gitignore` before initializing Git.
+
+Use:
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Next.js
+.next/
+**/.next/
+out/
+**/out/
+
+# Build output
+dist/
+**/dist/
+build/
+**/build/
+
+# Environment files
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+playwright-report/
+test-results/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.old
+
+9. Verify important folders will be ignored before staging anything.
+
+Run:
+
+git init
+git branch -M main
+
+git check-ignore -v "Frontend/node_modules"
+git check-ignore -v "frontend/node_modules"
+git check-ignore -v "backend/node_modules"
+git check-ignore -v "Frontend/.next"
+git check-ignore -v "frontend/.next"
+
+Only continue when existing `node_modules` and `.next` folders are confirmed ignored.
+
+10. Configure Git identity:
+
+git config --global user.name "afsalazeez29-code"
+git config --global user.email "afsalazeez29@gmail.com"
+
+11. Check for sensitive environment files:
+
+Get-ChildItem -Recurse -Force -File |
+Where-Object {
+  $_.Name -eq ".env" -or $_.Name -like ".env.*"
+} |
+Select-Object FullName
+
+Confirm real `.env` files are ignored and only `.env.example` files may be committed.
+
+12. Stage the project:
+
+git add .
+
+13. Verify forbidden folders are not staged:
+
+git diff --cached --name-only | Select-String "node_modules|\.next|\.env$|dist|build"
+
+Review every match. Do not commit until `node_modules`, `.next`, real `.env` files, and build output are absent.
+
+14. Show staged file count and status:
+
+git status
+git diff --cached --name-only
+
+15. Create the clean first commit:
+
+git commit -m "chore: initialize JailMeet 2.0 repository"
+
+16. Connect the GitHub repository:
+
+git remote add origin https://github.com/afsalazeez29-code/JailMeet2.0.git
+
+If `origin` already exists, use:
+
+git remote set-url origin https://github.com/afsalazeez29-code/JailMeet2.0.git
+
+17. Push:
+
+git push -u origin main
+
+18. Final verification:
+
+git status
+git log --oneline -3
+git remote -v
+git rev-parse --show-toplevel
+
+Expected final state:
+- branch is `main`
+- working tree is clean
+- `origin` points to the JailMeet2.0 GitHub repository
+- no `node_modules`, `.next`, real `.env`, or build folders are committed
+
+Final report:
+1. Whether the old `.git` folder was removed
+2. Whether source files remained untouched
+3. `.gitignore` verification results
+4. Number of staged files
+5. Sensitive or ignored files found
+6. Initial commit result
+7. Remote URL
+8. Push result
+9. Final Git status
+
+Stop if any command could delete project source files.

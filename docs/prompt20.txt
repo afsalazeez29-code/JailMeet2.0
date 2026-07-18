@@ -1,0 +1,1027 @@
+You are working on the JailMeet 2.0 full-stack project.
+
+Project root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0
+
+Frontend root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+Backend root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\backend
+
+Current stack:
+
+Frontend:
+- Next.js App Router
+- React
+- TypeScript
+- Tailwind CSS
+- Legacy Bootstrap/template CSS and assets for migrated UI
+- Shared auth hooks and authenticated request helpers
+- JWT access token stored in localStorage
+
+Backend:
+- Node.js
+- Express.js
+- TypeScript
+- Zod validation
+- JWT authentication
+- bcrypt
+- RBAC middleware
+- Prisma ORM
+- Neon PostgreSQL
+
+Current completed features:
+- Visitor registration
+- Login
+- Role dashboards
+- Visitor profile GET/PATCH
+- Visitor Settings page
+- Shared auth, protected-page, and dashboard hooks
+- Typecheck and build currently pass
+
+Goal:
+Create the complete Visitor Appointment Booking workflow:
+
+Visitor chooses prisoner, date/time, and reason
+→ appointment is created as PENDING
+→ Visitor sees own appointment status
+→ Officer views pending appointments
+→ Officer approves or rejects
+→ Visitor sees the updated final status
+
+Do not redesign the existing role layouts.
+Do not change authentication strategy.
+Do not add unrelated features.
+Do not guess Prisma fields or middleware names without inspecting the project first.
+
+==================================================
+PHASE 1 — INSPECT CURRENT PROJECT
+==================================================
+
+Inspect these backend files first:
+
+- backend/prisma/schema.prisma
+- backend/src/app.ts
+- backend/src/modules/auth/
+- backend/src/modules/dashboard/
+- backend/src/modules/visitor/
+- backend/src/middlewares/
+- backend/src/utils/
+- backend/src/config/
+- current authenticated request type
+- current RBAC middleware
+- current Zod validation pattern
+- current API response/error pattern
+- current Prisma client setup
+- current test scripts
+
+Inspect these frontend files first:
+
+- frontend/app/visitor/layout.tsx
+- frontend/app/visitor/dashboard/page.tsx
+- frontend/app/visitor/settings/page.tsx
+- frontend/app/officer/layout.tsx
+- frontend/app/officer/dashboard/page.tsx
+- frontend/components/legacy/visitor/
+- frontend/components/legacy/officer/
+- frontend/src/hooks/useAuth.ts
+- frontend/src/hooks/useProtectedPage.ts
+- frontend/src/hooks/useDashboard.ts
+- frontend/src/services/auth.service.ts
+- frontend/src/services/visitor.service.ts
+- frontend/src/types/
+- frontend/src/lib/auth.ts
+
+Also inspect any existing Visitor or Officer sidebar links related to:
+
+- appointments
+- booking
+- status
+- pending requests
+- appointment approval
+
+Before coding, confirm:
+
+1. Exact existing Prisma `Appointment` model fields
+2. Exact `AppointmentStatus` enum values
+3. Exact relation fields for:
+   - VisitorProfile
+   - PrisonerProfile
+   - OfficerProfile
+4. Whether prisoner number/identifier already exists
+5. Whether officer assignment already exists
+6. Whether appointments already store:
+   - appointment date/time
+   - reason
+   - status
+   - officer note
+   - createdAt
+   - updatedAt
+7. Whether current dashboard counts already query Appointment data
+
+Do not create duplicate models or fields if they already exist.
+
+==================================================
+PHASE 2 — FINAL FEATURE SCOPE
+==================================================
+
+Implement these APIs:
+
+Visitor:
+- GET /api/visitor/prisoners
+- POST /api/visitor/appointments
+- GET /api/visitor/appointments
+
+Officer:
+- GET /api/officer/appointments
+- PATCH /api/officer/appointments/:appointmentId/status
+
+Implement these frontend routes:
+
+- /visitor/appointments/book
+- /visitor/appointments
+- /officer/appointments
+
+Final workflow:
+
+Visitor opens booking page
+→ loads safe prisoner options
+→ selects prisoner
+→ chooses future date/time
+→ enters reason
+→ submits
+→ backend creates PENDING appointment
+→ Visitor status page shows PENDING
+→ Officer page shows pending request
+→ Officer approves or rejects
+→ Visitor status page shows APPROVED or REJECTED
+
+==================================================
+PHASE 3 — PRISMA MODEL CHECK
+==================================================
+
+Use the existing Appointment model if present.
+
+A suitable model typically contains:
+
+- id
+- visitorId
+- prisonerId
+- officerId
+- appointmentAt or equivalent date/time field
+- reason
+- status
+- officerNote
+- createdAt
+- updatedAt
+
+Do not rename existing fields unnecessarily.
+
+Only modify `schema.prisma` if required fields are genuinely missing.
+
+If Prisma changes are required:
+
+1. Make the smallest safe schema change.
+2. Create a clearly named Prisma migration.
+3. Update the seed only if required.
+4. Preserve existing records where possible.
+5. Run:
+   - prisma format
+   - prisma validate
+   - prisma migrate dev
+   - prisma generate, if required by the current setup
+
+Do not create a migration if the schema already supports the complete workflow.
+
+==================================================
+PHASE 4 — BACKEND MODULE STRUCTURE
+==================================================
+
+Create or extend modules consistent with the current backend architecture.
+
+Preferred scalable structure:
+
+backend/src/modules/appointment/
+├── appointment.routes.ts
+├── appointment.controller.ts
+├── appointment.service.ts
+├── appointment.validation.ts
+├── appointment.types.ts
+└── index.ts
+
+Role-specific route files may remain in:
+
+backend/src/modules/visitor/
+backend/src/modules/officer/
+
+Preferred responsibility split:
+
+- Visitor routes expose visitor appointment endpoints
+- Officer routes expose officer review endpoints
+- Shared appointment service contains Prisma and business logic
+- Shared appointment validation contains request schemas
+
+Follow the project’s existing conventions instead of duplicating patterns.
+
+==================================================
+PHASE 5 — SAFE PRISONER OPTIONS API
+==================================================
+
+Create:
+
+GET /api/visitor/prisoners
+
+Access:
+- authenticated
+- VISITOR role only
+
+Purpose:
+Return safe prisoner options for the booking dropdown.
+
+Use a Prisma `select`.
+
+Return only fields required for selection, such as:
+
+- prisoner profile ID
+- name
+- prisoner number or safe identifier, only if it exists
+- optional safe display field already present in the schema
+
+Do not return:
+
+- password/passwordHash
+- crime details
+- FIR details
+- medical details
+- private legal records
+- internal officer notes
+- account secrets
+- unnecessary personal information
+
+Example response shape:
+
+{
+  "success": true,
+  "message": "Prisoners fetched successfully",
+  "data": [
+    {
+      "id": "prisoner-profile-id",
+      "name": "Prisoner Name",
+      "prisonerNumber": "PR-1001"
+    }
+  ]
+}
+
+Adapt the field names to the actual Prisma schema.
+
+==================================================
+PHASE 6 — CREATE VISITOR APPOINTMENT
+==================================================
+
+Create:
+
+POST /api/visitor/appointments
+
+Access:
+- authenticated
+- VISITOR role only
+
+Request body:
+
+{
+  "prisonerId": "...",
+  "appointmentAt": "2026-07-25T10:30:00.000Z",
+  "reason": "Family visit"
+}
+
+The frontend must not send:
+
+- visitorId
+- officerId
+- status
+- role
+- userId
+- officerNote
+
+Use the authenticated visitor identity from the verified JWT.
+
+Required backend workflow:
+
+1. Verify JWT.
+2. Confirm VISITOR role.
+3. Validate request with Zod.
+4. Resolve authenticated User to VisitorProfile.
+5. Confirm the selected PrisonerProfile exists.
+6. Confirm appointment date/time is in the future.
+7. Check duplicate booking rules.
+8. Create appointment with status PENDING.
+9. Return a safe appointment response.
+
+Zod rules:
+
+prisonerId:
+- required non-empty string
+
+appointmentAt:
+- required ISO datetime string
+- service must confirm it is in the future
+
+reason:
+- trimmed string
+- minimum 5 characters
+- maximum 500 characters
+
+Use a strict object and reject unknown fields.
+
+==================================================
+PHASE 7 — APPOINTMENT BUSINESS RULES
+==================================================
+
+Implement these essential rules:
+
+1. Prisoner must exist.
+2. Appointment must be in the future.
+3. Status must always start as PENDING.
+4. Visitor identity must come from JWT.
+5. Visitor cannot create an appointment for another visitor.
+6. Visitor cannot set status or officerId.
+7. Prevent an obvious duplicate pending appointment.
+
+Recommended duplicate rule:
+
+Reject when the same visitor already has a PENDING appointment for the same prisoner at the same requested date/time.
+
+Return a 409 error such as:
+
+Appointment already exists
+
+Do not add complex prison scheduling rules unless the current project already defines them.
+
+Do not invent visiting-hour rules in this task.
+
+==================================================
+PHASE 8 — GET VISITOR APPOINTMENTS
+==================================================
+
+Create:
+
+GET /api/visitor/appointments
+
+Access:
+- authenticated
+- VISITOR role only
+
+The backend must fetch only appointments belonging to the authenticated visitor.
+
+Do not accept a visitorId query parameter.
+
+Return useful safe fields:
+
+- appointment ID
+- appointment date/time
+- reason
+- status
+- officer note
+- createdAt
+- updatedAt
+- selected prisoner safe details
+
+Example response:
+
+{
+  "success": true,
+  "message": "Appointments fetched successfully",
+  "data": [
+    {
+      "id": "...",
+      "appointmentAt": "...",
+      "reason": "Family visit",
+      "status": "PENDING",
+      "officerNote": null,
+      "createdAt": "...",
+      "updatedAt": "...",
+      "prisoner": {
+        "id": "...",
+        "name": "...",
+        "prisonerNumber": "..."
+      }
+    }
+  ]
+}
+
+Order appointments by newest or most relevant date consistently.
+
+Never return password data or unrelated prisoner details.
+
+==================================================
+PHASE 9 — GET OFFICER APPOINTMENTS
+==================================================
+
+Create:
+
+GET /api/officer/appointments
+
+Access:
+- authenticated
+- OFFICER role only
+
+Support an optional validated status filter:
+
+GET /api/officer/appointments?status=PENDING
+
+Allowed values must match the existing AppointmentStatus enum.
+
+For the first version, officers may view all pending appointments unless the current schema already has an assignment rule that must be enforced.
+
+Return safe review data:
+
+- appointment ID
+- requested date/time
+- reason
+- status
+- officer note
+- createdAt
+- visitor safe details
+- prisoner safe details
+
+Visitor safe details may include:
+
+- visitor profile ID
+- name
+- phone
+
+Prisoner safe details may include:
+
+- prisoner profile ID
+- name
+- prisoner number
+
+Do not return password data or unnecessary private information.
+
+==================================================
+PHASE 10 — OFFICER APPROVE OR REJECT
+==================================================
+
+Create:
+
+PATCH /api/officer/appointments/:appointmentId/status
+
+Access:
+- authenticated
+- OFFICER role only
+
+Request body:
+
+{
+  "status": "APPROVED",
+  "officerNote": "Visit approved"
+}
+
+or:
+
+{
+  "status": "REJECTED",
+  "officerNote": "Requested time is unavailable"
+}
+
+Validation:
+
+status:
+- only APPROVED or REJECTED
+
+officerNote:
+- optional
+- trimmed
+- maximum 500 characters
+
+Reject unknown fields.
+
+Do not allow through this endpoint:
+
+- PENDING
+- visitorId
+- prisonerId
+- appointmentAt
+- reason
+- officerId
+- userId
+- role
+
+Backend workflow:
+
+1. Verify JWT.
+2. Confirm OFFICER role.
+3. Validate appointment ID parameter.
+4. Validate request body.
+5. Resolve authenticated User to OfficerProfile.
+6. Find appointment.
+7. Confirm current status is PENDING.
+8. Update status to APPROVED or REJECTED.
+9. Store authenticated officer profile ID.
+10. Store optional officer note.
+11. Return updated safe appointment.
+
+Allowed transitions:
+
+- PENDING → APPROVED
+- PENDING → REJECTED
+
+Reject repeated review attempts with 409:
+
+Only pending appointments can be reviewed
+
+Do not allow the frontend to choose officerId.
+
+==================================================
+PHASE 11 — BACKEND RESPONSE AND ERROR RULES
+==================================================
+
+Use the project’s existing API response format and error middleware.
+
+Expected errors:
+
+- 400 Invalid appointment data
+- 400 Invalid appointment status
+- 401 Unauthorized
+- 403 Forbidden
+- 404 Prisoner not found
+- 404 Visitor profile not found
+- 404 Officer profile not found
+- 404 Appointment not found
+- 409 Appointment already exists
+- 409 Only pending appointments can be reviewed
+- 500 handled by the existing error middleware
+
+Do not expose:
+
+- Prisma error internals
+- stack traces in production
+- JWT contents
+- password hashes
+
+==================================================
+PHASE 12 — MOUNT ROUTES
+==================================================
+
+Mount routes using the current Express app structure.
+
+Final routes must be:
+
+Visitor:
+- GET /api/visitor/prisoners
+- POST /api/visitor/appointments
+- GET /api/visitor/appointments
+
+Officer:
+- GET /api/officer/appointments
+- PATCH /api/officer/appointments/:appointmentId/status
+
+Reuse existing Visitor and Officer routers if that best matches the project.
+
+Do not create duplicate auth or RBAC middleware.
+
+==================================================
+PHASE 13 — BACKEND TESTS
+==================================================
+
+Create a dedicated test script using the current project test style.
+
+Preferred file:
+
+backend/scripts/test-appointment-workflow.ts
+
+Test at minimum:
+
+1. Visitor can fetch prisoner options.
+2. Prisoner options do not expose sensitive fields.
+3. Visitor can create an appointment.
+4. Created appointment status is PENDING.
+5. Created appointment belongs to the authenticated visitor.
+6. Visitor cannot send visitorId.
+7. Visitor cannot send officerId.
+8. Visitor cannot set status.
+9. Past appointment date is rejected.
+10. Invalid prisoner ID is rejected.
+11. Invalid reason is rejected.
+12. Duplicate pending appointment is rejected.
+13. Visitor can fetch own appointments.
+14. Visitor cannot see another visitor’s appointments.
+15. No token returns 401.
+16. Invalid token returns 401.
+17. Admin cannot use Visitor endpoints.
+18. Officer cannot use Visitor booking endpoint.
+19. Prisoner cannot use Visitor booking endpoint.
+20. Officer can fetch pending appointments.
+21. Visitor cannot access Officer endpoints.
+22. Admin cannot review unless current RBAC explicitly allows it.
+23. Officer can approve a pending appointment.
+24. Officer identity is stored from JWT.
+25. Officer can reject a separate pending appointment.
+26. Invalid status is rejected.
+27. PENDING as review status is rejected.
+28. Reviewed appointment cannot be reviewed again.
+29. Visitor GET reflects APPROVED status.
+30. Visitor GET reflects REJECTED status.
+31. Responses never include password or passwordHash.
+32. Created test data is cleaned up or original data is restored.
+
+Use future test dates that will remain valid during the test run.
+
+Do not permanently alter seed data.
+
+==================================================
+PHASE 14 — FRONTEND TYPES
+==================================================
+
+Create:
+
+frontend/src/types/appointment.ts
+
+Add types matching the real backend response:
+
+- AppointmentStatus
+- PrisonerOption
+- CreateAppointmentInput
+- VisitorAppointment
+- OfficerAppointment
+- ReviewAppointmentInput
+- API response data types as needed
+
+Use the actual field names returned by the backend.
+
+Example status type:
+
+"PENDING" | "APPROVED" | "REJECTED"
+
+Use `string | null` where the backend may return null.
+
+==================================================
+PHASE 15 — FRONTEND SERVICE
+==================================================
+
+Create:
+
+frontend/src/services/appointment.service.ts
+
+Add typed functions:
+
+- getAvailablePrisoners()
+- createVisitorAppointment(payload)
+- getVisitorAppointments()
+- getOfficerAppointments(status?)
+- reviewAppointment(appointmentId, payload)
+
+Map to:
+
+- GET /api/visitor/prisoners
+- POST /api/visitor/appointments
+- GET /api/visitor/appointments
+- GET /api/officer/appointments
+- PATCH /api/officer/appointments/:appointmentId/status
+
+Reuse the existing authenticated request helper.
+
+Do not:
+
+- duplicate the token key
+- create another fetch wrapper
+- create another auth system
+- add Axios unless the project already requires it
+
+==================================================
+PHASE 16 — VISITOR BOOKING PAGE
+==================================================
+
+Create:
+
+frontend/app/visitor/appointments/book/page.tsx
+
+Create reusable components in the active structure, for example:
+
+frontend/components/visitor/AppointmentBookingForm.tsx
+frontend/components/visitor/AppointmentBookingForm.module.css
+
+Use the existing Visitor layout automatically.
+
+The page must:
+
+1. Use `useProtectedPage()`.
+2. Redirect no-token/401 users to /login.
+3. Show Access denied for 403.
+4. Load prisoner options.
+5. Show visible prisoner-loading state.
+6. Show an empty state if no prisoners are available.
+7. Let Visitor choose:
+   - prisoner
+   - date
+   - time
+   - reason
+8. Validate basic input.
+9. Combine date and time into an ISO datetime correctly.
+10. Submit through `createVisitorAppointment`.
+11. Show Booking... while saving.
+12. Disable repeated submission.
+13. Show readable errors.
+14. Show success.
+15. Redirect to:
+   /visitor/appointments
+   after successful creation.
+
+Preserve the existing Visitor UI/layout/classes/assets.
+
+Do not create another sidebar or navbar.
+
+==================================================
+PHASE 17 — TIMEZONE HANDLING
+==================================================
+
+The visitor selects local date and time.
+
+Handle conversion carefully:
+
+- treat the selected browser date/time as local time
+- convert it to ISO before sending
+- backend stores a DateTime
+- frontend formats returned date/time in the user’s local timezone
+
+Do not manually append `Z` to a local datetime string.
+
+Do not send a date-only value if the model expects date and time.
+
+Frontend must reject past local date/time before submitting, while backend also verifies future time.
+
+==================================================
+PHASE 18 — VISITOR APPOINTMENT STATUS PAGE
+==================================================
+
+Create:
+
+frontend/app/visitor/appointments/page.tsx
+
+Create reusable components, for example:
+
+frontend/components/visitor/VisitorAppointmentList.tsx
+frontend/components/visitor/AppointmentStatusCard.tsx
+frontend/components/visitor/VisitorAppointmentList.module.css
+
+The page must:
+
+1. Use protected-page auth behavior.
+2. Fetch only the authenticated visitor’s appointments.
+3. Show loading state.
+4. Show visible API error.
+5. Show empty state.
+6. Display:
+   - prisoner name
+   - prisoner number, if available
+   - requested date/time
+   - reason
+   - status
+   - officer note
+   - created date
+7. Use clear status badges:
+   - PENDING
+   - APPROVED
+   - REJECTED
+8. Support simple frontend-only filters:
+   - All
+   - Pending
+   - Approved
+   - Rejected
+9. Provide a link/button to:
+   /visitor/appointments/book
+10. Preserve Visitor layout and responsive behavior.
+
+Do not fake cancellation or editing.
+
+==================================================
+PHASE 19 — OFFICER APPOINTMENTS PAGE
+==================================================
+
+Create:
+
+frontend/app/officer/appointments/page.tsx
+
+Create reusable components, for example:
+
+frontend/components/officer/OfficerAppointmentList.tsx
+frontend/components/officer/AppointmentReviewModal.tsx
+frontend/components/officer/OfficerAppointmentList.module.css
+
+Use the existing Officer layout automatically.
+
+The page must:
+
+1. Use `useProtectedPage()`.
+2. Enforce Officer UX access.
+3. Fetch pending appointments initially.
+4. Show loading, error, and empty states.
+5. Display:
+   - visitor name
+   - visitor phone
+   - prisoner name
+   - prisoner number, if available
+   - requested date/time
+   - reason
+   - current status
+   - created date
+6. Let Officer:
+   - Approve
+   - Reject
+   - optionally enter an officer note
+7. Show Processing... during review.
+8. Disable duplicate clicks.
+9. Wait for backend success before changing UI.
+10. Refresh or update the list after success.
+11. Show readable success/error messages.
+12. Optionally support status filters if the API supports them.
+13. Preserve the existing Officer UI/layout/classes/assets.
+
+Do not create a new sidebar or redesign the dashboard.
+
+==================================================
+PHASE 20 — SIDEBAR LINK CHECK
+==================================================
+
+Inspect active Visitor and Officer sidebars.
+
+Ensure active links use valid Next.js routes:
+
+Visitor:
+- Book Appointment → /visitor/appointments/book
+- Appointment Status / My Appointments → /visitor/appointments
+
+Officer:
+- Appointments / Appointment Requests → /officer/appointments
+
+Use Next.js `Link` where appropriate.
+
+Preserve:
+
+- text
+- icons
+- classes
+- active styling
+- layout
+- inactive `data-legacy-href` metadata if useful
+
+No active navigation should point to `.php`.
+
+Do not invent additional sidebar links.
+
+==================================================
+PHASE 21 — UI AND CSS RULES
+==================================================
+
+Preserve existing legacy role layouts.
+
+For new feature-specific styling:
+
+- prefer CSS Modules
+- use Tailwind only if already consistent with that page
+- do not add page CSS globally
+- do not load Visitor CSS in the root layout
+- do not load Officer CSS in the root layout
+- do not reintroduce landing CSS globally
+
+Do not redesign:
+
+- Visitor dashboard
+- Officer dashboard
+- role navbar
+- role sidebar
+- login/register pages
+
+==================================================
+PHASE 22 — SECURITY RULES
+==================================================
+
+Must follow:
+
+- Visitor identity comes only from JWT.
+- Officer identity comes only from JWT.
+- Visitor endpoints require VISITOR role.
+- Officer endpoints require OFFICER role.
+- Visitor cannot set status.
+- Visitor cannot set visitorId or officerId.
+- Officer cannot change prisoner or visitor ownership.
+- Officer can only review PENDING appointments.
+- Zod validates bodies, params, and query filters.
+- Unknown fields are rejected.
+- Prisma handles database operations.
+- No password data is returned.
+- No JWT is logged.
+- No ownership ID is trusted from the frontend.
+- Frontend validation is never the only validation.
+
+Reject malicious payloads such as:
+
+{
+  "visitorId": "another-visitor",
+  "officerId": "another-officer",
+  "status": "APPROVED",
+  "role": "ADMIN"
+}
+
+==================================================
+PHASE 23 — FINAL VERIFICATION
+==================================================
+
+Backend:
+
+Run:
+- npm run typecheck
+- relevant Prisma validation commands if schema changed
+- appointment workflow test script
+- existing auth/RBAC tests if the new routes affect shared code
+
+Frontend:
+
+Run:
+- npm run typecheck
+- npm run build
+
+Verify the full workflow:
+
+1. Visitor logs in.
+2. Visitor opens `/visitor/appointments/book`.
+3. Prisoner dropdown loads.
+4. Visitor selects prisoner, future date/time, and reason.
+5. Appointment is created as PENDING.
+6. Visitor is redirected to `/visitor/appointments`.
+7. Visitor sees PENDING status.
+8. Officer logs in.
+9. Officer opens `/officer/appointments`.
+10. Officer sees the pending appointment.
+11. Officer approves it.
+12. Visitor refreshes and sees APPROVED.
+13. Create another test appointment.
+14. Officer rejects it with a note.
+15. Visitor sees REJECTED and the note.
+16. Refresh confirms persisted values.
+17. No role can access another role’s endpoints.
+18. No active appointment navigation points to `.php`.
+19. Existing dashboards still work.
+20. Existing Visitor Settings still works.
+
+==================================================
+STRICT NON-GOALS
+==================================================
+
+Do not:
+
+- add appointment cancellation
+- add appointment editing
+- add rescheduling
+- add notifications/email/SMS
+- add calendar integration
+- add visiting-hour administration
+- add prisoner search beyond the simple selection API
+- add admin appointment management
+- add parole workflow
+- add profile image upload
+- add password change
+- change JWT/localStorage strategy
+- add refresh tokens or cookies
+- redesign role dashboards
+- replace legacy CSS
+- move all components
+- run npm audit fix --force
+- perform unrelated refactors
+
+==================================================
+FINAL REPORT
+==================================================
+
+Report:
+
+1. Existing Appointment Prisma model fields confirmed
+2. Whether a Prisma migration was required
+3. Backend files created
+4. Backend files modified
+5. Frontend files created
+6. Frontend files modified
+7. Visitor prisoner-list API behavior
+8. Visitor appointment POST behavior
+9. Visitor appointment GET behavior
+10. Officer appointment GET behavior
+11. Officer review PATCH behavior
+12. Zod validation rules
+13. Duplicate-booking rule
+14. Status-transition rule
+15. JWT ownership enforcement
+16. VISITOR/OFFICER RBAC behavior
+17. Sidebar routes updated
+18. Backend test result
+19. Backend typecheck result
+20. Frontend typecheck result
+21. Frontend build result
+22. Confirmation of complete PENDING → APPROVED workflow
+23. Confirmation of complete PENDING → REJECTED workflow
+24. Confirmation that Visitor sees persisted final status
+25. Risks or future improvements
+
+Stop after completing the Visitor Appointment Booking and Officer Review workflow.
+
+Do not continue to parole, notifications, password change, Cloudinary, premium UI redesign, or unrelated features without explicit confirmation.

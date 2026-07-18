@@ -1,0 +1,638 @@
+You are working on the JailMeet 2.0 full-stack project.
+
+Project root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0
+
+Frontend:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+Backend:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\backend
+
+Current status:
+- `/visitor/settings` exists.
+- It currently uses `/api/auth/me`.
+- It only displays:
+  - id
+  - name
+  - email
+  - role
+- The page is read-only.
+- Visitor registration already creates a `User` and related `VisitorProfile`.
+- The backend uses Express, TypeScript, Zod, JWT, RBAC, Prisma, and Neon PostgreSQL.
+- The frontend uses Next.js, React, TypeScript, shared auth hooks, and shared API services.
+- Typecheck and build currently pass.
+
+Goal:
+Make `/visitor/settings` fully functional by creating secure Visitor Profile APIs and connecting the existing settings page to them.
+
+Create:
+
+GET /api/visitor/profile
+PATCH /api/visitor/profile
+
+These routes must work only for authenticated users with the `VISITOR` role.
+
+The editable fields are:
+
+- phone
+- address
+- state
+- zip
+
+The response may also include these read-only identity fields:
+
+- id
+- name
+- email
+- role
+
+Do not add name or email editing in this task.
+
+==================================================
+PHASE 1 — INSPECT CURRENT PROJECT
+==================================================
+
+Before modifying code, inspect:
+
+Backend:
+- backend/prisma/schema.prisma
+- backend/src/app.ts
+- backend/src/modules/auth/
+- backend/src/middlewares/
+- backend/src/utils/
+- current JWT-authenticated request type
+- current RBAC middleware
+- current Zod validation pattern
+- current error-handling pattern
+- current Prisma client setup
+
+Frontend:
+- frontend/app/visitor/settings/page.tsx
+- frontend/components/visitor/VisitorSettingsForm.tsx
+- frontend/components/visitor/VisitorSettingsForm.module.css
+- frontend/src/hooks/useAuth.ts
+- frontend/src/hooks/useProtectedPage.ts
+- frontend/src/services/auth.service.ts
+- frontend/src/types/auth.ts
+- frontend/src/lib/auth.ts
+
+Confirm the exact Prisma field names and existing middleware names before writing code.
+
+Do not guess paths, types, or response shapes when the project already defines them.
+
+==================================================
+PHASE 2 — CREATE BACKEND VISITOR MODULE
+==================================================
+
+Create a Visitor feature module consistent with the current backend structure.
+
+Preferred files:
+
+backend/src/modules/visitor/
+├── visitor.routes.ts
+├── visitor.controller.ts
+├── visitor.service.ts
+├── visitor.validation.ts
+└── index.ts
+
+Use the project’s actual naming conventions if they differ slightly.
+
+Responsibilities:
+
+visitor.routes.ts
+- define GET /profile
+- define PATCH /profile
+- apply authentication middleware
+- apply VISITOR-only RBAC
+- apply PATCH validation
+
+visitor.controller.ts
+- read authenticated user ID from the verified JWT request
+- call the service
+- return the project’s standard API response
+- pass errors to the existing error middleware
+
+visitor.service.ts
+- query Prisma
+- fetch User + VisitorProfile
+- update VisitorProfile
+- never return password data
+
+visitor.validation.ts
+- validate only phone, address, state, and zip
+- support partial PATCH updates
+- reject an empty PATCH body
+- reject unknown or forbidden fields
+
+index.ts
+- export the router/module consistently
+
+==================================================
+PHASE 3 — GET VISITOR PROFILE
+==================================================
+
+Create:
+
+GET /api/visitor/profile
+
+Security flow:
+
+Request
+→ JWT authentication middleware
+→ authenticated user added to request
+→ RBAC confirms `VISITOR`
+→ controller reads authenticated user ID
+→ service queries Prisma
+→ safe profile response returned
+
+Important:
+Use only the authenticated ID from the verified JWT.
+
+Do not read user ownership from:
+
+- query parameters
+- URL parameters
+- request body
+- frontend-provided userId
+
+Do not create an endpoint such as:
+
+/api/visitor/profile?userId=123
+
+Recommended Prisma query:
+Fetch the authenticated User and related VisitorProfile using a safe `select`.
+
+Return only:
+
+user:
+- id
+- name
+- email
+- role
+
+visitorProfile:
+- phone
+- address
+- state
+- zip
+
+Never return:
+
+- password
+- passwordHash
+- JWT
+- internal secrets
+- unrelated private fields
+
+Expected success response shape:
+
+{
+  "success": true,
+  "message": "Visitor profile fetched successfully",
+  "data": {
+    "user": {
+      "id": "...",
+      "name": "...",
+      "email": "...",
+      "role": "VISITOR"
+    },
+    "visitorProfile": {
+      "phone": "...",
+      "address": "...",
+      "state": "...",
+      "zip": "..."
+    }
+  }
+}
+
+If the authenticated User or VisitorProfile does not exist, return the project-standard 404 error:
+
+Visitor profile not found
+
+==================================================
+PHASE 4 — PATCH VISITOR PROFILE
+==================================================
+
+Create:
+
+PATCH /api/visitor/profile
+
+Accepted fields:
+
+{
+  "phone": "9876543210",
+  "address": "Nedumangad",
+  "state": "Kerala",
+  "zip": "695541"
+}
+
+All fields should be optional for PATCH, but at least one valid field must be provided.
+
+Use Zod validation.
+
+Validation rules:
+
+phone:
+- optional
+- trimmed string
+- exactly 10 digits
+
+address:
+- optional
+- trimmed string
+- reasonable maximum length, such as 255
+- allow an empty string only if the current project allows clearing optional values
+
+state:
+- optional
+- trimmed string
+- reasonable maximum length, such as 100
+
+zip:
+- optional
+- trimmed string
+- exactly 6 digits when provided
+
+Reject:
+
+- empty body
+- userId
+- role
+- password
+- passwordHash
+- email
+- name
+- profile image
+- any unsupported field
+
+Prefer a strict Zod object or equivalent behavior so unsupported fields are rejected rather than silently trusted.
+
+PATCH security flow:
+
+Frontend sends edited data
+→ JWT authentication
+→ VISITOR RBAC
+→ Zod validation
+→ controller reads `req.user.id`
+→ service confirms profile exists
+→ Prisma updates only that VisitorProfile
+→ safe updated profile response returned
+
+Do not allow a visitor to update another visitor.
+
+==================================================
+PHASE 5 — MOUNT THE ROUTES
+==================================================
+
+Mount the Visitor router in the Express app using:
+
+/api/visitor
+
+Final routes must be:
+
+GET /api/visitor/profile
+PATCH /api/visitor/profile
+
+Use the existing middleware and app structure.
+
+Do not duplicate authentication middleware or create a second token system.
+
+==================================================
+PHASE 6 — BACKEND ERROR BEHAVIOR
+==================================================
+
+Preserve the project’s existing API error format.
+
+Expected behavior:
+
+No token:
+- 401 Unauthorized
+
+Invalid or expired token:
+- 401 Unauthorized
+
+Authenticated non-visitor:
+- 403 Forbidden
+
+Invalid PATCH body:
+- 400 Invalid visitor profile data
+
+Missing profile:
+- 404 Visitor profile not found
+
+Unexpected failure:
+- handled by existing error middleware
+
+Validation errors should be readable by the frontend.
+
+Do not expose Prisma internals or stack traces in production responses.
+
+==================================================
+PHASE 7 — CREATE FRONTEND TYPES
+==================================================
+
+Create:
+
+frontend/src/types/visitor.ts
+
+Add typed structures for:
+
+- VisitorProfile
+- VisitorProfileResponse
+- UpdateVisitorProfileInput
+
+Use the exact API response shape implemented by the backend.
+
+Example fields:
+
+VisitorProfile:
+- phone
+- address
+- state
+- zip
+
+VisitorProfileResponse:
+- user
+- visitorProfile
+
+UpdateVisitorProfileInput:
+- optional phone
+- optional address
+- optional state
+- optional zip
+
+Use `string | null` where the backend can return null.
+
+==================================================
+PHASE 8 — CREATE FRONTEND SERVICE
+==================================================
+
+Create:
+
+frontend/src/services/visitor.service.ts
+
+Add:
+
+- getVisitorProfile()
+- updateVisitorProfile(payload)
+
+Reuse the existing authenticated request helper from `auth.service.ts` or the correct shared API helper.
+
+Do not:
+
+- duplicate the localStorage token key
+- create a second fetch wrapper
+- create another auth system
+- use Axios unless the project already uses it here
+
+Expected functions:
+
+getVisitorProfile()
+→ GET /api/visitor/profile
+
+updateVisitorProfile(payload)
+→ PATCH /api/visitor/profile
+→ JSON body
+
+Use typed request and response values.
+
+==================================================
+PHASE 9 — UPDATE VISITOR SETTINGS PAGE
+==================================================
+
+Modify:
+
+frontend/app/visitor/settings/page.tsx
+
+and/or:
+
+frontend/components/visitor/VisitorSettingsForm.tsx
+
+Preserve the current Visitor layout, UI, CSS classes, and assets.
+
+New page flow:
+
+/visitor/settings
+→ useProtectedPage()
+→ getVisitorProfile()
+→ populate form
+→ visitor edits phone/address/state/zip
+→ updateVisitorProfile()
+→ show success message
+→ update the form with returned saved data
+
+The page must continue handling:
+
+No token:
+- redirect to /login
+
+401:
+- clear token and redirect to /login
+
+403:
+- show Access denied
+
+Loading:
+- show visible profile loading state
+
+Fetch error:
+- show visible error state
+
+Saving:
+- disable Save button
+- show Saving...
+
+Success:
+- show a visible success message
+
+Validation/API failure:
+- show readable error message
+
+==================================================
+PHASE 10 — FORM RULES
+==================================================
+
+Editable:
+
+- phone
+- address
+- state
+- zip
+
+Read-only:
+
+- id, only if currently displayed
+- name
+- email
+- role
+
+Do not make name/email/role editable.
+
+Initialize form state from the GET response:
+
+phone:
+- profile phone or empty string
+
+address:
+- profile address or empty string
+
+state:
+- profile state or empty string
+
+zip:
+- profile zip or empty string
+
+On Save:
+
+1. clear old success/error messages
+2. validate basic frontend formatting
+3. call PATCH
+4. keep backend validation authoritative
+5. show saving state
+6. replace form values with returned saved values
+7. show success message
+
+Do not send unchanged identity fields.
+
+Do not send userId.
+
+==================================================
+PHASE 11 — SECURITY RULES
+==================================================
+
+Must follow:
+
+- use authenticated JWT identity
+- allow only VISITOR
+- validate with Zod
+- update only phone/address/state/zip
+- never accept password in this endpoint
+- never update role
+- never update userId
+- never return passwordHash
+- never trust frontend validation alone
+- use Prisma queries only
+- never log passwords or JWTs
+- never store profile data in URL parameters
+
+The following payload must be rejected:
+
+{
+  "userId": "another-user",
+  "role": "ADMIN",
+  "password": "test123"
+}
+
+==================================================
+PHASE 12 — TESTING
+==================================================
+
+Create or extend backend tests using the project’s current test style.
+
+Test at minimum:
+
+1. Visitor can fetch own profile
+2. Visitor receives User + VisitorProfile
+3. Visitor can update phone
+4. Visitor can update address
+5. Visitor can update state
+6. Visitor can update zip
+7. Partial PATCH works
+8. Invalid phone returns 400
+9. Invalid zip returns 400
+10. Empty PATCH returns 400
+11. No token returns 401
+12. Invalid token returns 401
+13. Admin returns 403
+14. Officer returns 403
+15. Prisoner returns 403
+16. userId/role/password fields are rejected
+17. Response never contains password or passwordHash
+18. GET after PATCH returns persisted updated data
+
+Do not make tests depend permanently on changed seed data.
+Restore test data if necessary.
+
+==================================================
+PHASE 13 — VERIFICATION
+==================================================
+
+Backend:
+Run the project’s existing backend commands, including:
+
+npm run typecheck
+
+Run the relevant backend test script.
+
+Frontend:
+Run from the frontend directory:
+
+npm run typecheck
+npm run build
+
+Also verify manually or through testable logic:
+
+- `/visitor/settings` loads profile data
+- phone/address/state/zip populate correctly
+- Save Changes persists data
+- refreshing the page shows saved data
+- invalid phone is rejected
+- invalid zip is rejected
+- no token redirects to login
+- non-visitor access is blocked
+- no password data appears in responses
+- current Visitor layout remains unchanged
+
+==================================================
+STRICT NON-GOALS
+==================================================
+
+Do not:
+
+- add name editing
+- add email editing
+- add password change
+- add profile-image upload
+- add Cloudinary
+- add appointment functionality
+- modify landing/login/register design
+- redesign Visitor Settings
+- change JWT/localStorage strategy
+- add cookies or refresh tokens
+- modify unrelated Prisma models
+- create unnecessary migrations if the fields already exist
+- move all frontend components
+- replace legacy CSS
+- run npm audit fix --force
+- perform unrelated refactors
+
+==================================================
+FINAL REPORT
+==================================================
+
+Report:
+
+1. Existing Prisma relationship confirmed
+2. Backend files created
+3. Backend files modified
+4. Frontend files created
+5. Frontend files modified
+6. GET API behavior
+7. PATCH API behavior
+8. Zod validation rules
+9. JWT ownership enforcement
+10. RBAC behavior
+11. Fields editable
+12. Fields kept read-only
+13. Security protections
+14. Backend test results
+15. Backend typecheck result
+16. Frontend typecheck result
+17. Frontend build result
+18. Confirmation that saved data persists after refresh
+19. Any risks or future work
+
+Stop after completing the Visitor Profile Settings feature.
+
+Do not continue to password change, profile image upload, appointment workflow, or unrelated work without explicit confirmation.

@@ -1,0 +1,400 @@
+You are working on the JailMeet 2.0 frontend architecture cleanup.
+
+Project root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0
+
+Frontend root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+Current completed status:
+- Shared API types are already created.
+- Shared auth and dashboard services are already created.
+- Visitor, Admin, Officer, and Prisoner dashboards all use the shared services.
+- All four dashboards currently preserve their old UI/UX.
+- Typecheck and build currently pass.
+- Repeated token/auth/401/403/loading/error logic still exists inside dashboard pages.
+- The next goal is to centralize that repeated logic safely using reusable React hooks.
+
+Read and inspect these files before modifying code:
+
+- frontend/src/types/api.ts
+- frontend/src/types/auth.ts
+- frontend/src/types/dashboard.ts
+- frontend/src/services/auth.service.ts
+- frontend/src/services/dashboard.service.ts
+- frontend/src/lib/auth.ts
+- frontend/app/visitor/dashboard/page.tsx
+- frontend/app/admin/dashboard/page.tsx
+- frontend/app/officer/dashboard/page.tsx
+- frontend/app/prisoner/dashboard/page.tsx
+
+Goal:
+Create shared frontend hooks for protected authenticated pages and dashboard loading, then refactor all four dashboards to use those hooks while preserving all current behavior and UI.
+
+Do not redesign anything.
+Do not change CSS loading.
+Do not move components.
+Do not add new workflow pages.
+Do not modify backend code.
+
+==================================================
+PHASE 1 — CREATE SHARED AUTH HOOK
+==================================================
+
+Create:
+
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\src\hooks\useAuth.ts
+
+Purpose:
+Centralize authenticated-user loading and basic auth state.
+
+Requirements:
+
+1. The hook must be a client-side React hook.
+2. Reuse:
+   - getCurrentUser() from auth.service.ts
+   - existing token helpers from src/lib/auth.ts
+3. Do not duplicate the localStorage token key.
+4. Expose a stable typed result such as:
+   - user
+   - isLoading
+   - error
+   - isAuthenticated
+   - isForbidden if appropriate
+   - reload or refresh function if useful
+5. No token:
+   - report unauthenticated state
+   - do not invent a user
+6. 401:
+   - clear stored token
+   - expose unauthenticated state
+7. 403:
+   - expose forbidden/access-denied state
+8. Other network/API errors:
+   - expose a visible error value
+9. Avoid redirecting directly inside this low-level hook unless absolutely required.
+10. Do not swallow errors silently.
+11. Prevent state updates after unmount.
+12. Avoid duplicate API requests caused by unstable dependencies.
+13. Use existing shared API error class/status information.
+14. Do not modify service files unless a very small type correction is required.
+
+==================================================
+PHASE 2 — CREATE PROTECTED PAGE HOOK
+==================================================
+
+Create:
+
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\src\hooks\useProtectedPage.ts
+
+Purpose:
+Centralize redirect behavior for protected frontend routes.
+
+Requirements:
+
+1. Use Next.js App Router navigation APIs.
+2. Reuse useAuth().
+3. If no token or auth returns 401:
+   - clear token if not already cleared
+   - redirect to /login
+4. For 403:
+   - do not redirect automatically
+   - expose Access denied state to the page
+5. Expose:
+   - user
+   - isLoading
+   - error
+   - isForbidden
+   - isReady
+6. Do not render protected content before auth has finished.
+7. Avoid redirect loops.
+8. Avoid repeated router.push/replace calls.
+9. Prefer router.replace("/login") for auth redirects.
+10. Keep the hook generic enough for Admin, Visitor, Officer, and Prisoner dashboards.
+11. Do not hardcode role-specific dashboard paths here.
+12. Do not move role authorization enforcement out of the backend. Frontend checks are only UX protection.
+
+==================================================
+PHASE 3 — CREATE GENERIC DASHBOARD HOOK
+==================================================
+
+Create:
+
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\src\hooks\useDashboard.ts
+
+Purpose:
+Centralize dashboard-service loading, loading state, error state, and 401/403 handling.
+
+Requirements:
+
+1. Implement as a generic typed hook.
+2. It should accept a dashboard loader function, for example:
+   () => getVisitorDashboard()
+3. It should work with:
+   - getAdminDashboard()
+   - getVisitorDashboard()
+   - getOfficerDashboard()
+   - getPrisonerDashboard()
+4. Expose:
+   - data
+   - isLoading
+   - error
+   - isForbidden
+   - reload
+5. 401:
+   - clear stored token
+   - expose an unauthenticated condition so the page can redirect through protected-page logic
+6. 403:
+   - expose isForbidden
+7. Other errors:
+   - expose a visible error message/value
+8. Prevent state updates after unmount.
+9. Avoid infinite refetch loops.
+10. Avoid duplicate requests from unstable function identity.
+11. Use typed generics and existing shared API error types.
+12. Do not put UI markup inside the hook.
+13. Do not redirect directly inside this hook unless necessary to preserve current behavior.
+14. Do not default dashboard values inside the hook; pages may keep using ?? 0 for display.
+15. Support a controlled reload function.
+
+==================================================
+PHASE 4 — REFACTOR VISITOR DASHBOARD FIRST
+==================================================
+
+Modify only:
+
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\app\visitor\dashboard\page.tsx
+
+Use the new hooks:
+
+- useProtectedPage()
+- useDashboard(getVisitorDashboard)
+
+Preserve exactly:
+
+- Existing Visitor layout
+- Existing Sneat/Boxicons UI
+- Existing cards
+- Existing CSS classes
+- Existing assets
+- Existing route
+- Loading message/state
+- Access denied state
+- Visible error state
+- Stats:
+  - myAppointments
+  - pendingAppointments
+  - approvedAppointments
+  - rejectedAppointments
+- Missing values render as 0
+- No token redirects to /login
+- 401 clears token and redirects to /login
+- 403 shows Access denied
+
+Do not redesign or simplify the UI.
+
+After Visitor refactor, run:
+
+npm run typecheck
+npm run build
+
+If either fails, fix only issues caused by this refactor before proceeding.
+
+==================================================
+PHASE 5 — REFACTOR ADMIN DASHBOARD
+==================================================
+
+After Visitor passes, modify only:
+
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\app\admin\dashboard\page.tsx
+
+Use:
+
+- useProtectedPage()
+- useDashboard(getAdminDashboard)
+
+Preserve exactly:
+
+- Existing Kaiadmin UI
+- Existing layout/cards/classes/assets
+- No-token redirect
+- 401 handling
+- 403 Access denied
+- Loading state
+- Error state
+- Fields:
+  - totalUsers
+  - totalVisitors
+  - totalOfficers
+  - totalPrisoners
+  - totalAppointments
+  - pendingAppointments
+  - pendingParoleRequests
+- Missing values render as 0
+
+Run typecheck and build after Admin refactor.
+
+==================================================
+PHASE 6 — REFACTOR OFFICER DASHBOARD
+==================================================
+
+After Admin passes, modify only:
+
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\app\officer\dashboard\page.tsx
+
+Use:
+
+- useProtectedPage()
+- useDashboard(getOfficerDashboard)
+
+Preserve exactly:
+
+- Existing DeskApp UI
+- Existing cards/classes/assets
+- No-token redirect
+- 401 handling
+- 403 Access denied
+- Loading state
+- Error state
+- Fields:
+  - totalPrisoners
+  - pendingAppointments
+  - approvedAppointments
+  - rejectedAppointments
+  - pendingParoleRequests
+- Use approvedAppointments exactly
+- Missing values render as 0
+
+Run typecheck and build after Officer refactor.
+
+==================================================
+PHASE 7 — REFACTOR PRISONER DASHBOARD
+==================================================
+
+After Officer passes, modify only:
+
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\app\prisoner\dashboard\page.tsx
+
+Use:
+
+- useProtectedPage()
+- useDashboard(getPrisonerDashboard)
+
+Preserve exactly:
+
+- Existing Dashtreme UI
+- Existing card/table classes
+- Existing assets
+- Existing identity display from /auth/me:
+  - id
+  - name
+  - email
+  - role
+- No-token redirect
+- 401 handling
+- 403 Access denied
+- Loading state
+- Error state
+- Fields:
+  - myParoleRequests
+  - pendingParoleRequests
+  - approvedParoleRequests
+  - rejectedParoleRequests
+  - myAppointments
+- Use approvedParoleRequests exactly
+- Missing values render as 0
+
+Do not invent unavailable profile fields such as:
+- age
+- crime
+- jail name
+- cell block
+- FIR details
+- medical details
+- parole end date
+- visitor names/dates
+
+Run typecheck and build after Prisoner refactor.
+
+==================================================
+AUTH + DASHBOARD COORDINATION RULES
+==================================================
+
+Avoid duplicate auth calls.
+
+Current dashboard pages previously called both:
+
+- getCurrentUser()
+- role dashboard service
+
+The final hook design should avoid unnecessary duplicate requests while still preserving identity data where needed.
+
+Rules:
+
+1. useProtectedPage() should own current-user loading.
+2. useDashboard() should own dashboard-data loading.
+3. Pages should not call services directly after refactor.
+4. Visitor/Admin/Officer pages may ignore user data if not displayed.
+5. Prisoner page should use user data from useProtectedPage().
+6. Do not create multiple getCurrentUser() calls per render.
+7. Do not refetch continuously because of changing callback references.
+8. Use useCallback/useMemo where required, but avoid unnecessary complexity.
+9. Preserve backend RBAC as the final security authority.
+
+==================================================
+STRICT NON-GOALS
+==================================================
+
+Do not:
+
+- Change any dashboard UI or visual design.
+- Change CSS imports or CSS scope.
+- Fix global landing CSS yet.
+- Move components into src/components.
+- Add new pages.
+- Add visitor booking, appointment, parole, or prisoner workflows.
+- Modify backend.
+- Modify Prisma schema, migrations, or seed.
+- Change JWT storage from localStorage.
+- Add cookies or refresh tokens.
+- Add Axios.
+- Delete legacy assets.
+- Delete PHP reference files.
+- Run npm audit fix --force.
+- Refactor unrelated landing/login/register code.
+- Change route names.
+
+==================================================
+FINAL VERIFICATION
+==================================================
+
+After all four dashboards are refactored, run from:
+
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+Commands:
+
+npm run typecheck
+npm run build
+
+If build encounters only the known Windows sandbox spawn EPERM issue, rerun the same build in the approved environment without changing code.
+
+Final report must include:
+
+1. Hooks created
+2. Files modified
+3. Hook responsibilities
+4. How no-token behavior works
+5. How 401 behavior works
+6. How 403 behavior works
+7. How loading and errors work
+8. Confirmation that pages no longer duplicate direct auth/dashboard request logic
+9. Exact fields preserved for each dashboard
+10. Confirmation that UI/layout/classes/assets are unchanged
+11. Typecheck result
+12. Build result
+13. Any risks or follow-up work found
+
+Stop after this task.
+
+Do not continue to CSS cleanup, component moving, premium UI work, or new workflow pages without explicit confirmation.

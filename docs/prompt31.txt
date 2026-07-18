@@ -1,0 +1,115 @@
+Fix two confirmed landing page issues in JailMeet 2.0. Do NOT change any UI, design,
+layout, colors, or unrelated content — this is a technical path-fix and script-
+initialization fix ONLY. This exact fix was already implemented and verified working
+once before, but was later reverted by an undo operation — re-apply it correctly and
+do not let it get rolled back again.
+
+Project root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+Exact known locations (already identified — do not search blindly):
+- app/page.tsx (line 117)
+- components/legacy/landing/LandingAssets.tsx (line 5)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MANDATORY SAFETY STEP — BEFORE ANY EDIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+git add .
+git commit -m "Backup before landing hero-bg and AOS fix"
+
+Never overwrite app/page.tsx using output-redirection commands (e.g. `rg "text" > page.tsx`).
+This previously corrupted the file into invalid UTF-16LE search-output text and broke
+the build. Use direct, targeted line edits only. If PowerShell must write the file,
+always use explicit UTF-8:
+  Set-Content -Path app/page.tsx -Value $content -Encoding utf8
+Verify the file is valid UTF-8 immediately after any edit to this file.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ISSUE 1 — Wrong hero background image path (404)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Currently requested (wrong, causes 404 + broken image / "Prison corridor" alt text):
+  /legacy/landing/hero-bg.jpg
+
+Actual file location on disk:
+  frontend/public/legacy/landing/assets/img/hero-bg.jpg
+
+Fix — update the src in LandingAssets.tsx (line 5) and/or page.tsx (line 117),
+wherever the hero background is actually referenced, to:
+  src="/legacy/landing/assets/img/hero-bg.jpg"
+
+Do not rename or move the actual image file — only correct the reference path.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ISSUE 2 — AOS animation library not initialized (13 invisible elements)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Confirmed cause: AOS CSS is loaded and sets all `data-aos` elements to opacity: 0
+by default. 13 elements on the landing page use data-aos attributes. But aos.js
+itself and AOS.init() are never actually loaded/called, so those 13 elements never
+receive the .aos-animate class and remain permanently invisible. This is why content
+appears "missing" even though it exists in the JSX. The footer stays visible only
+because it does not use any data-aos attribute — this confirms the diagnosis.
+
+Fix — in page.tsx (or LandingAssets.tsx, whichever actually mounts landing scripts):
+
+1. Load these scripts ONLY on the landing page, in this exact order:
+   bootstrap.bundle.min.js
+   aos.js
+   purecounter_vanilla.js
+   glightbox.min.js
+   swiper-bundle.min.js
+   main.js
+
+   Correct absolute paths (verify each exists at these paths before referencing):
+   /legacy/landing/assets/vendor/bootstrap/js/bootstrap.bundle.min.js
+   /legacy/landing/assets/vendor/aos/aos.js
+   /legacy/landing/assets/vendor/purecounter/purecounter_vanilla.js
+   /legacy/landing/assets/vendor/glightbox/js/glightbox.min.js
+   /legacy/landing/assets/vendor/swiper/swiper-bundle.min.js
+   /legacy/landing/assets/js/main.js
+
+2. After aos.js has loaded, initialize it:
+   (window as any).AOS?.init({
+     duration: 600,
+     once: true,
+   });
+
+3. If landing content renders dynamically after mount, also call:
+   (window as any).AOS?.refreshHard();
+
+4. Do not add these scripts to any route other than the landing page.
+5. Do not add duplicate script tags if any of these are already loaded elsewhere.
+
+Do NOT choose the alternative of removing data-aos attributes or disabling AOS CSS —
+initializing AOS correctly is the required solution, since it preserves the original
+intended animations rather than deleting them.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VERIFICATION — required before considering this complete
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. UTF-8 check on app/page.tsx → must be valid UTF-8
+2. npm run typecheck → PASS
+3. npm run build → PASS
+4. Clear cache and hard-reload:
+   Remove-Item -Recurse -Force .next
+   npm run dev
+   (then Ctrl+Shift+R in browser)
+5. Open browser Console + Network tab on the landing page and confirm:
+   [ ] Zero 404 errors (specifically confirm hero-bg.jpg loads successfully)
+   [ ] window.AOS is truthy (AOS loaded)
+   [ ] All 13 data-aos elements become visible / receive .aos-animate on scroll
+   [ ] No duplicate script tags in the page source
+   [ ] No horizontal overflow reintroduced
+   [ ] Footer and all previously-working content remain unchanged and visible
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CONSTRAINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Do not change any UI design, colors, layout, spacing, or wording.
+- Do not touch the logo replacements or IoIosArrowForward icons already in place —
+  leave all previously completed, unrelated changes exactly as they are.
+- Do not modify any file other than the two identified above unless a genuine
+  additional 404 or missing-script issue is found and confirmed via browser console.
+- Do not guess paths — verify each asset file's real location on disk before
+  referencing it in code.
+- This fix must be durable — commit the working result immediately after
+  verification passes, so it cannot be silently lost by a future undo operation.

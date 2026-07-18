@@ -1,0 +1,72 @@
+Analyze the current JailMeet 2.0 frontend and backend folder structure.
+
+Project root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0
+
+Frontend stack:
+- Next.js, React, TypeScript, Tailwind CSS
+- Legacy CSS/assets reused for old UI/UX
+- Bootstrap/template assets from old project
+
+Backend stack:
+- Node.js, Express.js, TypeScript
+- Zod validation, JWT authentication, bcrypt password hashing
+- RBAC middleware, Prisma ORM, Neon PostgreSQL
+
+GOAL:
+Create a professional folder-structure audit and cleanup plan. This is a
+structure analysis only. Do NOT write, modify, move, or delete any files or code.
+
+ANALYZE:
+1. frontend/app route structure
+2. frontend/components structure
+3. frontend/src/lib, src/types, src/services, src/hooks (if present)
+4. frontend/public/legacy assets
+5. frontend/legacy-reference files
+6. frontend CSS loading strategy
+7. backend/src/modules structure
+8. backend middlewares/config/utils structure
+9. missing frontend pages
+10. missing backend modules
+11. duplicated or messy files
+12. files that should stay as legacy reference
+13. files that should be active Next.js code
+14. files that should never be in public
+15. recommended professional final structure
+
+CREATE THIS FILE ONLY:
+docs/14-frontend-backend-structure-audit-plan.md
+
+DOCUMENT MUST INCLUDE:
+1. Current structure summary
+2. Problems found
+3. Active Next.js pages list
+4. Legacy reference files list
+5. Public asset safety status
+6. CSS loading analysis (global vs role-specific CSS)
+7. Recommended frontend structure
+8. Recommended backend structure
+9. Page-to-component mapping
+10. Service/type/hook recommendations
+11. Cleanup tasks
+12. Safe next coding step
+
+THE DOCUMENT MUST ANSWER:
+- What files exist now?
+- Which files are legacy?
+- Which files are active Next.js pages?
+- Which components should move?
+- Which CSS is global?
+- Which CSS is role-specific?
+- What new folders should be created?
+- What pages are still missing?
+- What backend modules are still missing?
+
+STRICT RULES:
+- Do not modify any file.
+- Do not move any file.
+- Do not delete any file.
+- Do not edit any code.
+- Only create the single documentation file listed above.
+- Be specific with exact file paths, not general descriptions.
+- Do not begin implementation or coding of any kind — analysis and documentation only.

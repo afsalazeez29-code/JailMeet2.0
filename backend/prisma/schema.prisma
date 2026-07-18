@@ -1,0 +1,256 @@
+// ─────────────────────────────────────────
+// JailMeet 2.0 — Prisma Schema
+// Database: PostgreSQL
+// Designed from: docs/06-prisma-database-design.md
+// Legacy reference: jailmeet.sql (MySQL)
+// ─────────────────────────────────────────
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// =======================
+// ENUMS
+// =======================
+
+enum Role {
+  ADMIN
+  OFFICER
+  VISITOR
+  PRISONER
+}
+
+enum AppointmentStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+enum ParoleStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum ActionType {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  APPROVE
+  REJECT
+}
+
+// =======================
+// CORE AUTH MODEL
+// =======================
+
+model User {
+  id        String   @id @default(uuid())
+  email     String?  @unique // Optional: Prisoners might not have email on creation
+  password  String
+  role      Role
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Profile Relations (One-to-One)
+  adminProfile    AdminProfile?
+  officerProfile  OfficerProfile?
+  visitorProfile  VisitorProfile?
+  prisonerProfile PrisonerProfile?
+
+  // Utility Relations
+  notifications Notification[]
+  auditLogs     AuditLog[]
+}
+
+// =======================
+// ROLE PROFILES
+// =======================
+
+model AdminProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OfficerProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name  String
+  phone String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Workflows assigned/reviewed by this officer
+  reviewedAppointments Appointment[]     @relation("OfficerReviewedAppointments")
+  reviewedParoleReqs   ParoleRequest[]   @relation("OfficerReviewedParoles")
+  createdPrisoners     PrisonerProfile[] @relation("OfficerCreatedPrisoners")
+}
+
+model VisitorProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name       String
+  phone      String
+  state      String?
+  address    String?
+  zip        String?
+  profilePic String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // A visitor can request many appointments
+  appointments Appointment[]
+}
+
+model PrisonerProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name           String
+  age            Int
+  gender         String
+  caseDetails    String?
+  admissionDate  DateTime
+  sentencePeriod String?
+  jailType       String?
+  jailName       String?
+  cellNumber     String?
+  profilePic     String?
+
+  // Track which officer added them to the system
+  createdByOfficerId String?
+  createdByOfficer   OfficerProfile? @relation("OfficerCreatedPrisoners", fields: [createdByOfficerId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Prisoner entities
+  appointments   Appointment[]
+  paroleRequests ParoleRequest[]
+  firRecords     FirRecord[]
+  medicalRecords MedicalRecord[]
+}
+
+// =======================
+// WORKFLOW MODELS
+// =======================
+
+model Appointment {
+  id        String         @id @default(uuid())
+  visitorId String
+  visitor   VisitorProfile @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+
+  prisonerId String
+  prisoner   PrisonerProfile @relation(fields: [prisonerId], references: [id], onDelete: Cascade)
+
+  // Officer who reviewed this request
+  officerId String?
+  officer   OfficerProfile? @relation("OfficerReviewedAppointments", fields: [officerId], references: [id], onDelete: SetNull)
+
+  relationship  String
+  message       String?
+  requestedDate DateTime
+  status        AppointmentStatus @default(PENDING)
+  replyMessage  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ParoleRequest {
+  id         String          @id @default(uuid())
+  prisonerId String
+  prisoner   PrisonerProfile @relation(fields: [prisonerId], references: [id], onDelete: Cascade)
+
+  // Officer who reviewed this parole
+  officerId String?
+  officer   OfficerProfile? @relation("OfficerReviewedParoles", fields: [officerId], references: [id], onDelete: SetNull)
+
+  relativeName String
+  relationship String
+  purpose      String
+  message      String?
+  fromDate     DateTime
+  toDate       DateTime
+  status       ParoleStatus @default(PENDING)
+  officerReply String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FirRecord {
+  id         String          @id @default(uuid())
+  prisonerId String
+  prisoner   PrisonerProfile @relation(fields: [prisonerId], references: [id], onDelete: Cascade)
+
+  firNumber   String
+  description String?
+  dateFiled   DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MedicalRecord {
+  id         String          @id @default(uuid())
+  prisonerId String
+  prisoner   PrisonerProfile @relation(fields: [prisonerId], references: [id], onDelete: Cascade)
+
+  bloodGroup     String?
+  allergies      String?
+  checkupDetails String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// =======================
+// UTILITY MODELS
+// =======================
+
+model Notification {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title   String
+  message String
+  isRead  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id     String  @id @default(uuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  action   ActionType
+  entity   String
+  entityId String?
+  details  String?
+
+  createdAt DateTime @default(now())
+}

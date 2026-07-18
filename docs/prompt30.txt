@@ -1,0 +1,137 @@
+Fix missing legacy assets and broken AOS animation initialization on the JailMeet 2.0
+landing page. Do NOT change any UI, design, colors, layout, or content — this is a
+technical asset-path and script-loading fix ONLY.
+
+Project root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 1 — Find the exact 404 file (do not guess)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Open the landing page → F12 → Console AND Network tab → filter: 404
+Copy the exact failed URL(s). Do not assume which file is missing —
+confirm every 404 from the actual browser output first.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 2 — Verify public file paths
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+For a browser URL such as:
+  /legacy/landing/assets/vendor/aos/aos.js
+
+The actual file must physically exist at:
+  frontend/public/legacy/landing/assets/vendor/aos/aos.js
+
+Do NOT use a path containing "/public/legacy/..." in code — Next.js automatically
+serves everything inside /public from the root /, so /public/ must never appear
+in the URL itself. Also check for filename spelling mistakes and
+uppercase/lowercase mismatches (case-sensitive on some deployments).
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 3 — Correct old relative asset paths
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Replace old PHP-style relative paths:
+  assets/vendor/aos/aos.js
+  ../assets/js/main.js
+  index.php
+
+With absolute Next.js public paths:
+  /legacy/landing/assets/vendor/aos/aos.js
+  /legacy/landing/assets/js/main.js
+  /
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 4 — Restore required landing scripts in correct order
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Load in this exact order, on the landing page ONLY:
+  1. bootstrap.bundle.min.js
+  2. aos.js
+  3. purecounter_vanilla.js
+  4. glightbox.min.js
+  5. swiper-bundle.min.js
+  6. main.js
+
+Do not duplicate any script tag. Do not load these scripts on any other route.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 5 — Initialize AOS after script load
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+After aos.js finishes loading, initialize it:
+
+(window as any).AOS?.init({
+  duration: 600,
+  once: true,
+});
+
+If JSX content loads dynamically (client-side render after mount), also call:
+
+(window as any).AOS?.refreshHard();
+
+Without this initialization, any element using data-aos="fade-up" (or similar)
+will remain invisible, since AOS's own CSS hides elements by default until
+initialized. This is likely the primary cause of "missing" sections — the JSX
+may already be present but invisible due to uninitialized AOS.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 6 — Confirm whether landing content is actually missing (not just hidden)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Compare the current app/page.tsx against:
+  - the last known-working Git commit
+  - any backup copy
+  - the original legacy index.php
+
+If entire sections are genuinely missing from the JSX (not just hidden by AOS),
+restore that missing JSX from the original source. Fixing AOS initialization
+alone will NOT bring back content that was never migrated into the JSX in the
+first place — confirm which case you're dealing with before deciding the fix is complete.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 7 — Clear Next.js cache and retest
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+cd C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+Remove-Item -Recurse -Force .next
+npm run dev
+
+Then hard-reload the browser: Ctrl + Shift + R
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 8 — Final verification
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+npm run typecheck
+npm run build
+npm run responsive-audit
+
+Confirm ALL of the following before considering this complete:
+[ ] No 404 errors in Console/Network on the landing page
+[ ] No invisible/hidden AOS sections — all data-aos elements are visible and animate
+[ ] All landing sections present and matching the original design
+[ ] Animations (AOS, Swiper, GLightbox, PureCounter) work correctly
+[ ] No duplicate script tags loaded
+[ ] No horizontal overflow reintroduced
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SAFETY RULES — apply throughout this entire task
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Before editing any important file, commit first:
+    git add .
+    git commit -m "Backup before landing page changes"
+
+- NEVER overwrite a source file using output-redirection commands such as:
+    rg "text" > app/page.tsx
+  This can replace the entire file with search results and/or corrupt encoding.
+  Use proper editor patches/diffs instead — never blind stdout redirection.
+
+- If PowerShell must write a file directly, always specify UTF-8 explicitly:
+    Set-Content -Path app/page.tsx -Value $content -Encoding utf8
+
+- Safest required order of operations for this entire task:
+    Commit first → edit only the required lines → verify UTF-8 encoding →
+    run typecheck → run build → check browser console → confirm no 404s/no hidden sections
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CONSTRAINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Do not change any UI design, colors, layout, spacing, or content wording on the landing page.
+- Do not add these legacy scripts to any route other than the landing page.
+- Do not guess which asset is missing — confirm every fix against an actual
+  observed 404 or an actual confirmed missing JSX section, not assumption.
+- Do not consider this task done until Step 8's full checklist passes with zero exceptions.

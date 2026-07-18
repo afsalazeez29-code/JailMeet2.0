@@ -1,0 +1,417 @@
+JailMeet 2.0 — Admin Management Module (Phase A: Read-Only Visibility + Phase B: Account Status Control)
+
+Project root: C:\Users\afsal\OneDrive\Desktop\JailMeet2.0
+Backend root: C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\backend
+Frontend root: C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+Current state (already working, do not touch):
+- Backend: auth, RBAC, dashboard APIs, visitor registration, parole workflow (if built) — all tested
+- Frontend: landing page, /login, all four dashboards, visitor registration — migrated and working
+- Admin dashboard already shows: totalUsers, totalVisitors, totalOfficers, totalPrisoners, totalAppointments, pendingAppointments, pendingParoleRequests
+- Shared frontend architecture: frontend/src/types/, frontend/src/services/ (auth.service.ts, dashboard.service.ts, and parole.service.ts if built)
+
+Overall goal:
+Build the Admin Management module so the Admin can view and search all system accounts (Users, Visitors, Officers, Prisoners) and read-only overviews (Appointments, Parole Requests), plus activate/deactivate accounts safely. This is explicitly staged as Phase A + Phase B only — do NOT implement Officer/Prisoner creation, role changes, audit logs, or hard deletion in this task; those are future phases.
+
+Follow this EXACT implementation order. Run npm run typecheck (backend and frontend, as relevant) after each code-producing step and do not proceed past a failing build.
+
+============================================================
+STEP 1 — INSPECT EXISTING SCHEMA (read-only, no changes)
+============================================================
+
+Before writing any code, inspect backend/prisma/schema.prisma and report:
+
+1. The exact User model fields — confirm id, name, email, passwordHash, role, createdAt, updatedAt, and CRITICALLY: does an account-status field already exist? Check for isActive, status, isBlocked, or deletedAt. Do NOT assume — report exactly what's there.
+2. If NO account-status field exists at all, STOP after this analysis and report that a Prisma migration is required (adding e.g. isActive Boolean @default(true) to User) before Phase B (status control) can be implemented. Do not silently add this field yourself — flag it and wait for confirmation, since it requires a migration and touches authentication logic.
+3. The exact AdminProfile, VisitorProfile, OfficerProfile, PrisonerProfile field lists — report only fields that genuinely exist, do not assume fields like crime, sentence, cell number, medical information, FIR number, or release date exist unless confirmed in the schema.
+4. The exact Appointment model fields — confirm relationship, message, requestedDate, replyMessage, status, and the visitor/prisoner/officer relations, plus the real ParoleStatus-equivalent enum for appointments (do not assume ACCEPTED — verify).
+5. The exact ParoleRequest model fields — confirm prisoner relation, relativeName, relationship, purpose, message, fromDate, toDate, status, officer relation, officerReply/replyMessage, createdAt, updatedAt (report exact field names as they exist, not as assumed here).
+6. The real enum values for Role, and for Appointment/ParoleRequest status.
+
+Report all findings clearly. Use ONLY the real confirmed field/enum names for every subsequent step — substitute wherever this prompt's examples don't match reality.
+
+IMPORTANT: If Step 1 confirms no account-status field exists on User, implement ONLY Phase A (read-only) in this task, and stop before Phase B — report back with a clear recommendation for the required migration, and wait for my go-ahead before adding it.
+
+============================================================
+STEP 2 — BACKEND: ADMIN MODULE STRUCTURE
+============================================================
+
+Create:
+backend/src/modules/admin/
+  admin.routes.ts
+  admin.controller.ts
+  admin.service.ts
+  admin.validation.ts
+  admin.types.ts
+  index.ts
+
+Responsibility split (strict):
+- Routes: URL + auth middleware + ADMIN role middleware + Zod validation + calling controller
+- Controllers: read req.user/params/query/validated body, call service, return standard { success, message, data } response shape — keep small
+- Service: all Prisma queries, filters, pagination, safe field selection, profile relations, account-status business rules, self-deactivation/last-admin protection
+- Validation: Zod schemas for every query/param/body, using safe defaults and .strict() where appropriate
+
+Every endpoint in this module must chain: JWT authentication → ADMIN RBAC → Zod validation → controller → service → Prisma → safe response. Wrong roles get 403 Forbidden.
+
+Do NOT split into admin-user.service.ts / admin-visitor.service.ts / etc. yet — the module is small enough for one admin.service.ts for now, per the workflow's own guidance not to split too early.
+
+============================================================
+STEP 3 — BACKEND: PAGINATION + ZOD SCHEMAS
+============================================================
+
+Create shared Zod schemas in admin.validation.ts for:
+1. User list query — role filter (real Role enum), status filter (only if Step 1 confirmed a status field exists), search (string, trimmed, max 100), page (coerced int, min 1, default 1), limit (coerced int, min 1, max 100, default 20)
+2. userId route parameter (string/cuid validation matching the actual ID format used elsewhere in the codebase)
+3. Account status update body — matching the REAL confirmed status field name and type (e.g. { isActive: boolean } or the real equivalent)
+4. Visitor/Officer/Prisoner list query — same search/pagination pattern
+5. Appointment status filter query — using the REAL confirmed enum
+6. Parole status filter query — using the REAL confirmed enum
+
+Example pagination response shape to use consistently across all list endpoints:
+{
+  "success": true,
+  "message": "...",
+  "data": {
+    "items": [...],
+    "pagination": { "page": 1, "limit": 20, "totalItems": 83, "totalPages": 5 }
+  }
+}
+
+Run npm run typecheck in backend before continuing.
+
+============================================================
+STEP 4 — BACKEND: USER LIST + DETAIL ENDPOINTS
+============================================================
+
+Endpoints:
+GET /api/admin/users
+GET /api/admin/users/:userId
+
+Rules for the list endpoint:
+1. ADMIN role only
+2. Support ?role=, ?status= (if applicable), ?search= (matches name or email, case-insensitive), ?page=, ?limit= — all validated via Zod from Step 3
+3. Return only safe fields: name, email, role, account status (if applicable), createdAt — NEVER passwordHash, JWT, or any other sensitive field
+4. Paginated response using the shape above
+
+Rules for the detail endpoint:
+1. ADMIN role only
+2. Return the User's safe identity fields plus their role-specific profile (AdminProfile/VisitorProfile/OfficerProfile/PrisonerProfile depending on role) — shape:
+   { "user": { id, name, email, role, ...status if applicable }, "profile": { ...role-specific safe fields } }
+3. Return 404 "User not found" if the userId doesn't exist
+4. Never return password/passwordHash
+
+Run npm run typecheck in backend before continuing.
+
+============================================================
+STEP 5 — BACKEND: ACCOUNT STATUS UPDATE (only if Step 1 confirmed a status field exists)
+============================================================
+
+Endpoint: PATCH /api/admin/users/:userId/status
+
+Body (use the real confirmed field name from Step 1):
+{ "isActive": false }
+
+Business rules enforced in the service layer:
+1. ADMIN role only, resolved from JWT — the frontend must never send adminId
+2. Admin cannot deactivate their OWN account (compare userId param against req.user.id) — return a clear error if attempted
+3. Admin cannot deactivate the LAST remaining active Admin in the system — before applying a deactivation, count active admins; if this would bring the count to zero, reject with a clear error
+4. Return 404 if the target userId doesn't exist
+5. Return the updated safe user object on success
+
+CRITICAL follow-up: update the existing auth login logic (backend/src/modules/auth/auth.service.ts or wherever login is implemented) so that an inactive user is rejected at login time — check the account-status field after verifying credentials and before issuing a JWT. Report exactly what you changed here, since this touches existing, already-tested auth code — do not break existing login tests.
+
+Optionally (if straightforward without major rework): note whether protected routes could also check account status per-request so an already-issued token doesn't work indefinitely for a deactivated user — implement this only if it's a small addition to the existing auth middleware; otherwise just report it as a known limitation/follow-up.
+
+Run npm run typecheck in backend before continuing.
+
+============================================================
+STEP 6 — BACKEND: VISITOR / OFFICER / PRISONER LIST + DETAIL ENDPOINTS
+============================================================
+
+Endpoints:
+GET /api/admin/visitors
+GET /api/admin/visitors/:visitorId
+GET /api/admin/officers
+GET /api/admin/officers/:officerId
+GET /api/admin/prisoners
+GET /api/admin/prisoners/:prisonerId
+
+Rules (apply to all six):
+1. ADMIN role only
+2. List endpoints support search + pagination, same pattern as Step 4
+3. Display only real, confirmed profile fields (from Step 1) — for Visitor: name, email, phone, address, state, zip, account status, registration date. For Officer/Prisoner: use only fields genuinely confirmed to exist — do NOT invent fields like crime, sentence, cell number, medical information, FIR number, or release date
+4. Detail endpoints return 404 if the record doesn't exist
+5. Never return password/passwordHash
+6. Do not expose visitor appointment details inside the visitor list — that's out of scope for this task
+
+This task does NOT include POST/PATCH for Officer or Prisoner creation/editing — read-only visibility only, per Phase A/B scope. If you find yourself needing to add creation logic to make something work, stop and flag it instead — do not silently expand scope.
+
+Run npm run typecheck in backend before continuing.
+
+============================================================
+STEP 7 — BACKEND: APPOINTMENTS + PAROLE OVERVIEW (read-only)
+============================================================
+
+Endpoints:
+GET /api/admin/appointments (optional ?status= filter using the real confirmed enum)
+GET /api/admin/parole (optional ?status= filter using the real confirmed enum)
+
+Rules:
+1. ADMIN role only, read-only — Admin does NOT approve/reject appointments or parole requests in this task; that responsibility remains with Officer
+2. Appointments: display visitor name, prisoner name, requestedDate, relationship, message, status, reviewing officer, officer reply, createdAt (using real confirmed field names)
+3. Parole: display prisoner, relativeName, relationship, purpose, message, fromDate, toDate, status, officer, officerReply, createdAt, updatedAt (using real confirmed field names)
+4. Paginated, same response shape as other list endpoints
+5. Invalid status filter values return 400
+
+Run npm run typecheck in backend before continuing.
+
+============================================================
+STEP 8 — BACKEND TESTS
+============================================================
+
+Create: backend/scripts/test-admin-management.ts
+(Plain Node/fetch style, matching existing test scripts)
+
+Implement and run these test cases (adjust/skip status-related tests if Step 1 found no status field exists):
+1. Admin can fetch users
+2. User list excludes passwordHash
+3. Role filtering works
+4. Search works (name and email)
+5. Pagination works (page/limit respected, totalPages correct)
+6. Invalid role filter returns 400
+7. Invalid pagination values return 400
+8. Admin can fetch one user by ID
+9. Missing/nonexistent user returns 404
+10. Admin can deactivate a user (if status field exists)
+11. Admin can reactivate a user (if status field exists)
+12. Non-Admin role cannot update status (403)
+13. Admin cannot deactivate themselves (rejected)
+14. Last-active-admin protection works (rejected)
+15. No token returns 401
+16. Invalid token returns 401
+17. Visitor role gets 403 on all admin endpoints
+18. Officer role gets 403 on all admin endpoints
+19. Prisoner role gets 403 on all admin endpoints
+20. Admin can fetch visitors list
+21. Admin can fetch officers list
+22. Admin can fetch prisoners list
+23. Admin can fetch appointments list
+24. Appointment status filtering works
+25. Admin can fetch parole requests list
+26. Parole status filtering works
+27. Unknown/extra fields in request bodies are rejected
+28. Password/passwordHash never appear in any response across all endpoints
+29. Confirm test data is cleaned up or the script is safely re-runnable
+
+Print PASS/FAIL for each with a summary. Run the full script and confirm all pass before proceeding to frontend work. Report the full results.
+
+============================================================
+STEP 9 — FRONTEND: SHARED TYPES
+============================================================
+
+Create: frontend/src/types/admin.ts
+
+Define (using REAL backend field names from Step 1):
+- AdminUser, AdminUserRole, AdminAccountStatus (only if applicable)
+- PaginatedResponse<T> generic type
+- AdminVisitor, AdminOfficer, AdminPrisoner
+- AdminAppointment, AdminParoleRequest (import/extend existing Appointment/Parole types from frontend/src/types/ if they already exist — do not duplicate)
+- UpdateUserStatusInput
+
+Do not conflict with existing types elsewhere in frontend/src/types/.
+
+============================================================
+STEP 10 — FRONTEND: SHARED SERVICE
+============================================================
+
+Create: frontend/src/services/admin.service.ts
+
+Implement, reusing the existing authenticated-request helper (do not create a second auth/token system):
+- getAdminUsers(filters)
+- getAdminUserById(userId)
+- updateAdminUserStatus(userId, payload) — only if Step 5 was implemented
+- getAdminVisitors(filters), getAdminVisitorById(visitorId)
+- getAdminOfficers(filters), getAdminOfficerById(officerId)
+- getAdminPrisoners(filters), getAdminPrisonerById(prisonerId)
+- getAdminAppointments(filters)
+- getAdminParoleRequests(filters)
+
+Each function must:
+1. Send the Bearer token via the existing helper
+2. Return typed data using the types from Step 9
+3. Preserve HTTP status info for 401/403 handling by the caller
+4. NOT redirect, NOT touch React router, NOT hold UI state
+5. NOT silently swallow errors
+
+Run npm run typecheck in frontend before continuing.
+
+============================================================
+STEP 11 — FRONTEND: SHARED COMPONENTS (Pagination, Filters)
+============================================================
+
+Create:
+frontend/components/admin/Pagination.tsx
+frontend/components/admin/AdminFilters.tsx
+
+These should be small, reusable, framework-agnostic components used across all Admin list pages — not one giant component per role. Pagination handles page/limit controls and emits page-change events; AdminFilters handles search input + dropdown filters and emits filter-change events.
+
+Run npm run typecheck in frontend before continuing.
+
+============================================================
+STEP 12 — FRONTEND: ADMIN USERS PAGE
+============================================================
+
+Create:
+frontend/app/admin/users/page.tsx
+frontend/components/admin/AdminUserTable.tsx
+frontend/components/admin/UserStatusModal.tsx (only if Step 5 was implemented)
+
+Behavior:
+1. Use the shared protected-page auth pattern (useProtectedPage or equivalent): no token → /login, 401 → clear token + /login, 403 → Access denied
+2. Search input (name/email), role filter (All/Admin/Officer/Visitor/Prisoner), status filter (All/Active/Inactive, only if applicable) — using AdminFilters
+3. Table or card list showing: name, email, role, account status (if applicable), created date
+4. Pagination using the Pagination component
+5. "View" action per row/card (can link to a detail view or expand inline — keep it simple for this phase)
+6. "Activate/Deactivate" action per row (only if Step 5 was implemented) — clicking opens a confirmation modal (UserStatusModal) before sending the PATCH request
+7. Status update flow: click Deactivate → confirmation modal → PATCH request → button shows "Processing..." → wait for backend confirmation → update the row → show success message. Do NOT update the UI optimistically before backend confirmation.
+8. Loading state, error state, and empty state (no users found) all handled visibly
+9. Preserve the existing Admin legacy layout (AdminLayout, AdminNavbar, AdminSidebar) — do not duplicate that markup here
+
+Run npm run typecheck and npm run build in frontend before continuing.
+
+============================================================
+STEP 13 — FRONTEND: VISITOR / OFFICER / PRISONER PAGES
+============================================================
+
+Create:
+frontend/app/admin/visitors/page.tsx + components/admin/AdminVisitorTable.tsx
+frontend/app/admin/officers/page.tsx + components/admin/AdminOfficerTable.tsx
+frontend/app/admin/prisoners/page.tsx + components/admin/AdminPrisonerTable.tsx
+
+Each page should reuse the shared Pagination and AdminFilters components from Step 11, and follow the same pattern as the Users page: search, pagination, account-status badge (if applicable), view-details action, activate/deactivate action (if applicable), role-specific safe fields only.
+
+Keep these as separate smaller table components per role rather than one giant multi-role component, per the workflow's guidance.
+
+Run npm run typecheck and npm run build in frontend before continuing.
+
+============================================================
+STEP 14 — FRONTEND: APPOINTMENTS + PAROLE OVERVIEW PAGES
+============================================================
+
+Create:
+frontend/app/admin/appointments/page.tsx + components/admin/AdminAppointmentTable.tsx
+frontend/app/admin/parole/page.tsx + components/admin/AdminParoleTable.tsx
+
+Behavior:
+1. Read-only tables — no approve/reject actions on these pages, Admin only monitors
+2. Status filter dropdown (Pending/Approved/Rejected using the real confirmed enum labels)
+3. Pagination
+4. Display the real confirmed fields for each (from Step 1/Step 7)
+5. Loading/error/empty states
+
+Run npm run typecheck and npm run build in frontend before continuing.
+
+============================================================
+STEP 15 — DASHBOARD CARD LINKS + SIDEBAR
+============================================================
+
+1. Update the existing Admin dashboard page (app/admin/dashboard/page.tsx) so each stat card links to its detail page:
+   - Total Users → /admin/users
+   - Total Visitors → /admin/visitors
+   - Total Officers → /admin/officers
+   - Total Prisoners → /admin/prisoners
+   - Total Appointments → /admin/appointments
+   - Pending Appointments → /admin/appointments?status=PENDING (or the real pending-equivalent value)
+   - Pending Parole Requests → /admin/parole?status=PENDING (or the real pending-equivalent value)
+   Do not duplicate the dashboard's existing count-fetching logic — the dashboard keeps using dashboard.service.ts as before; only the card's outer element becomes a Next.js Link.
+
+2. Update the existing AdminSidebar component (already created during dashboard migration) to add links:
+   - Users → /admin/users
+   - Visitors → /admin/visitors
+   - Officers → /admin/officers
+   - Prisoners → /admin/prisoners
+   - Appointments → /admin/appointments
+   - Parole Requests → /admin/parole
+
+   Preserve existing text, icons, classes, active-link highlighting logic, and legacy appearance. No link should point to any .php path.
+
+Run npm run typecheck and npm run build in frontend before continuing.
+
+============================================================
+STEP 16 — CSS RULES
+============================================================
+
+1. Preserve the existing Admin legacy layout completely — do not redesign the Admin dashboard or replace the legacy template.
+2. For new page-specific styling on these management pages, prefer CSS Modules (or Tailwind only if it's already consistently used elsewhere in this project — check first, don't introduce it fresh).
+3. Do NOT load Admin CSS globally beyond what's already scoped in app/admin/layout.tsx.
+4. Do NOT touch landing CSS or app/layout.tsx.
+5. New tables and controls must remain responsive.
+
+============================================================
+STEP 17 — FULL VERIFICATION
+============================================================
+
+Confirm the backend test script (Step 8) still passes 100% after all frontend work.
+
+Manually verify (describe how each was confirmed in your report):
+1. Admin sidebar routes all work
+2. /admin/users loads with real data
+3. Search and role/status filters work correctly
+4. Pagination works correctly
+5. Deactivate requires confirmation modal before applying
+6. Inactive status persists after page refresh
+7. Reactivate works
+8. Visitor account cannot access any /admin/* page (redirect or Access denied)
+9. Officer account cannot access any /admin/* page
+10. Prisoner account cannot access any /admin/* page
+11. Appointments list shows current real data with working status filter
+12. Parole list shows current real data with working status filter
+13. No password/passwordHash data appears anywhere in the UI or network responses
+14. No active Admin link points to any .php path
+15. The existing Admin dashboard (counts, cards) still works correctly, and cards now link to the right pages
+
+============================================================
+SECURITY RULES (apply throughout, verify explicitly in final report)
+============================================================
+
+- Admin role comes from JWT only — frontend must never send adminId
+- Only ADMIN may access any /api/admin/* route
+- Unknown/extra fields in request bodies are rejected
+- Password hashes are never returned in any response
+- Admin cannot directly change another user's role in this phase — role changes are explicitly out of scope
+- Admin cannot change user IDs
+- Admin cannot deactivate themselves
+- Admin cannot remove the last active Admin
+
+============================================================
+STRICT NON-GOALS
+============================================================
+
+- Do NOT implement Officer creation (POST /api/admin/officers) — Phase C, future task
+- Do NOT implement Prisoner creation (POST /api/admin/prisoners) — Phase C, future task
+- Do NOT implement Officer/Prisoner editing (PATCH) — Phase C, future task
+- Do NOT implement Admin approve/reject override for appointments or parole — Officer remains sole authority
+- Do NOT implement hard/permanent user deletion — explicitly deferred
+- Do NOT implement role changes, audit logs, or system settings — Phase D, future task
+- Do NOT modify the Prisma schema without first reporting the need and getting confirmation (see Step 1's stop condition)
+- Do NOT modify existing dashboards, auth, visitor registration, or parole workflow beyond the specific login-check addition in Step 5
+- Do NOT run npm audit fix --force
+
+============================================================
+FINAL REPORT
+============================================================
+
+After completing all steps (or stopping early per Step 1's condition), report:
+1. Confirmed real Prisma fields/enums used throughout (from Step 1)
+2. Whether an account-status field existed already, or whether Phase B was skipped pending a migration decision
+3. Backend files created
+4. Backend endpoints implemented, with final confirmed request/response shapes
+5. The exact change made to login logic to reject inactive users (Step 5), and confirmation existing login tests still pass
+6. Backend test script results — full pass/fail summary
+7. Frontend files created
+8. Dashboard and sidebar files modified
+9. Confirmation of all 15 end-to-end verification items from Step 17
+10. Confirmation of the security rules checklist
+11. Final npm run typecheck result (backend and frontend)
+12. Final npm run build result (backend and frontend)
+13. Any risks, schema mismatches, or follow-up items — especially flagging anything deferred to Phase.

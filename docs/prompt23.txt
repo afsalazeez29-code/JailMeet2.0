@@ -1,0 +1,331 @@
+JailMeet 2.0 — Admin Management Phase C: Officer & Prisoner Create/Edit
+
+Project root: C:\Users\afsal\OneDrive\Desktop\JailMeet2.0
+Backend root: C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\backend
+Frontend root: C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+Current state (already working, do not touch):
+- Backend: auth, RBAC, dashboard APIs, parole workflow, Admin Management Phase A (read-only lists) + Phase B (activate/deactivate) — all tested
+- Frontend: landing page, /login, all four dashboards, /admin/users, /admin/visitors, /admin/officers, /admin/prisoners, /admin/appointments, /admin/parole (read-only) — all migrated and working
+- Existing Admin module: backend/src/modules/admin/ (admin.routes.ts, admin.controller.ts, admin.service.ts, admin.validation.ts, admin.types.ts, index.ts)
+- Existing frontend: frontend/src/types/admin.ts, frontend/src/services/admin.service.ts, components/admin/ (tables, Pagination, AdminFilters)
+
+Overall goal:
+Implement secure create and edit workflows for Officer and Prisoner accounts. This is Phase C — explicitly does NOT include role changes, hard deletion, password viewing, or appointment/parole approval decisions (those remain Officer's responsibility or are separately deferred).
+
+Follow this EXACT implementation order (matches the recommended order in the workflow doc). Run npm run typecheck (backend and frontend, as relevant) after each code-producing step and do not proceed past a failing build.
+
+============================================================
+STEP 1 — INSPECT REAL SCHEMA (read-only, no changes)
+============================================================
+
+Inspect backend/prisma/schema.prisma and report:
+1. Exact OfficerProfile fields (id, userId, name, phone, designation, department, or whatever actually exists — do not assume)
+2. Exact PrisonerProfile fields (id, userId, name, phone, prisonerCode, address, or whatever actually exists — do not assume)
+3. Which fields are required vs nullable vs unique
+4. Whether any profile fields duplicate User fields (e.g. does OfficerProfile have its own "name" separate from User.name?)
+5. Confirm User model fields: id, email, password (hashed), role, isActive (or the real confirmed status field name from Phase B), createdAt, updatedAt
+6. Whether any existing seed data depends on these fields in a way that could conflict with new required fields
+
+Report findings clearly before writing any code. Use ONLY these real confirmed field names for every subsequent step — do not use the example field names in this prompt (name, phone, designation, department, prisonerCode, address) unless Step 1 confirms they're accurate.
+
+============================================================
+STEP 2 — DECIDE EXACT CREATE/EDIT FIELDS
+============================================================
+
+Based on Step 1's findings, finalize:
+1. Which fields are required at Officer creation (always: email, password, plus required profile fields)
+2. Which fields are required at Prisoner creation (always: email, password, plus required profile fields)
+3. Which fields are editable via PATCH for each role (name, phone, and other profile fields — NEVER role, userId, officerId/prisonerId, password, isActive/status, createdAt, updatedAt)
+4. Confirm: for the first version, email is READ-ONLY after creation (not editable via PATCH) — a secure email-change flow is out of scope for this task
+
+Report this field decision clearly before proceeding to Zod schemas.
+
+============================================================
+STEP 3 — STRICT ZOD VALIDATION SCHEMAS
+============================================================
+
+Add to backend/src/modules/admin/admin.validation.ts:
+- createOfficerSchema — requires email, password (min 8, max 100), name, plus other required OfficerProfile fields confirmed in Step 1. Use .strict() to reject unknown fields (role, userId, officerId, isActive, passwordHash, createdAt, updatedAt).
+- updateOfficerSchema — all fields optional, but only the editable fields from Step 2. Use .strict() and .refine() to require at least one field present. Explicitly must reject: role, userId, officerId, password, isActive, createdAt, updatedAt.
+- createPrisonerSchema — same pattern as createOfficerSchema, adapted to PrisonerProfile's real fields.
+- updatePrisonerSchema — same pattern as updateOfficerSchema, adapted to PrisonerProfile's real fields, must reject: role, userId, prisonerId, password, isActive, createdAt, updatedAt.
+
+Run npm run typecheck in backend before continuing.
+
+============================================================
+STEP 4 — OFFICER CREATION: SERVICE + TRANSACTION
+============================================================
+
+Implement createOfficer in admin.service.ts:
+1. Check for duplicate email (query User.email) BEFORE attempting creation — return 409 "Email already registered" if found
+2. Also handle the database-level unique constraint error gracefully (in case of a race condition between two near-simultaneous requests) — catch it and return the same 409 response rather than a raw Prisma error
+3. Hash the password with bcrypt (same salt rounds used elsewhere in the codebase)
+4. Use prisma.$transaction(async (tx) => { ... }) to create the User (role: OFFICER, isActive/status: true, using the real confirmed field name from Step 1) AND the linked OfficerProfile together — if either insert fails, both roll back
+5. The backend hard-codes role = OFFICER — this must never come from the request body (already enforced by .strict() rejecting it, but confirm the service doesn't read it from anywhere else either)
+6. Return a safe response: { user: { id, email, role, isActive }, officerProfile: { ...safe fields, no password} } — never include password or passwordHash
+
+============================================================
+STEP 5 — OFFICER CREATION API + TESTS
+============================================================
+
+Add route: POST /api/admin/officers (authenticate → require ADMIN → validate with createOfficerSchema → controller → createOfficer service)
+
+Controller should be small: read validated body → call service → return 201 with the safe response shape.
+
+Extend backend/scripts/test-admin-management.ts with:
+1. Admin can create Officer
+2. Officer User role is OFFICER
+3. Officer profile is created
+4. Officer password is hashed (verify via bcrypt.compare against the known plaintext, not by checking the DB directly for a hash pattern)
+5. Response excludes password/passwordHash
+6. Duplicate Officer email returns 409
+7. Invalid Officer data (missing required field) returns 400
+8. Unknown Officer fields (e.g. role, isActive in the body) are rejected with 400
+9. Non-Admin role (test with Officer or Visitor token) cannot create an Officer (403)
+
+Run this subset and confirm all pass before continuing.
+
+============================================================
+STEP 6 — OFFICER UPDATE API + TESTS
+============================================================
+
+Implement updateOfficer in admin.service.ts:
+1. Find the OfficerProfile by officerId — return 404 "Officer not found" if it doesn't exist
+2. Apply only the fields present in the validated (already-.strict()'d) body
+3. Never allow role, userId, officerId, password, isActive, createdAt, updatedAt to be touched by this function — defense in depth even though Zod already blocks it at the schema level
+4. Return the updated safe Officer object
+
+Add route: PATCH /api/admin/officers/:officerId (authenticate → require ADMIN → validate officerId param → validate body with updateOfficerSchema → controller → service)
+
+Extend the test script with:
+10. Admin can edit Officer allowed fields (e.g. name, phone) and the change persists
+11. Admin cannot edit Officer role (attempting it is rejected by validation, and even if bypassed, the value doesn't change in the DB — verify both)
+12. Missing/nonexistent Officer returns 404
+
+Run this subset and confirm all pass before continuing.
+
+============================================================
+STEP 7 — PRISONER CREATION: SERVICE + TRANSACTION
+============================================================
+
+Implement createPrisoner in admin.service.ts — same pattern as Step 4, adapted to PrisonerProfile's real fields:
+1. Duplicate email check + unique constraint fallback → 409
+2. bcrypt password hashing
+3. prisma.$transaction creating User (role: PRISONER, isActive/status: true) + linked PrisonerProfile together, atomic
+4. Backend hard-codes role = PRISONER, never from the request
+5. Safe response: { user: {...}, prisonerProfile: {...} }, never password/passwordHash
+
+============================================================
+STEP 8 — PRISONER CREATION API + TESTS
+============================================================
+
+Add route: POST /api/admin/prisoners (same middleware chain as Officer creation)
+
+Extend the test script with:
+13. Admin can create Prisoner
+14. Prisoner User role is PRISONER
+15. Prisoner profile is created
+16. Prisoner password is hashed
+17. Duplicate Prisoner email returns 409
+18. Invalid Prisoner data returns 400
+19. Unknown Prisoner fields are rejected
+20. Non-Admin cannot create Prisoner (403)
+
+Run this subset and confirm all pass before continuing.
+
+============================================================
+STEP 9 — PRISONER UPDATE API + TESTS
+============================================================
+
+Implement updatePrisoner in admin.service.ts — same pattern as Step 6, adapted to PrisonerProfile.
+
+Add route: PATCH /api/admin/prisoners/:prisonerId
+
+Extend the test script with:
+21. Admin can edit Prisoner allowed fields and the change persists
+22. Admin cannot edit Prisoner role
+23. Missing/nonexistent Prisoner returns 404
+24. Transaction rolls back correctly if profile creation fails mid-transaction (simulate this if feasible — e.g. by triggering a constraint violation on the profile insert — and confirm no orphaned User record remains)
+25. Confirm all test records created by this script are cleaned up, or that the script is safely re-runnable without leftover data breaking future runs
+
+Also re-run at this point (regression check):
+- The full auth/RBAC test script (test-auth-rbac.ts)
+- The full Admin Phase A/B test script from the earlier task (user list, visitor/officer/prisoner list, activate/deactivate)
+
+Run the complete extended backend/scripts/test-admin-management.ts (all 25 new cases) plus the regression suites, and confirm 100% pass before moving to frontend work. Report the full pass/fail summary.
+
+============================================================
+STEP 10 — FRONTEND: EXTEND SHARED TYPES
+============================================================
+
+Extend frontend/src/types/admin.ts with:
+- CreateOfficerInput, UpdateOfficerInput
+- CreatePrisonerInput, UpdatePrisonerInput
+- AdminOfficerDetails, AdminPrisonerDetails
+- CreateOfficerResponse, CreatePrisonerResponse
+
+Use the EXACT backend response shapes confirmed in Steps 4-9 — do not guess.
+
+============================================================
+STEP 11 — FRONTEND: EXTEND SHARED SERVICE
+============================================================
+
+Extend frontend/src/services/admin.service.ts with:
+- createAdminOfficer(payload) → POST /api/admin/officers
+- updateAdminOfficer(officerId, payload) → PATCH /api/admin/officers/:officerId
+- createAdminPrisoner(payload) → POST /api/admin/prisoners
+- updateAdminPrisoner(prisonerId, payload) → PATCH /api/admin/prisoners/:prisonerId
+
+Reuse the existing authenticated request helper — no new auth/token system. Same rules as existing service functions: typed returns, no UI state, no router access, no silent error swallowing.
+
+Run npm run typecheck in frontend before continuing.
+
+============================================================
+STEP 12 — FRONTEND: REUSABLE OFFICER FORM
+============================================================
+
+Create:
+frontend/components/admin/OfficerForm.tsx
+frontend/components/admin/OfficerForm.module.css (optional, if styling needs isolation)
+
+This ONE component must support both create and edit modes via props, e.g.:
+{ mode: "create" | "edit", initialValues?: Partial<...>, onSubmit: (data) => Promise<void>, isSubmitting: boolean }
+
+Behavior:
+1. Fields matching the real confirmed OfficerProfile fields plus email/password (create mode only)
+2. In edit mode: do NOT render a password field at all, and pre-populate the form with initialValues
+3. In create mode: password field is required and shown
+4. Client-side validation before submit (required fields, basic format checks) — backend Zod remains the source of truth
+5. Submit button text changes appropriately ("Create Officer" / "Save Changes") and shows "Creating..." / "Saving..." while submitting
+6. Disable the button during submission to prevent duplicate submits
+7. Display backend error messages clearly (duplicate email, validation errors)
+
+Do not duplicate this form's markup/logic between create and edit pages — both pages render this one component with different props.
+
+============================================================
+STEP 13 — FRONTEND: OFFICER CREATE/EDIT PAGES
+============================================================
+
+Create:
+frontend/app/admin/officers/new/page.tsx
+frontend/app/admin/officers/[officerId]/edit/page.tsx
+
+new/page.tsx:
+1. Uses the shared protected-page auth pattern (useProtectedPage or equivalent), ADMIN role required
+2. Renders <OfficerForm mode="create" ... /> 
+3. On successful submit: show success message, redirect to /admin/officers
+
+[officerId]/edit/page.tsx:
+1. Same auth pattern
+2. On mount, fetch the officer's current details via GET /api/admin/officers/:officerId (use the existing detail-fetch function from Phase A's admin.service.ts)
+3. Show a loading state while fetching, an error state if the fetch fails, and a 404-appropriate message if the officer doesn't exist
+4. Once loaded, renders <OfficerForm mode="edit" initialValues={...} ... />
+5. On successful submit: show success message, update the form with returned values (or redirect to /admin/officers — pick whichever matches the existing Admin UX pattern already established elsewhere in this project)
+6. Do NOT send unchanged/read-only fields in the PATCH request — only send fields the admin actually modified, or accept that the form sends all editable fields and let the backend's .strict() schema (which only allows editable fields anyway) handle it safely — either approach is fine as long as read-only fields are never included
+
+Run npm run typecheck and npm run build in frontend before continuing.
+
+============================================================
+STEP 14 — FRONTEND: REUSABLE PRISONER FORM + PAGES
+============================================================
+
+Repeat Steps 12-13 exactly for Prisoner:
+
+Create:
+frontend/components/admin/PrisonerForm.tsx
+frontend/components/admin/PrisonerForm.module.css (optional)
+frontend/app/admin/prisoners/new/page.tsx
+frontend/app/admin/prisoners/[prisonerId]/edit/page.tsx
+
+Same requirements: single reusable form component with create/edit modes, no password field in edit mode, client validation, loading/error states, protected-page auth pattern, redirect to /admin/prisoners on success.
+
+Run npm run typecheck and npm run build in frontend before continuing.
+
+============================================================
+STEP 15 — UPDATE ADMIN LIST PAGES
+============================================================
+
+Update the existing list pages (created in Phase A):
+frontend/app/admin/officers/page.tsx
+frontend/app/admin/prisoners/page.tsx
+
+Add:
+1. An "Add Officer" button on the officers list page → links to /admin/officers/new
+2. An "Add Prisoner" button on the prisoners list page → links to /admin/prisoners/new
+3. An "Edit" action per row/card in both tables → links to /admin/officers/[officerId]/edit or /admin/prisoners/[prisonerId]/edit respectively
+
+Preserve the existing Admin legacy layout and table design exactly — only add these buttons/links, do not restructure the existing tables.
+
+Run npm run typecheck and npm run build in frontend before continuing.
+
+============================================================
+STEP 16 — FULL REGRESSION + VERIFICATION
+============================================================
+
+Confirm backend/scripts/test-admin-management.ts (all cases, Phase A/B/C combined) passes 100%.
+Confirm backend/scripts/test-auth-rbac.ts still passes 100% (no regressions from Phase C changes).
+
+Manually verify (describe how each was confirmed in your report):
+1. /admin/officers/new loads correctly
+2. Officer creation works end-to-end
+3. New Officer appears in the /admin/officers list immediately after creation
+4. The newly created Officer can log in with the temporary password
+5. /admin/officers/[id]/edit loads with correct pre-populated data
+6. Officer edit persists after a page refresh
+7. /admin/prisoners/new loads correctly
+8. Prisoner creation works end-to-end
+9. New Prisoner appears in the /admin/prisoners list immediately after creation
+10. The newly created Prisoner can log in with the temporary password
+11. /admin/prisoners/[id]/edit loads with correct pre-populated data
+12. Prisoner edit persists after a page refresh
+13. Non-Admin roles attempting to access these pages/APIs receive Access denied / 403
+14. Passwords are never displayed anywhere in the UI (create form after submission, edit form, or list views)
+15. The existing Admin legacy layout remains visually unchanged outside the new buttons/links added
+
+============================================================
+SECURITY RULES (apply throughout, verify explicitly in final report)
+============================================================
+
+- Only ADMIN can create/edit Officer or Prisoner accounts
+- Admin identity comes from JWT only
+- Backend assigns role (OFFICER/PRISONER) — never accepted from the frontend
+- Password is hashed with bcrypt before storage — never stored, logged, or returned in plaintext or as a hash
+- User and profile creation happen in one Prisma transaction — no partial/orphaned records possible
+- Unknown fields are rejected on every create/update endpoint (.strict() Zod schemas)
+- Duplicate email is blocked (both application-level check and DB constraint fallback)
+- Role cannot be changed via any endpoint in this task
+- IDs (User ID, Profile ID) cannot be changed via edit
+- Password data is never returned in any API response
+- Frontend validation is a UX nicety only — backend Zod validation is the real authority
+
+============================================================
+STRICT NON-GOALS
+============================================================
+
+- Do NOT implement role changes for existing accounts
+- Do NOT implement hard/permanent deletion of Officer or Prisoner accounts
+- Do NOT implement a password-reset/change feature — explicitly deferred to a future task
+- Do NOT let Admin approve/reject appointments or parole requests — Officer remains sole authority
+- Do NOT make email editable in this task
+- Do NOT modify Phase A (read-only lists) or Phase B (activate/deactivate) functionality beyond adding the new buttons/links specified in Step 15
+- Do NOT modify the Prisma schema without first reporting the need and getting explicit confirmation
+- Do NOT run npm audit fix --force
+
+============================================================
+FINAL REPORT
+============================================================
+
+After completing all 16 steps, report:
+1. Confirmed real OfficerProfile and PrisonerProfile fields used (from Step 1)
+2. Final field decisions for create vs edit (from Step 2)
+3. Backend files created/modified
+4. Backend endpoints implemented with final confirmed request/response shapes
+5. Full test-admin-management.ts pass/fail summary (all cases, Phase A/B/C combined)
+6. Confirmation that auth/RBAC regression tests still pass
+7. Frontend files created/modified
+8. Confirmation of all 15 end-to-end verification items from Step 16
+9. Confirmation of the security rules checklist
+10. Final npm run typecheck result (backend and frontend)
+11. Final npm run build result (backend and frontend)
+12. Any risks, schema mismatches, or follow-up items (e.g. password-reset feature still needed, email-change flow still needed).

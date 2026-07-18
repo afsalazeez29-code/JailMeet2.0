@@ -1,0 +1,240 @@
+You are working on the JailMeet 2.0 Next.js frontend.
+
+Project root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0
+
+Frontend root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+Problem:
+The migrated landing page still contains old PHP links such as:
+
+- visitor/login.php
+- officer/officerlogin.php
+- prisoner/prisonerlogin.php
+- admin/adminlogin.php
+- visitor/register.php
+
+These paths do not exist in the new Next.js app, so clicking them causes 404 errors such as:
+
+http://localhost:3000/visitor/login.php
+
+Current valid Next.js routes are:
+
+- /login
+- /register
+
+Goal:
+Find every active frontend reference to old PHP authentication routes and replace them with the correct Next.js routes, without changing the existing UI/UX.
+
+Read and inspect first:
+
+- frontend/app/page.tsx
+- frontend/components/legacy/landing/
+- frontend/components/auth/
+- frontend/public/legacy/landing/
+- any landing-related React components
+- any navigation/header/footer components used on the landing page
+
+Also search the complete frontend source for:
+
+- .php
+- login.php
+- register.php
+- officerlogin.php
+- prisonerlogin.php
+- adminlogin.php
+- visitor/login.php
+- admin/adminlogin.php
+- officer/officerlogin.php
+- prisoner/prisonerlogin.php
+
+==================================================
+ROUTE MAPPING
+==================================================
+
+Replace active old frontend links using this mapping:
+
+visitor/login.php
+→ /login
+
+officer/officerlogin.php
+→ /login
+
+prisoner/prisonerlogin.php
+→ /login
+
+admin/adminlogin.php
+→ /login
+
+visitor/register.php
+→ /register
+
+Any equivalent relative path, such as:
+
+./visitor/login.php
+../visitor/login.php
+/visitor/login.php
+
+must also map to:
+
+/login
+
+Any equivalent visitor registration path must map to:
+
+/register
+
+Do not create separate role login pages in this task.
+
+==================================================
+NEXT.JS LINK RULES
+==================================================
+
+For normal internal navigation in React components, use:
+
+import Link from "next/link";
+
+Example:
+
+<Link href="/login">Login</Link>
+
+<Link href="/register">Register</Link>
+
+Rules:
+
+1. Replace internal anchor navigation to old PHP pages with Next.js Link where appropriate.
+2. Preserve the existing text, icons, classes, button styles, and layout.
+3. Preserve nested elements inside the link.
+4. Do not change external URLs.
+5. Do not change hash links such as:
+   - #hero
+   - #about
+   - #services
+   - #contact
+6. Do not change mailto:, tel:, javascript:, or download links unless they point to an obsolete PHP route.
+7. Do not use window.location for standard internal navigation.
+8. Do not add role-specific query parameters unless already required.
+9. Do not alter backend authentication logic.
+10. Do not change the login submission or role-based post-login redirect behavior.
+
+==================================================
+SEARCH FOR OTHER ACTIVE PHP LINKS
+==================================================
+
+Search all active frontend TypeScript, TSX, JavaScript, JSX, and HTML-like content for PHP links.
+
+Classify results as:
+
+1. Active React UI links
+   - must be updated
+
+2. Static files currently injected or displayed in the browser
+   - update only if they control active navigation
+
+3. Files under legacy-reference or documentation
+   - do not modify
+
+4. Comments or historical examples
+   - do not modify unless misleading in active source
+
+5. Public vendor/template files
+   - do not mass-edit vendor code
+
+If additional active PHP links are found, map them to an existing Next.js route only when the correct route is clear.
+
+If no equivalent route exists, report it instead of inventing a route.
+
+==================================================
+REGISTER ROUTE CHECK
+==================================================
+
+Verify whether this file exists:
+
+frontend/app/register/page.tsx
+
+If it exists:
+- map registration links to /register
+
+If it does not exist:
+- do not create a full registration feature in this task
+- report that /register is missing
+- either leave registration links clearly identified for the next task or map them only if an existing valid registration route is confirmed
+
+Do not create backend registration logic in this task.
+
+==================================================
+PRESERVE CURRENT UI
+==================================================
+
+Do not change:
+
+- Landing design
+- CSS classes
+- Bootstrap classes
+- Legacy template appearance
+- Icons
+- Images
+- Responsive behavior
+- AOS behavior
+- Login form design
+- Dashboard pages
+- Shared hooks
+- API services
+- Backend code
+- Prisma files
+- Authentication storage
+- Role-based redirects after successful login
+
+This task is only for replacing obsolete PHP navigation links with valid Next.js navigation.
+
+==================================================
+VERIFICATION
+==================================================
+
+After changes, run from:
+
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+Commands:
+
+npm run typecheck
+npm run build
+
+Also run a static search to confirm no active frontend source still points to:
+
+- visitor/login.php
+- officer/officerlogin.php
+- prisoner/prisonerlogin.php
+- admin/adminlogin.php
+- visitor/register.php
+
+Expected browser behavior:
+
+- Clicking any Login button opens /login
+- Clicking Visitor Login opens /login
+- Clicking Officer Login opens /login
+- Clicking Prisoner Login opens /login
+- Clicking Admin Login opens /login
+- Clicking Register opens /register, only if that route exists
+- No authentication button opens a .php URL
+- No related 404 error occurs
+
+==================================================
+FINAL REPORT
+==================================================
+
+Report:
+
+1. Files inspected
+2. Files modified
+3. Each old PHP route replaced
+4. Final Next.js route used for each link
+5. Whether /register exists
+6. Any unresolved PHP links and why they were not changed
+7. Confirmation that UI/classes/layout were unchanged
+8. Typecheck result
+9. Build result
+
+Stop after completing this route-link cleanup.
+
+Do not continue to new feature pages, registration implementation, component moving, CSS redesign, or backend changes.

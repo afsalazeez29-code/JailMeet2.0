@@ -1,0 +1,45 @@
+import { NextFunction, Request, Response } from 'express';
+import { z } from 'zod';
+
+export const updateVisitorProfileSchema = z
+  .object({
+    phone: z
+      .string()
+      .trim()
+      .regex(/^[0-9]{10}$/, 'Phone must be exactly 10 digits')
+      .optional(),
+    address: z.string().trim().max(255, 'Address is too long').optional(),
+    state: z.string().trim().max(100, 'State is too long').optional(),
+    zip: z
+      .string()
+      .trim()
+      .regex(/^[0-9]{6}$/, 'Zip must be exactly 6 digits')
+      .optional(),
+  })
+  .strict()
+  .refine((data) => Object.keys(data).length > 0, {
+    message: 'At least one visitor profile field is required',
+  });
+
+export type UpdateVisitorProfileInput = z.infer<
+  typeof updateVisitorProfileSchema
+>;
+
+export const validateUpdateVisitorProfile = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
+  const parsedBody = updateVisitorProfileSchema.safeParse(req.body);
+
+  if (!parsedBody.success) {
+    res.status(400).json({
+      success: false,
+      message: 'Invalid visitor profile data',
+    });
+    return;
+  }
+
+  req.body = parsedBody.data;
+  next();
+};

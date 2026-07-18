@@ -1,0 +1,334 @@
+JailMeet 2.0 — Change Password Feature (All Roles)
+
+Project root: C:\Users\afsal\OneDrive\Desktop\JailMeet2.0
+Backend root: C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\backend
+Frontend root: C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+Current state (already working, do not touch):
+- Backend: auth, RBAC, dashboard APIs, parole workflow, Admin Management (Phases A/B/C) — all tested
+- Frontend: landing page, /login, all four dashboards, all four role layouts (Admin/Visitor/Officer/Prisoner sidebars), visitor registration — migrated and working
+- Existing auth module: backend/src/modules/auth/ (auth.routes.ts, auth.controller.ts, auth.service.ts, auth.validation.ts)
+- Existing frontend: frontend/src/types/auth.ts, frontend/src/services/auth.service.ts (with existing authenticated request helper)
+- Existing User model has isActive (or the real confirmed status field name) already enforced at login
+
+Overall goal:
+Build one shared, secure Change Password feature usable by all four roles (ADMIN, OFFICER, VISITOR, PRISONER), each accessing it through their own role-specific route and layout, but all calling the same backend endpoint.
+
+Follow this EXACT implementation order (matches the recommended order in the workflow doc). Run npm run typecheck (backend and frontend, as relevant) after each code-producing step and do not proceed past a failing build.
+
+============================================================
+STEP 1 — INSPECT EXISTING AUTH CODE (read-only, no changes)
+============================================================
+
+Before writing any code, inspect:
+1. backend/src/modules/auth/auth.service.ts — find the exact bcrypt configuration/salt rounds used at registration/login, and the exact User model field name for the password hash column (likely "password" but confirm)
+2. backend/src/modules/auth/auth.routes.ts — confirm the existing router structure so the new route fits the established pattern
+3. backend/prisma/schema.prisma — confirm the exact User model fields: password field name, and the real confirmed account-status field (isActive or equivalent, from earlier Admin Phase B work)
+4. frontend/src/services/auth.service.ts — confirm the exact authenticated request helper name/signature already in use, and the exact localStorage token key
+5. frontend/src/types/auth.ts — confirm existing type structure to avoid conflicts
+
+Report these findings before proceeding. Use the REAL confirmed names (bcrypt salt rounds variable/constant, password field name, status field name, auth helper function name, token key) throughout every subsequent step — do not assume the example names used in this prompt are correct.
+
+============================================================
+STEP 2 — ZOD VALIDATION SCHEMA
+============================================================
+
+Add to backend/src/modules/auth/auth.validation.ts:
+
+changePasswordSchema:
+- currentPassword: string, min 1 char, required ("Current password is required")
+- newPassword: string, min 8 chars, max 100 chars ("New password must contain at least 8 characters" / "New password is too long")
+- Use .strict() so unknown fields (userId, role, passwordHash, accountId, email) are rejected
+- Do NOT require confirmPassword in the backend schema — that's a frontend-only UX concern, not part of the API contract
+
+Keep the password strength rules simple for this first version (length only) unless the project already has an established stronger password policy elsewhere — check for one before adding uppercase/lowercase/number regex rules; if none exists, don't invent one now.
+
+Run npm run typecheck in backend before continuing.
+
+============================================================
+STEP 3 — BACKEND SERVICE: changePassword
+============================================================
+
+Implement changePassword(userId, input) in auth.service.ts:
+
+1. Fetch the User by userId (from JWT — req.user.id, never from the request body) — select only id, password (hash field), and the account-status field
+2. If user not found → 404 "User not found"
+3. If account-status field indicates inactive → 403 "Account is inactive" (protects against an already-issued token surviving deactivation)
+4. bcrypt.compare(currentPassword, user.password) — if false → 400 "Current password is incorrect". Do not reveal any other detail.
+5. bcrypt.compare(newPassword, user.password) — if true (new password same as current) → 400 "New password must be different from the current password"
+6. bcrypt.hash(newPassword, <the same salt rounds config confirmed in Step 1>) — reuse the exact existing hashing configuration/helper, do not hard-code a new pattern
+7. Prisma update: User.password = hashedPassword (only this field, nothing else touched)
+8. Return void/safe confirmation — never return the password or the hash
+
+The service must never trust userId, role, or any identity field from the request body — identity comes exclusively from the authenticated req.user.id.
+
+============================================================
+STEP 4 — CONTROLLER + ROUTE
+============================================================
+
+Controller (auth.controller.ts) — keep it small, no bcrypt or Prisma logic here:
+```
+export async function changePassword(req, res, next) {
+  try {
+    await authService.changePassword(req.user.id, req.body);
+    return res.status(200).json({
+      success: true,
+      message: "Password changed successfully",
+      data: null
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+```
+
+Route (auth.routes.ts) — add to the existing auth router:
+```
+router.patch(
+  "/change-password",
+  authenticate,
+  validate(changePasswordSchema),
+  changePassword
+);
+```
+
+Final endpoint: PATCH /api/auth/change-password
+
+No role-specific RBAC middleware is needed — all authenticated roles may use this endpoint for their own account. Authentication (valid JWT) is still required.
+
+Run npm run typecheck in backend before continuing.
+
+============================================================
+STEP 5 — BACKEND TESTS
+============================================================
+
+Create: backend/scripts/test-change-password.ts
+(Plain Node/fetch style, matching existing test scripts. IMPORTANT: this test suite changes real seeded account passwords — it MUST restore the original passwords at the end, or all other test scripts and manual testing with the seeded accounts will break.)
+
+Implement and run:
+1. Admin can change own password
+2. Visitor can change own password
+3. Officer can change own password
+4. Prisoner can change own password
+5. Correct current password succeeds
+6. Incorrect current password returns 400
+7. Too-short new password returns 400
+8. New password same as old returns 400
+9. Missing current password returns 400
+10. Missing new password returns 400
+11. Empty body returns 400
+12. Unknown fields (e.g. extra property) are rejected with 400
+13. userId in body is rejected (ignored/rejected by .strict(), and confirm it can't be used to target another account)
+14. role in body is rejected
+15. passwordHash in body is rejected
+16. No token returns 401
+17. Invalid token returns 401
+18. Inactive user (if you can toggle status in the test) is rejected with 403
+19. Response excludes password
+20. Response excludes password hash
+21. After change, the OLD password no longer logs in
+22. After change, the NEW password successfully logs in
+23. Changing one user's password does not affect any other user's password (verify by logging in as a different account before/after)
+24. CRITICAL: at the end of the test run, restore each test account's password back to its original seeded value, and verify the restore worked by confirming login with the original password succeeds
+
+Print PASS/FAIL for each with a summary. Run the full script and confirm all 24 pass before continuing. Report the results.
+
+============================================================
+STEP 6 — REGRESSION TESTS
+============================================================
+
+Because this touches core auth code, re-run the following existing test suites in full and confirm no regressions:
+- backend/scripts/test-auth-rbac.ts
+- Any visitor profile test script, if one exists
+- Any appointment workflow test script, if one exists
+- backend/scripts/test-parole-workflow.ts, if it exists
+- backend/scripts/test-admin-management.ts, if it exists
+
+Report pass/fail for each suite. Do not proceed to frontend work if any regression suite fails — stop and report the failure first.
+
+============================================================
+STEP 7 — FRONTEND: EXTEND SHARED TYPES
+============================================================
+
+Extend frontend/src/types/auth.ts with:
+```
+export interface ChangePasswordInput {
+  currentPassword: string;
+  newPassword: string;
+}
+export interface ChangePasswordResponse {
+  success: true;
+  message: string;
+  data: null;
+}
+```
+Adjust to match the EXACT backend response format confirmed in Step 4. Do not conflict with existing types in this file.
+
+============================================================
+STEP 8 — FRONTEND: EXTEND SHARED SERVICE
+============================================================
+
+Extend frontend/src/services/auth.service.ts with a changePassword(payload) function that calls PATCH /api/auth/change-password using the EXACT existing authenticated request helper confirmed in Step 1 — do not create a new fetch wrapper or a second token-storage mechanism.
+
+Run npm run typecheck in frontend before continuing.
+
+============================================================
+STEP 9 — FRONTEND: SHARED CHANGE PASSWORD FORM
+============================================================
+
+Create:
+frontend/components/auth/ChangePasswordForm.tsx
+frontend/components/auth/ChangePasswordForm.module.css
+
+"use client" component. State: currentPassword, newPassword, confirmPassword, individual show/hide toggles for each of the three fields, submitting, error, success.
+
+Submit workflow:
+1. Clear old error/success messages
+2. Client-side validation: all fields filled, newPassword === confirmPassword ("New passwords do not match"), newPassword meets minimum length
+3. Disable the button, show "Changing..."
+4. Call changePassword() from auth.service.ts with ONLY { currentPassword, newPassword } — confirmPassword stays frontend-only, never sent to the backend
+5. On error: display the backend's message clearly (incorrect current password, too short, same as old, etc.)
+6. On success:
+   - Show a success message: "Password changed. Please log in again."
+   - Clear all password fields from state immediately
+   - Clear the stored JWT token (same key/mechanism used elsewhere)
+   - Redirect to /login after a short delay (or immediately, matching the UX pattern already used elsewhere in this project, e.g. the registration success flow)
+
+Password visibility toggles:
+- Default input type="password" for all three fields
+- Show/hide buttons toggle only the input's visibility type — never log, never display a previously stored password, never preload the current password field
+- Use accessible labels: "Show current password" / "Hide current password", and equivalent for new/confirm
+
+Security constraints:
+- Never save any password value anywhere outside component state (no localStorage, no console.log, no URL params)
+- Do not persist form values across navigation
+
+Run npm run typecheck in frontend before continuing.
+
+============================================================
+STEP 10 — FRONTEND: FOUR ROLE PAGES
+============================================================
+
+Create:
+frontend/app/admin/change-password/page.tsx
+frontend/app/visitor/change-password/page.tsx
+frontend/app/officer/change-password/page.tsx
+frontend/app/prisoner/change-password/page.tsx
+
+Each should be minimal, e.g.:
+```
+import ChangePasswordForm from "@/components/auth/ChangePasswordForm";
+export default function ChangePasswordPage() {
+  return <ChangePasswordForm />;
+}
+```
+
+Since each of these routes falls under its respective app/<role>/layout.tsx (already established during dashboard migration), the correct role-specific sidebar/navbar/layout is applied automatically — do not duplicate any layout markup in these page files.
+
+If any role's protected-page auth pattern (useProtectedPage or equivalent) needs to wrap this page explicitly rather than relying solely on the parent layout, apply it consistently with how the existing dashboard pages for that role handle auth — check the pattern before assuming.
+
+Run npm run typecheck and npm run build in frontend before continuing.
+
+============================================================
+STEP 11 — SIDEBAR + SETTINGS INTEGRATION
+============================================================
+
+1. Update all four existing sidebar components (AdminSidebar, VisitorSidebar, OfficerSidebar, PrisonerSidebar — already created during dashboard migration) to add a link:
+   - Label: "Change Password" (or "Security" / "Account Security" — pick whichever best matches the existing sidebar's naming conventions for similar items)
+   - Route: the role-appropriate /admin/change-password, /visitor/change-password, /officer/change-password, /prisoner/change-password
+   - Use Next.js Link
+   - Preserve existing classes, icons, layout, active-link highlighting logic, and legacy appearance exactly
+   - No link should point to any .php path
+
+2. If frontend/app/visitor/settings/page.tsx (or equivalent) already exists, add a "Change Password" button there that links to /visitor/change-password. Do NOT add password fields into the existing profile-update form/endpoint — keep them strictly separate:
+   - PATCH /api/visitor/profile (or whatever the real existing endpoint is) → phone/address/state/zip only
+   - PATCH /api/auth/change-password → password only
+   Do not merge these two concerns into one endpoint or one form.
+
+Run npm run typecheck and npm run build in frontend before continuing.
+
+============================================================
+STEP 12 — FULL VERIFICATION
+============================================================
+
+Confirm backend/scripts/test-change-password.ts (Step 5) still passes 100%, and all regression suites from Step 6 still pass.
+
+Manually verify for EACH of the four roles (describe how each was confirmed in your report):
+1. The change-password page loads within the correct role layout (correct sidebar/navbar visible)
+2. Current password is required — submitting without it shows a clear error
+3. New password + confirm password mismatch shows "New passwords do not match" before any API call is made
+4. Wrong current password shows the backend's "Current password is incorrect" error
+5. Too-short new password shows a validation error
+6. Successful change: fields clear, success message shown, token removed, redirect to /login happens
+7. Old password no longer works for login
+8. New password successfully logs in
+9. No password value appears anywhere in the browser console or the URL at any point
+10. Sidebar link works correctly from that role's dashboard
+
+Also confirm:
+11. A user cannot change another user's password — attempt (via direct API call in testing, not just UI) to send a userId in the body and confirm it has no effect
+12. Wrong-role page access still respects each role's existing protected-page behavior (no token → /login, 401 → clear + redirect, etc.)
+
+============================================================
+IMPORTANT KNOWN LIMITATION (report this explicitly, do not silently work around it)
+============================================================
+
+Since the JWT system is stateless (no token versioning, no session table), changing a password does NOT automatically invalidate previously issued access tokens on other devices/browsers until they naturally expire. The chosen mitigation for this first version is: clear the current browser's token and force a fresh login. This does not revoke tokens elsewhere. A stronger design (tokenVersion field, passwordChangedAt check in auth middleware, refresh-token revocation) is explicitly OUT OF SCOPE for this task — do not implement it, just note it as a known follow-up in your final report.
+
+============================================================
+SECURITY RULES (apply throughout, verify explicitly in final report)
+============================================================
+
+- JWT identifies the user — userId is never accepted from the frontend body
+- All roles may change ONLY their own password
+- Current password must be verified via bcrypt.compare before any change is applied
+- New password must be validated (length, and reused strength rules if applicable)
+- New password must differ from the current password
+- bcrypt hashes the new password using the same configuration as registration
+- Password and password hash are never returned in any API response
+- Unknown fields are rejected (.strict())
+- Passwords are never logged, never stored in localStorage, never placed in URLs
+- Inactive users are rejected even with a still-valid token
+
+============================================================
+ERROR HANDLING (use the project's existing API error format throughout)
+============================================================
+
+- 400 Invalid password-change data
+- 400 Current password is incorrect
+- 400 New password must be different
+- 401 Unauthorized
+- 403 Account is inactive
+- 404 User not found
+- 500 Internal server error
+
+Do not expose bcrypt errors, Prisma errors, the stored hash, or stack traces in any response.
+
+============================================================
+STRICT NON-GOALS
+============================================================
+
+- Do not implement tokenVersion, passwordChangedAt, session tables, or refresh-token revocation
+- Do not merge password-change fields into the existing profile-update endpoint/form for any role
+- Do not add password strength rules beyond length unless the project already has an established policy
+- Do not implement "forgot password" / password reset via email — separate future feature
+- Do not modify the Prisma schema
+- Do not run npm audit fix --force
+
+============================================================
+FINAL REPORT
+============================================================
+
+After completing all 12 steps, report:
+1. Confirmed real field/config names used (password field, bcrypt salt rounds source, status field, auth helper name, token key) from Step 1
+2. Backend files created/modified
+3. Final confirmed request/response shape for PATCH /api/auth/change-password
+4. test-change-password.ts full pass/fail summary (all 24 cases), and confirmation test passwords were restored
+5. Regression suite results (Step 6)
+6. Frontend files created/modified
+7. Confirmation of all 12 end-to-end verification items from Step 12, across all four roles
+8. Confirmation of the security rules checklist
+9. Final npm run typecheck result (backend and frontend)
+10. Final npm run build result (backend and frontend)
+11. Explicit restatement of the stateless-JWT limitation and the chosen mitigation
+12. Any other risks or follow-up items found.

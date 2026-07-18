@@ -1,0 +1,14 @@
+.formCard {
+  max-width: 760px;
+}
+
+.helpText {
+  color: #697a8d;
+  font-size: 0.875rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}

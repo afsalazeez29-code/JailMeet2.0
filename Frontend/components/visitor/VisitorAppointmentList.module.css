@@ -1,0 +1,14 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.statusBadge {
+  text-transform: capitalize;
+}
+
+.emptyState {
+  margin-bottom: 0;
+}

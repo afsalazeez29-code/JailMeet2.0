@@ -1,0 +1,261 @@
+Perform a complete, systematic responsive-audit and fix across the entire JailMeet 2.0
+frontend project. Do NOT assume the project is responsive just because typecheck and
+build pass — those only confirm the code compiles, not that pages are visually correct
+on small screens. Also note: html/body { overflow-x: hidden; } can silently hide a
+scrollbar while content is still cut off — this alone does NOT count as a fix.
+
+Project root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+Do NOT change colors, themes, fonts, animations, or component logic.
+Only fix technical sizing/layout causes of overflow and non-responsiveness.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 1 — Test every active route (not just landing page)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Landing, Login, Register
+Admin: Dashboard, Users, Visitors, Officers, Prisoners, Appointments, Parole,
+       Create/Edit forms, Change password
+Visitor: Dashboard, Profile settings, Book appointment, Appointment history,
+         Change password
+Officer: Dashboard, Appointments, Parole reviews, Change password
+Prisoner: Dashboard, Parole request, Parole history, Change password
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 2 — Test at these exact screen widths
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+320×568, 360×640, 375×667, 390×844, 430×932, 768×1024, 1024×768, 1366×768, 1920×1080
+Priority widths: 320px, 375px, 768px, 1366px
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 3 — Detect overflowing elements on every page/width
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Run this in browser console (F12) at 320px, 375px, 768px, 1366px on each route:
+
+const viewportWidth = document.documentElement.clientWidth;
+const overflowingElements = [...document.querySelectorAll('body *')]
+  .filter((element) => {
+    const rect = element.getBoundingClientRect();
+    return (
+      rect.right > viewportWidth + 1 ||
+      rect.left < -1 ||
+      element.scrollWidth > element.clientWidth + 1
+    );
+  })
+  .map((element) => ({
+    tag: element.tagName, className: element.className, id: element.id,
+    clientWidth: element.clientWidth, scrollWidth: element.scrollWidth,
+    rect: element.getBoundingClientRect(),
+  }));
+console.table(overflowingElements);
+
+Fix every returned element individually. Exceptions that are VALID (should scroll
+inside their own container only, not the page): responsive tables, carousels,
+horizontal nav sliders, code blocks.
+
+Optionally use this temporary debug rule to visually spot overflow sources, then
+remove it after testing:
+* { outline: 1px solid rgba(255, 0, 0, 0.15); }
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 4 — Search frontend for common overflow causes
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Search for: width:, min-width:, max-width:, 100vw, px, margin-left, margin-right,
+left:, right:, translateX, position: absolute, position: fixed,
+white-space: nowrap, overflow:, flex-wrap, grid-template-columns
+
+Pay special attention to values like: width: 1200px, min-width: 800px,
+margin-left: 280px, left: 300px, transform: translateX(500px).
+Do NOT blindly remove all fixed px values — icons, avatars, buttons, and modal
+sizes may correctly use fixed pixels.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 5 — Global sizing foundation (globals.css)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+*, *::before, *::after { box-sizing: border-box; }
+html, body { width: 100%; max-width: 100%; margin: 0; }
+body { overflow-x: hidden; }
+This is a safety guard only — the actual overflowing component must still be
+corrected at its source, not just masked.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 6 — Fix media elements
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+img, video, iframe { display: block; max-width: 100%; height: auto; }
+svg { max-width: 100%; }   /* do not force height:auto on svg — breaks icon libraries */
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 7 — Fix flexbox layouts
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+.flex-container { display: flex; max-width: 100%; }
+.flex-child { min-width: 0; }
+.flex-container.wrap { flex-wrap: wrap; }
+.action-row { display: flex; flex-wrap: wrap; gap: 12px; }
+Replace large fixed gaps (e.g. gap: 100px) with: gap: clamp(8px, 2vw, 24px);
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 8 — Fix CSS Grid layouts
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Replace: grid-template-columns: repeat(4, 1fr);
+With:    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+@media (max-width: 1024px) { .dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px)  { .dashboard-grid { grid-template-columns: 1fr; } }
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 9 — Fix sidebars and main content (per-role layouts)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Desktop:
+.role-layout { display: flex; width: 100%; max-width: 100%; }
+.role-sidebar { width: 280px; flex-shrink: 0; }
+.role-main { flex: 1; min-width: 0; }
+
+Mobile (max-width: 768px):
+.role-sidebar { position: fixed; width: min(280px, 85vw); transform: translateX(-100%); }
+.role-sidebar.is-open { transform: translateX(0); }
+.role-main { width: 100%; margin-left: 0; }
+
+Do NOT keep desktop values (margin-left: 280px, width: calc(100% - 280px)) active
+on small screens — they must be overridden inside the mobile media query.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 10 — Fix navbars
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+.navbar { width: 100%; max-width: 100%; padding-inline: clamp(12px, 3vw, 32px); }
+.navbar-inner { display: flex; align-items: center; justify-content: space-between; min-width: 0; }
+.user-name { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 11 — Fix forms
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+.form-container { width: 100%; max-width: 720px; margin-inline: auto; padding-inline: 16px; }
+input, select, textarea, button { max-width: 100%; }
+
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 12 — Fix tables (wrap, don't squeeze)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<div className="table-responsive"><table>{/* rows */}</table></div>
+
+.table-responsive { width: 100%; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table-responsive table { width: 100%; min-width: 700px; }
+
+Do NOT globally apply overflow-x: auto directly to `table` elements — it must be
+on the wrapping div. Table scroll should stay contained; the page itself must not scroll.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 13 — Fix long text / IDs / emails / tokens
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+.breakable-text { overflow-wrap: anywhere; word-break: break-word; }
+td, th { overflow-wrap: anywhere; }
+Do not apply aggressive word-breaking to headings unless actually necessary.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 14 — Fix modals and dialogs
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+.modal { width: min(600px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow-y: auto; }
+Avoid fixed centering hacks like: width: 700px; left: 50%; margin-left: -350px;
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 15 — Fix cards and containers
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+.card { width: 100%; max-width: 100%; min-width: 0; }
+Replace hard-coded mobile card widths (width: 450px) with: width: min(100%, 450px);
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 16 — Check absolute-positioned decorative elements
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Inspect every position: absolute / left / right / transform: translateX(...) —
+decorative shapes, hero images, badges, and floating buttons are common overflow
+sources. Clip only decorative containers, never important content:
+.hero { position: relative; overflow: hidden; }
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 17 — Replace unsafe 100vw
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Replace width: 100vw with width: 100% wherever full viewport width isn't strictly
+required (100vw includes scrollbar width and causes overflow).
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 18 — Check browser zoom levels
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Verify the project remains usable at 100%, 125%, and 150% browser zoom on every
+role dashboard and form page.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 19 — Check text scaling
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Increase text size via DevTools/OS accessibility settings and verify: navbar
+doesn't overlap, buttons don't cut off text, forms stay usable, cards grow
+vertically, no fixed-height container hides content.
+Replace fixed heights (height: 80px) with: min-height: 80px;
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 20 — Check touch interaction (mobile)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Verify: sidebar opens/closes correctly, dropdowns stay inside the screen, buttons
+are easily tappable, no hover-only controls exist, forms don't unexpectedly zoom,
+tables scroll properly, modal close button is visible.
+For all inputs, prevent iOS Safari auto-zoom:
+input, select, textarea { font-size: 16px; }
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 21 — Automated cross-route testing (Playwright)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Write a Playwright script that opens every route at these widths and checks for
+page-level overflow:
+[{ width: 320, height: 568 }, { width: 375, height: 667 },
+ { width: 768, height: 1024 }, { width: 1366, height: 768 }]
+
+const hasHorizontalOverflow = await page.evaluate(() =>
+  document.documentElement.scrollWidth > document.documentElement.clientWidth
+);
+
+For authenticated pages, log in as each seeded role (Admin, Officer, Visitor,
+Prisoner) before checking that role's routes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 22 — Final project checks
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+cd C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+npm run typecheck
+npm run build
+Then run all existing workflow regression tests.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FINAL ACCEPTANCE CONDITIONS — ALL must be true
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[ ] No page-level horizontal scrollbar at 320px or above, on any route
+[ ] No important content is hidden by overflow-x: hidden
+[ ] No white area appears on either side of any page
+[ ] All navbars fit or collapse correctly at every tested width
+[ ] All role sidebars (Admin/Officer/Visitor/Prisoner) work correctly on mobile
+[ ] Cards become one or two columns when required
+[ ] Forms become single-column on small screens
+[ ] Tables scroll only inside their own wrapper, never the full page
+[ ] Long text/IDs/emails/tokens do not widen the page
+[ ] Images and videos stay inside their containers
+[ ] Modals fit inside mobile screens without overflowing
+[ ] All pages remain usable at 125% and 150% browser zoom
+[ ] npm run typecheck passes
+[ ] npm run build passes
+[ ] Existing workflow regression tests pass
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CONSTRAINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Do not change colors, fonts, themes, animations, or component logic.
+- Do not remove valid fixed pixel values for icons, avatars, buttons, or modals
+  without confirming they are actually causing overflow first.
+- overflow-x: hidden is a safety net only — never treat it as the actual fix.
+- Passing typecheck/build is necessary but NOT sufficient proof of completion —
+  every route at every required width must be visually and technically verified
+  per Steps 1–3 and the Final Acceptance Conditions above before this task is
+  considered done.

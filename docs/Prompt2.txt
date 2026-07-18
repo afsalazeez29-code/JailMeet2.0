@@ -1,0 +1,232 @@
+JailMeet 2.0 — Officer Dashboard Migration (Full Workflow)
+
+Project: C:\Users\afsal\OneDrive\Desktop\JailMeet2.0
+
+Current state (already working, do not touch):
+- Backend fully working: auth, RBAC, dashboard APIs, visitor registration — all tested
+- Frontend: landing page, /login, Admin dashboard (full), Visitor dashboard (full) — all confirmed working end-to-end
+- Legacy assets for admin/visitor already correctly placed under public/legacy/, with PHP/tooling files cleaned out and moved to legacy-reference/
+- Seeded test accounts exist for all 4 roles, including officer@jailmeet.com / officer123
+
+Overall goal for this task:
+Migrate the OLD officer dashboard (PHP) to Next.js, preserving old officer UI/UX exactly, while removing all PHP/session/database logic and connecting it to the existing backend API. This follows the SAME proven pattern used successfully for Admin and Visitor. Work through the phases below IN ORDER. Some phases are conditional — only run them if their trigger condition is met, as determined by Phase 1's findings. STOP after Phase 1 to let me review before any code or file-copy work happens.
+
+Golden rules that apply across ALL phases of this task:
+1. One page at a time — this task covers ONLY the officer dashboard. Do not touch prisoners, appointments, parole, FIR, or profile pages.
+2. UI first, logic second — get the visual structure right before wiring data.
+3. Remove PHP, not UI — strip session_start(), mysqli, include/require, $_SESSION, $_POST, $_GET, header() redirects, and inline SQL result echoing. Keep all classes, cards, icons, sidebar, navbar, footer, section structure, colors, and images exactly as they were.
+4. Never touch the database directly from the frontend — all data flows through the existing Express/Prisma backend API only.
+5. NEVER copy PHP files, .env files, .sql files, db.php, config files with credentials, or any server-side source file into the public/ folder. Anything under public/ is directly downloadable by any browser visitor. If old PHP reference files are needed, they go to frontend/legacy-reference/officer/, never to frontend/public/.
+6. DO NOT GUESS backend field names. Before wiring any stat in Phase 3, inspect the actual source of truth: backend/src/modules/dashboard/dashboard.service.ts (and/or call the live endpoint) to get the exact field names returned by GET /api/dashboard/officer. This caused a real bug during the Visitor migration (approvedAppointments vs acceptedAppointments) — do not repeat that mistake.
+7. Build after every phase that touches code — npm run typecheck and npm run build must both pass with zero errors before moving to the next phase.
+8. Do not modify the backend in any of these phases.
+9. Do not delete or move old copied PHP files without explicit instruction — when instructed to move them, they go to legacy-reference/, never deleted outright.
+
+============================================================
+PHASE 1 — ANALYSIS ONLY (no code changes, no file copies)
+============================================================
+
+Analyze the old officer dashboard and its layout/assets. Do NOT modify, move, or copy any files in this phase.
+
+Source:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\officer\index.php
+
+Also inspect:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\officer
+(including any subfolders such as officer\assets, officer\src, officer\vendors, officer\uploads, officer\includes — trace every include()/require() call from index.php, even outside these folders)
+
+Create a new document at:
+docs/12-officer-dashboard-ui-migration-plan.md
+
+The document must include ALL of the following sections:
+1. Old layout files used (full list with paths)
+2. Old CSS/JS assets required (full list with paths)
+3. Images/icons/fonts required (full list, note anything that looks missing)
+4. Sidebar/navbar/header/footer structure — describe the HTML structure and how these pieces are assembled/included
+5. PHP code to remove — list every PHP block, session check, mysqli query, include/require, and redirect found
+6. Dynamic dashboard data — list every piece of dynamic data displayed and where in the old code it comes from
+7. Matching backend API fields — inspect backend/src/modules/dashboard/dashboard.service.ts directly (do not guess) to get the EXACT field names returned by GET /api/dashboard/officer, then cross-reference against the old dashboard's dynamic data from #6. Flag any old data point with no backend equivalent yet.
+8. New component breakdown — proposed component list (OfficerLayout, OfficerNavbar, OfficerSidebar, OfficerFooter, dashboard content sections)
+9. New route structure — proposed Next.js routes, including how this fits the eventual full officer module (dashboard, prisoners, appointments, parole, FIR, profile)
+10. Public asset copy/exposure needs — which folders actually need to be copied into public/legacy/officer to preserve the UI
+11. Risky files that must NOT be copied to public — explicitly list any .php, .env, .sql, db.php, config files with credentials, or similar found anywhere under frontend/officer
+12. Risks and missing assets — anything that could block a faithful conversion, including legacy JS dependent on jQuery/Bootstrap JS/plugins that assume traditional page loads
+13. Exact next coding step — a one-paragraph summary, including whether Phase 1.5 (asset copy) and Phase 1.6 (cleanup) are actually needed based on what you found, or whether assets are already safely in place
+
+After Phase 1, STOP. Show me the full content of docs/12-officer-dashboard-ui-migration-plan.md and wait for my explicit confirmation before proceeding. Do not copy files or write component code yet.
+
+============================================================
+PHASE 1.5 — COPY/EXPOSE OFFICER ASSETS (only if Phase 1 found assets not yet in public/legacy/officer)
+============================================================
+
+Run this phase ONLY if Phase 1's analysis confirmed that visual assets (CSS/JS/img/fonts/vendor) are not already present under public/legacy/officer. If they're already there and verified, skip straight to Phase 1.6 or Phase 2 as appropriate.
+
+Source folders (adjust based on what Phase 1 actually found):
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\officer\assets
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\officer\src
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\officer\vendors
+
+Target public folder:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\public\legacy\officer
+
+Tasks:
+1. Create target folders if missing.
+2. Copy required visual assets recursively (css, js, img, fonts, icons, vendor css/js).
+3. Do not delete or move old source files — this is a copy, not a move.
+4. Do not modify the backend.
+5. Do not convert any UI code yet.
+6. Do NOT copy PHP files into public — filter them out during copy, not after.
+7. Do NOT copy .env, .sql, db.php, config files with credentials, package-lock files, node_modules, .git folders, build configs (gulpfile.js, webpack.config.js), or documentation (README/CHANGELOG/LICENSE) — these are not needed at runtime and either pose a security risk or are dead weight.
+8. Verify after copy that these categories exist: css, js, images, fonts, icons, vendor css/js.
+9. Spot-check 5-10 resulting paths and confirm they resolve as /legacy/officer/... in Next.js (never /public/legacy/officer/...).
+
+Report back:
+- Folders copied
+- Number of files copied
+- Key CSS paths
+- Key JS paths
+- Key image/icon/font paths
+- Risky files explicitly skipped (and why)
+- Any expected assets still missing
+
+============================================================
+PHASE 1.6 — PUBLIC FOLDER SAFETY CLEANUP (only if Phase 1 or 1.5 found risky files already inside public/legacy/officer)
+============================================================
+
+Run this phase ONLY if risky files (PHP, .env, .sql, config-with-credentials, or template build tooling) were found sitting inside frontend/public/legacy/officer — whether from a prior manual copy or from Phase 1.5. If the folder is already clean, skip to Phase 2.
+
+Target folder:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\public\legacy\officer
+
+Rules:
+1. Do not delete visual assets needed for the UI (css, js, img, fonts, vendor).
+2. Remove or move out any of: .php files, .env files, .sql files, db.php, config files containing credentials, package.json, package-lock.json, yarn.lock, gulpfile.js, webpack config files, .git/.github folders, node_modules, README/CHANGELOG/LICENSE/docs not needed by the UI.
+3. If any PHP/config file contains real database or API credentials, do NOT print the actual values in your report — only report that credentials were found and your assessment of whether they look like old/local XAMPP credentials (unrelated to the new Neon setup) or something that needs urgent attention.
+4. If old PHP/source files are needed later as reference during Phase 3, move them (don't delete) to:
+   frontend/legacy-reference/officer/
+5. After cleanup, verify NO .php, .env, or .sql files remain anywhere under public/legacy/officer.
+6. Re-list the final folder structure and confirm key asset paths (css/js/img) still resolve correctly.
+7. Do not run typecheck/build in this step — this is a pure file operation, no code was touched.
+
+Report back:
+- Files moved (with new location) and files deleted (with justification)
+- Confirmation no PHP/.env/.sql files remain under public/legacy/officer
+- Whether credentials were found, and your assessment (without printing values)
+- Final folder structure
+- Confirmation key asset paths still resolve
+
+============================================================
+PHASE 2 — CONVERT OFFICER LAYOUT SHELL
+============================================================
+
+Convert only the old officer layout shell (navbar, sidebar, footer, menu toggle, profile dropdown, main wrapper) into reusable Next.js components. Do NOT convert dashboard content and do NOT connect the backend API in this phase.
+
+Source:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\officer\index.php
+(plus whatever layout/include files Phase 1 identified — reference legacy-reference/officer/ if PHP files were moved there in Phase 1.6)
+
+Public asset base (must already be clean and verified from Phase 1/1.5/1.6):
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\public\legacy\officer
+Next.js paths must use /legacy/officer/... (never /public/legacy/officer/...)
+
+Target files:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\components\legacy\officer\OfficerLayout.tsx
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\components\legacy\officer\OfficerNavbar.tsx
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\components\legacy\officer\OfficerSidebar.tsx
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\components\legacy\officer\OfficerFooter.tsx
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\app\officer\layout.tsx
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\app\officer\page.tsx
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\app\officer\dashboard\page.tsx
+
+Rules:
+1. Convert only the officer layout shell — this becomes the shared wrapper for ALL future officer pages (dashboard, prisoners, appointments, parole, FIR, profile), so get the structure right once here.
+2. Do not convert dashboard cards/content yet — app/officer/dashboard/page.tsx should render only a placeholder like <div>Officer dashboard content coming in Phase 3</div> inside the new layout, purely to verify the layout renders.
+3. Do not connect the backend API yet.
+4. Remove PHP includes, session code, MySQL code, duplicated html/head/body tags, and all PHP logic.
+5. Convert HTML to valid JSX: class→className, for→htmlFor, style strings→React style objects where needed, self-close void elements correctly, fix any malformed tags from the original.
+6. Keep old officer template classes, structure, spacing, and visual hierarchy as closely as possible — technology conversion, not a redesign.
+7. Use assets only from /legacy/officer/... — never reference any PHP file from public.
+8. Load only the CSS actually needed for the officer layout — do not globally import every legacy CSS file if only some are used.
+9. Be careful with old JavaScript. Do not blindly load every old JS file globally.
+10. If browser-only JS is needed for sidebar/menu/dropdown toggle behavior:
+    - reimplement with React state/hooks (preferred), or
+    - if the original script must be reused, load it inside a useEffect in a client component — never import legacy JS into a server component
+11. Scope all officer CSS/JS loading to app/officer/layout.tsx only, so it never leaks into or breaks the landing page, /login, admin dashboard, or visitor dashboard.
+12. Make /officer redirect to /officer/dashboard.
+13. If any image, CSS, JS, font, or icon asset referenced in index.php is missing from the copied assets, list the exact old source path and expected new public path — do not guess a substitute and do not let it block the build.
+14. Do not modify the backend.
+15. Do not convert admin/visitor/prisoner pages.
+16. Do not delete or move old copied PHP files beyond what was already handled in Phase 1.6.
+17. Run:
+    npm run typecheck
+    npm run build
+    Both must pass with zero errors.
+
+Report after Phase 2:
+- Files created/modified
+- Assets used (with exact /legacy/officer/... paths)
+- CSS files loaded and where
+- JS files loaded, if any, and how (useEffect vs reimplemented as React state)
+- Missing assets, if any
+- Confirmation /officer redirects to /officer/dashboard
+- npm run typecheck result
+- npm run build result
+
+Proceed directly to Phase 3 unless the build fails — if it fails, stop and report.
+
+============================================================
+PHASE 3 — CONVERT OFFICER DASHBOARD CONTENT + CONNECT API
+============================================================
+
+Convert only the old officer dashboard's data/content into Next.js, using the OfficerLayout built in Phase 2, and connect it to the real backend API.
+
+Source:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\officer\index.php (content area only — layout already handled in Phase 2)
+
+Target:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\app\officer\dashboard\page.tsx
+
+Existing layout:
+Use the OfficerLayout already created via app/officer/layout.tsx — do not duplicate navbar/sidebar/footer markup here.
+
+Backend API:
+GET http://localhost:5000/api/dashboard/officer
+(Protected route — requires Authorization: Bearer <token> header)
+
+CRITICAL — do not guess field names:
+Before writing any code that reads stat fields, inspect the actual source of truth:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\backend\src\modules\dashboard\dashboard.service.ts
+(and/or hit the live endpoint with a valid officer token) to confirm the EXACT field names returned — for example, whether the appointment-approval field is called acceptedAppointments or approvedAppointments. Use whatever the backend actually returns, not what seems logical. Report the confirmed field names in your final report.
+
+Rules:
+1. Convert only officer dashboard content — do not touch prisoners, appointments, parole, FIR, or profile pages.
+2. Remove PHP session checks, MySQL queries, includes, redirects, and echo blocks.
+3. Make the dashboard page (or a client sub-component within it) a client component, since it fetches using the stored JWT token.
+4. Read the JWT token using the SAME auth helper/localStorage key already established during /login, admin dashboard, and visitor dashboard work — do not invent a new mechanism.
+5. If no token is found, redirect to /login immediately, before attempting any fetch.
+6. Call GET ${NEXT_PUBLIC_API_BASE_URL}/dashboard/officer with the Authorization header.
+7. Optionally also call GET ${NEXT_PUBLIC_API_BASE_URL}/auth/me to confirm identity — secondary to the dashboard stats call.
+8. If the API response is 401: clear the stored token and redirect to /login.
+9. If the API response is 403: show a clear "Access denied" message instead of attempting to render dashboard content.
+10. Show a loading state while the fetch is in progress: "Loading officer dashboard..." — never leave a blank screen.
+11. Handle fetch/network errors safely with a visible error message — do not let the page crash silently.
+12. Display all stats returned by the backend for the officer dashboard (confirmed in the step above — likely including totalPrisoners, pendingAppointments, an approved/accepted appointments count, rejectedAppointments, pendingParoleRequests), defaulting any missing value to 0 rather than showing "undefined" or crashing.
+13. Preserve the old card layout, classes, icons, and visual style as closely as possible — same structure, just wired to real data instead of PHP/MySQL output.
+14. Use only /legacy/officer/... asset paths.
+15. Do not load old dashboard demo JS, jQuery, or Bootstrap JS bundles unless truly unavoidable for this specific page — prefer plain React-driven rendering for the data-display portion.
+16. Do not modify the backend.
+17. Do not delete or move old PHP files.
+18. Run:
+    npm run typecheck
+    npm run build
+    Both must pass with zero errors.
+
+Final report after Phase 3 (and for the whole task):
+- Files created/modified across Phase 2 and Phase 3
+- Confirmed exact backend field names used (as verified from dashboard.service.ts or live API call)
+- Which stats were successfully wired vs defaulted to 0
+- Assets used and any still missing
+- Confirmation of token/401/403/loading/error handling behavior
+- Any old PHP logic removed
+- Final npm run typecheck result
+- Final npm run build result

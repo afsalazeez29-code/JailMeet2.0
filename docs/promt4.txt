@@ -1,0 +1,225 @@
+JailMeet 2.0 — Prisoner Dashboard Migration (Full Workflow)
+
+Project: C:\Users\afsal\OneDrive\Desktop\JailMeet2.0
+
+Current state (already working, do not touch):
+- Backend fully working: auth, RBAC, dashboard APIs (GET /api/dashboard/admin, /officer, /visitor, /prisoner) — all tested
+- Frontend: landing page, /login, Admin dashboard, Visitor dashboard, Officer dashboard all fully migrated (layout + content + API) and confirmed working
+- Legacy assets pattern established: public/legacy/<role>/... with PHP/source files moved to legacy-reference/<role>/... during cleanup
+- Seeded test account exists: prisoner@jailmeet.com / prisoner123
+
+Overall goal for this task:
+Migrate the OLD prisoner dashboard (PHP) to Next.js, preserving old prisoner UI/UX exactly, while removing all PHP/session/database logic and connecting it to the existing backend API. This is the FOURTH and FINAL of the four main role dashboards. Follow the exact same proven phased pattern used for Officer. Do NOT skip a phase, do NOT merge phases, and STOP after Phase 1 to let me review the analysis before any cleanup or code changes happen.
+
+Golden rules that apply across ALL phases of this task:
+1. One page at a time — this task covers ONLY the prisoner dashboard shell + content. Do not touch parole request pages, visit history pages, or any other prisoner page.
+2. UI first, logic second.
+3. Remove PHP, not UI — strip session_start(), mysqli, include/require, $_SESSION, $_POST, $_GET, header() redirects. Keep all classes, cards, icons, sidebar, navbar, footer, section structure, colors, and images.
+4. Never touch the database directly from the frontend — all data flows through the existing Express/Prisma backend API only.
+5. Build after every code-producing phase — npm run typecheck and npm run build must both pass with zero errors before moving to the next phase.
+6. Do not modify the backend in any of these phases.
+7. Do not delete any old PHP source files — move them to legacy-reference if they need to come out of the public folder; never delete originals.
+8. No PHP, .env, .sql, or credential files may ever exist under any public/ path.
+
+============================================================
+PHASE 1 — ANALYSIS ONLY (no code/file changes)
+============================================================
+
+Analyze the old prisoner dashboard and its layout files. Do NOT modify, move, copy, or delete any files in this phase.
+
+Source file (confirm actual path — may differ from assumption):
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\prisoner\index.php
+
+Also inspect the full prisoner folder for related layout/include/asset files:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\prisoner
+
+Trace every include()/require() call from index.php, even if the included file lives outside this folder.
+
+Create a new document at:
+docs/13-prisoner-dashboard-ui-migration-plan.md
+
+The document must include ALL of the following sections:
+1. Old layout files used (full list with paths, including navbar/sidebar/footer includes)
+2. Old CSS/JS assets required (full list with paths) — identify the UI template/framework in use (e.g. DeskApp, Sneat, custom, or something else) since this determines the conversion approach
+3. Images/icons required (full list, note any that appear to be missing from the filesystem)
+4. Sidebar/navbar/header/footer structure — describe how these pieces are assembled/included
+5. PHP code to remove — list every PHP block, session check, mysqli query, include/require, and redirect found
+6. Dynamic dashboard data — list every piece of dynamic data displayed (counts, tables, welcome text, names, etc.) and where in the old code it comes from
+7. Matching backend API fields — cross-reference the dynamic data from #6 against the actual response shape of GET /api/dashboard/prisoner (fetch/inspect it if needed). Expected fields to check against based on prior backend work: myParoleRequests, pendingParoleRequests, approvedParoleRequests, rejectedParoleRequests, myAppointments. Flag any mismatch (e.g. if the API actually uses different field names, similar to the acceptedAppointments vs approvedAppointments correction found for other dashboards).
+8. PUBLIC SAFETY AUDIT — this is critical, do this explicitly: scan the prisoner folder (and any already-copied public/legacy/prisoner folder if one exists) for .php, .env, .sql, db.php, or any credential-bearing config files. Report exactly what was found and where, without printing credential values.
+9. New component breakdown — proposed component list (PrisonerLayout, PrisonerNavbar, PrisonerSidebar, PrisonerFooter, dashboard content sections)
+10. New route structure — proposed Next.js route(s), including how this fits into the eventual full prisoner module (dashboard, parole request, parole status, visit history)
+11. Risks and missing assets — anything that could block a faithful conversion, including legacy JS dependencies (jQuery, DataTables, chart libraries, etc.)
+12. Exact next coding step — a one-paragraph summary of what Phase 1.5/1.6 and Phase 2 should do based on findings
+
+After Phase 1, STOP. Show me the full content of docs/13-prisoner-dashboard-ui-migration-plan.md and wait for my explicit confirmation before proceeding to any cleanup or conversion. Do not write or move any files yet.
+
+============================================================
+PHASE 1.6 — PUBLIC SAFETY CLEANUP (only after I confirm Phase 1 findings)
+============================================================
+
+Based on Phase 1's public safety audit, clean any public/legacy/prisoner folder (if assets were already copied there) or prepare for a clean copy.
+
+Target public folder:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\public\legacy\prisoner
+
+Rules:
+1. Do not delete any visual asset needed for the UI.
+2. Remove/never copy these unsafe/source-only file types into public: .php, .env, .sql, db.php, credential-bearing configs, package.json, package-lock.json, yarn.lock, gulpfile.js, webpack configs, .git/.github folders, node_modules, README/CHANGELOG/LICENSE/docs not referenced by the UI.
+3. If any PHP file contains credentials, do NOT print values — only report that credentials were found and your assessment of whether they're old/local-only.
+4. Move all PHP/source-only files (not delete) to:
+   C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\legacy-reference\prisoner
+   (preserve original subfolder structure)
+5. Delete safe-to-remove template tooling files after confirming no CSS/JS/HTML references them by path; skip and flag any that are referenced.
+6. Verify — after cleanup — that NO .php, .env, or .sql files remain anywhere under public/legacy/prisoner.
+7. Do not modify the backend. Do not convert any UI in this step. Do not run typecheck/build (no code touched).
+
+Report for Phase 1.6:
+- Files moved and their new legacy-reference paths
+- Files deleted, confirmed unreferenced
+- Credentials found or not (no values printed)
+- Final folder structure of public/legacy/prisoner
+- Key asset paths that resolve correctly
+
+============================================================
+PHASE 1.5 — COPY/VERIFY MISSING ASSETS (only after Phase 1.6 is confirmed)
+============================================================
+
+Based on Phase 1's findings, copy only the specific missing assets identified (images, icons, or any asset files referenced by index.php but not yet present in public/legacy/prisoner) — a targeted copy, not a broad folder dump.
+
+Rules:
+1. Copy only the specific missing files identified in Phase 1's analysis — do not re-copy assets that already exist correctly.
+2. If entire asset folders (css/, js/, vendor/, img/, fonts/) are missing entirely and were never copied, copy them fully from the source template location identified in Phase 1, following the same clean structure used for admin/visitor/officer.
+3. Do not modify the backend. Do not convert any UI in this step.
+4. Confirm final browser-resolvable paths follow the pattern:
+   /legacy/prisoner/...
+
+Report for Phase 1.5:
+- What was copied and from where
+- Final confirmed public paths
+- Any assets still missing after this step (exact expected path, do not guess substitutes)
+
+============================================================
+PHASE 2 — CONVERT PRISONER LAYOUT SHELL (only after Phases 1.6 and 1.5 are confirmed complete)
+============================================================
+
+Convert only the old prisoner layout shell (navbar, sidebar, footer, main wrapper) into reusable Next.js components. Do NOT convert dashboard cards/content and do NOT connect the backend API in this phase.
+
+Source files (adjust exact paths based on Phase 1's findings):
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\prisoner\index.php
+(plus any navbar/sidebar/footer include files identified in Phase 1)
+
+Reference doc:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\docs\13-prisoner-dashboard-ui-migration-plan.md
+
+Target files:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\components\legacy\prisoner\PrisonerLayout.tsx
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\components\legacy\prisoner\PrisonerNavbar.tsx
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\components\legacy\prisoner\PrisonerSidebar.tsx
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\components\legacy\prisoner\PrisonerFooter.tsx
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\app\prisoner\layout.tsx
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\app\prisoner\page.tsx
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\app\prisoner\dashboard\page.tsx
+
+Goal:
+Preserve the old prisoner dashboard layout shell UI/UX as closely as possible while migrating to Next.js.
+
+Rules:
+1. Convert only the layout shell — this becomes the shared wrapper for all future prisoner pages (dashboard, parole request, parole status, visit history).
+2. Do not convert dashboard cards/content yet — keep app/prisoner/dashboard/page.tsx as simple placeholder content inside the layout, e.g. <div>Prisoner dashboard content coming in Phase 3</div>.
+3. Do not connect the backend API yet.
+4. Remove PHP includes, session code, MySQL code, duplicated html/head/body tags, and all PHP logic.
+5. Convert HTML to valid JSX: class→className, for→htmlFor, style strings→React style objects, self-close void elements, fix any malformed original HTML.
+6. Keep old template classes, structure, spacing, and visual hierarchy as closely as possible — this is a technology conversion, not a redesign.
+7. Use copied assets ONLY from /legacy/prisoner/... paths.
+8. Load only the CSS actually needed for the prisoner layout, scoped inside app/prisoner/layout.tsx so it doesn't leak into or break other routes.
+9. Do not blindly load old JS files globally.
+10. Reimplement sidebar/menu toggle and any dropdown behavior using React state/hooks (useState, next/navigation's usePathname) wherever reasonable.
+11. If browser-only legacy JS is absolutely necessary, load it inside a useEffect in a client component only — never import into a server component.
+12. Do NOT reference any PHP files from the public folder — there shouldn't be any after Phase 1.6; if found, stop and flag it.
+13. Do not modify the backend.
+14. Do not convert admin/visitor/officer pages.
+15. Do not delete or move old copied PHP files further (they're already safely in legacy-reference).
+16. Make /prisoner redirect to /prisoner/dashboard.
+17. Run:
+    npm run typecheck
+    npm run build
+    Both must pass with zero errors.
+
+Report for Phase 2:
+- Files created/modified
+- Assets used (exact /legacy/prisoner/... paths)
+- CSS files loaded and where
+- JS files loaded, if any, and how (useEffect vs reimplemented as React state)
+- Missing assets, if any
+- Any old PHP/layout logic removed
+- Confirmation /prisoner redirects to /prisoner/dashboard
+- npm run typecheck result
+- npm run build result
+
+Proceed directly to Phase 3 if Phase 2's build passes — no need to stop again unless it fails.
+
+============================================================
+PHASE 3 — CONVERT PRISONER DASHBOARD CONTENT + CONNECT API
+============================================================
+
+Convert only the old prisoner dashboard's data/content into Next.js, using the PrisonerLayout built in Phase 2, and connect it to the real backend API.
+
+Source:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\legacy-reference\prisoner\index.php (or the original path if Phase 1.6 didn't move it — use whichever location actually holds the file after cleanup)
+
+Target:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\app\prisoner\dashboard\page.tsx
+
+Existing layout:
+Use the PrisonerLayout already created via app/prisoner/layout.tsx — do not duplicate navbar/sidebar/footer markup here.
+
+Backend API:
+GET http://localhost:5000/api/dashboard/prisoner
+(Protected route — requires Authorization: Bearer <token> header)
+
+IMPORTANT: Use the EXACT field names confirmed in Phase 1's analysis against the real API response — do not assume field names without verification. Based on prior backend work, likely fields are:
+- myParoleRequests
+- pendingParoleRequests
+- approvedParoleRequests
+- rejectedParoleRequests
+- myAppointments
+If Phase 1 found different actual field names (e.g. an "accepted" vs "approved" naming mismatch like was found for appointments), use the CORRECTED real names instead.
+
+Goal:
+Preserve the old prisoner dashboard content UI/UX as closely as possible, replacing old PHP/MySQL dashboard values with the new backend API.
+
+Rules:
+
+1. Convert only prisoner dashboard content — do not touch parole request page, parole status page, visit history page, or any other prisoner page.
+2. Use the existing PrisonerLayout from app/prisoner/layout.tsx.
+3. Remove all PHP session checks, MySQL queries, includes, redirects, and echo blocks.
+4. Make the dashboard page (or a client sub-component within it) a client component, since it fetches using the stored JWT token.
+5. Read the JWT token using the SAME auth helper/localStorage key already established for the other dashboards — do not invent a second storage mechanism.
+6. If no token is found, redirect to /login immediately, before attempting any fetch.
+7. Call GET ${NEXT_PUBLIC_API_BASE_URL}/dashboard/prisoner with the Authorization header.
+8. Optionally also call GET ${NEXT_PUBLIC_API_BASE_URL}/auth/me to confirm the logged-in user's identity.
+9. If the API response is 401: clear the stored token and redirect to /login.
+10. If the API response is 403: show a clear "Access denied" message instead of attempting to render dashboard content.
+11. Show a loading state while the fetch is in progress: "Loading prisoner dashboard..." — never leave a blank screen.
+12. Handle fetch/network errors safely with a visible error message — do not let the page crash silently.
+13. Display all confirmed stat fields, defaulting any missing value to 0 rather than showing "undefined" or crashing.
+14. Preserve the old card layout, classes, icons, and visual style as closely as possible.
+15. Use only public asset paths under /legacy/prisoner/... if needed on this page.
+16. Do NOT load old dashboard demo JS, chart libraries, DataTables, jQuery, or analytics scripts for this page — data-driven React only.
+17. Do not modify the backend.
+18. Do not delete or move old PHP files.
+19. Run:
+    npm run typecheck
+    npm run build
+    Both must pass with zero errors.
+
+Final report after Phase 3 (and for the whole task):
+- Files created/modified across Phases 1.6, 1.5, 2, and 3
+- API endpoint(s) used
+- Exact backend fields wired (list each, confirmed against real API response)
+- Assets used and any still missing
+- Confirmation of token/401/403/loading/error handling behavior
+- Any old PHP logic removed
+- Final npm run typecheck result
+- Final npm run build result

@@ -1,0 +1,222 @@
+JailMeet 2.0 — Structure Cleanup & Frontend Architecture: Phase 1-4 (Foundation + Visitor Dashboard Refactor)
+
+You are working on the JailMeet 2.0 structure-cleanup and frontend architecture phase.
+
+Project root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0
+
+Frontend root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+Backend root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\backend
+
+Read this audit document completely before making any changes:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\docs\14-frontend-backend-structure-audit-plan.md
+
+Current completed status (already working, do not break):
+- Backend authentication, JWT, RBAC, Prisma, and Neon PostgreSQL are working
+- Landing page and login page are migrated to Next.js
+- Admin, Visitor, Officer, and Prisoner dashboards are migrated
+- All four dashboards are connected to real backend APIs
+- Typecheck and build currently pass
+- Existing legacy layouts and UI behavior must not be broken
+- frontend/public currently contains no PHP, env, SQL, database, package, or build-tooling files
+- The main known structural risk is landing-page legacy CSS loaded globally through app/layout.tsx (this is NOT being fixed in this task — noted for later)
+
+Goal for this task:
+Begin the professional structure cleanup safely by creating shared frontend API types and services, then refactor ONLY the Visitor Dashboard to use them. This is a proof-of-concept refactor to validate the new architecture before rolling it out to the other three dashboards.
+
+Do not perform the full project restructure in this task. This task covers Phases 1 through 4 only, in strict order. Stop after Phase 4 — do not continue to Admin/Officer/Prisoner refactors, hooks, component moves, or CSS scoping without my explicit confirmation.
+
+==================================================
+PHASE 1 — VERIFY AND CREATE REQUIRED FOLDERS
+==================================================
+
+Inspect the current frontend structure first.
+
+Create these folders only if they do not already exist:
+- frontend/src/services
+- frontend/src/hooks
+- frontend/src/types
+- frontend/src/components/ui
+- frontend/src/components/layout
+- frontend/src/components/admin
+- frontend/src/components/visitor
+- frontend/src/components/officer
+- frontend/src/components/prisoner
+
+Rules:
+1. Do not move existing components.
+2. Do not delete files.
+3. Do not rename existing routes.
+4. Do not modify legacy-reference or public/legacy assets.
+5. Do not create empty placeholder files just to fill folders unless needed by this task.
+
+==================================================
+PHASE 2 — CREATE SHARED TYPES
+==================================================
+
+Inspect the actual frontend and backend response shapes before writing any types — do not guess field names.
+
+Create or update:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\src\types\api.ts
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\src\types\auth.ts
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\src\types\dashboard.ts
+
+Requirements:
+1. api.ts should contain reusable generic API response/error types based on the real backend response structure (e.g. { success, message, data }).
+2. auth.ts should contain the current authenticated user type and login/current-user response types.
+3. dashboard.ts should contain typed dashboard stat interfaces for: Admin dashboard, Visitor dashboard, Officer dashboard, Prisoner dashboard.
+4. Use the exact real backend fields — verify against the actual API responses, do not invent fields.
+5. Reuse or merge safely with any existing frontend/src/types/auth.ts file if one already exists.
+6. Avoid duplicate conflicting type definitions across files.
+
+Expected dashboard fields (verify these are correct against the real API before finalizing):
+
+Admin:
+- totalUsers
+- totalVisitors
+- totalOfficers
+- totalPrisoners
+- totalAppointments
+- pendingAppointments
+- pendingParoleRequests
+
+Visitor:
+- myAppointments
+- pendingAppointments
+- approvedAppointments
+- rejectedAppointments
+
+Officer:
+- totalPrisoners
+- pendingAppointments
+- approvedAppointments
+- rejectedAppointments
+- pendingParoleRequests
+
+Prisoner:
+- myParoleRequests
+- pendingParoleRequests
+- approvedParoleRequests
+- rejectedParoleRequests
+- myAppointments
+
+==================================================
+PHASE 3 — CREATE SHARED AUTH AND DASHBOARD SERVICES
+==================================================
+
+Create:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\src\services\auth.service.ts
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\src\services\dashboard.service.ts
+
+Before coding, inspect:
+- frontend/src/lib/api.ts (if it exists)
+- frontend/src/lib/auth.ts (if it exists)
+- current dashboard pages (all four, to understand existing fetch patterns)
+- backend auth routes/controllers/services
+- backend dashboard routes/controllers/services
+
+Requirements for auth.service.ts:
+1. Reuse the existing API base URL and auth/token helpers — do not create a second, competing implementation.
+2. Provide a typed function for: GET /auth/me
+3. Reuse existing login logic if appropriate, but do not break the current login form or LoginForm component.
+4. Do not duplicate the localStorage token key — use the exact same key already established.
+5. Do not hardcode http://localhost:5000 if NEXT_PUBLIC_API_BASE_URL is already used elsewhere in the codebase.
+6. Return structured typed results, or throw a predictable typed API error object.
+
+Requirements for dashboard.service.ts:
+Provide typed functions for:
+- getAdminDashboard()
+- getVisitorDashboard()
+- getOfficerDashboard()
+- getPrisonerDashboard()
+
+Each function must:
+1. Call the correct route under NEXT_PUBLIC_API_BASE_URL.
+2. Send the Bearer token in the Authorization header.
+3. Parse the actual backend response structure.
+4. Return only typed dashboard data (using the types created in Phase 2).
+5. Preserve HTTP status information for 401 and 403 handling — the caller needs to know which status occurred.
+6. Handle malformed or non-JSON responses safely (no unhandled exceptions on bad JSON).
+7. NOT redirect directly inside the service — no router access here.
+8. NOT access React router APIs (no useRouter, no next/navigation imports in the service files).
+9. NOT contain UI state (no useState, no loading/error state — that stays in the component).
+10. NOT silently swallow errors — always surface them to the caller in a typed, predictable way.
+
+Do not create Axios dependencies unless the project already uses Axios for this frontend. Prefer the existing fetch-based approach already in use.
+
+==================================================
+PHASE 4 — REFACTOR ONLY VISITOR DASHBOARD
+==================================================
+
+Refactor only:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\app\visitor\dashboard\page.tsx
+
+Goal:
+Replace repeated direct fetch() and response-parsing logic with the new service functions from Phase 3 — this is a structural refactor, not a behavior or visual change.
+
+Use:
+- getCurrentUser() (or the equivalent function) from auth.service.ts
+- getVisitorDashboard() from dashboard.service.ts
+
+Preserve ALL existing behavior exactly, with zero regressions:
+1. No token → redirect to /login
+2. 401 response → clear stored token, redirect to /login
+3. 403 response → show "Access denied"
+4. Loading → show the existing loading message/state ("Loading visitor dashboard...")
+5. Network/API error → show the existing visible error state
+6. Stats displayed: myAppointments, pendingAppointments, approvedAppointments, rejectedAppointments
+7. Missing stat values → default to 0
+8. Preserve exactly: existing VisitorLayout, existing Sneat/Boxicons UI, existing CSS classes, existing assets, existing route behavior, existing dashboard card structure
+
+Do not redesign anything — this task is purely "same behavior, cleaner code underneath."
+
+==================================================
+STRICT NON-GOALS — DO NOT DO ANY OF THE FOLLOWING IN THIS TASK
+==================================================
+
+- Do not refactor Admin, Officer, or Prisoner dashboards yet
+- Do not create hooks yet (useAuth, useProtectedPage, useDashboard — that's Phase 5, a separate future task)
+- Do not move components into src/components yet (that's Phase 7, a separate future task)
+- Do not change global CSS loading yet (that's Phase 6, a separate future task)
+- Do not remove landing CSS from app/layout.tsx yet
+- Do not add Visitor Booking or any other new workflow page (that's Phase 8, a separate future task)
+- Do not modify backend behavior
+- Do not modify the Prisma schema
+- Do not modify database migrations or seed files
+- Do not change JWT storage strategy
+- Do not change localStorage to cookies in this task
+- Do not redesign old UI
+- Do not delete legacy assets or PHP reference files
+- Do not run npm audit fix --force
+
+==================================================
+VERIFICATION
+==================================================
+
+Run from frontend:
+npm run typecheck
+npm run build
+
+If the build encounters only the known Windows sandbox spawn EPERM issue, rerun the same build through the approved environment without changing any code to work around it.
+
+==================================================
+FINAL REPORT
+==================================================
+
+After implementation, report exactly:
+1. Folders created
+2. Files created
+3. Files modified
+4. Shared types created (summarize each interface/type)
+5. Auth service functions created
+6. Dashboard service functions created
+7. Exact Visitor Dashboard changes made
+8. Confirmation that existing UI and behavior were preserved (walk through each of the 8 preserved-behavior points from Phase 4 and confirm each one explicitly)
+9. Typecheck result
+10. Build result
+11. Any risks or follow-up tasks found (e.g. mismatched field names discovered, missing helper files, inconsistencies between dashboards' current fetch patterns that the other three refactors will need to account for)
+
+Stop after this task. Do not continue to the remaining dashboard refactors (Phase 5 hooks, Phase 6 CSS scoping, Phase 7 component moves, or refactoring Admin/Officer/Prisoner dashboards) without my explicit confirmation.

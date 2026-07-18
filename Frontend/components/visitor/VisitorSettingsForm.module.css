@@ -1,0 +1,20 @@
+.readonlyValue {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  color: #697a8d;
+  background-color: #f5f5f9;
+  border: 1px solid #d9dee3;
+  border-radius: 0.375rem;
+  padding: 0.4375rem 0.875rem;
+}
+
+.avatarPreview {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
+
+.notice {
+  margin-bottom: 0;
+}

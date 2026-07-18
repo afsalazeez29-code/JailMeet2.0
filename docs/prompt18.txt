@@ -1,0 +1,447 @@
+You are working on the JailMeet 2.0 Next.js frontend.
+
+Project root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0
+
+Frontend root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+Problem:
+The Visitor sidebar contains a link to:
+
+/visitor/settings
+
+But this route does not currently exist in the Next.js app.
+
+Current visitor routes are:
+
+- /visitor
+- /visitor/dashboard
+
+Because this file is missing:
+
+frontend/app/visitor/settings/page.tsx
+
+clicking Visitor Settings or Account Settings causes:
+
+404 Not Found
+
+This is a frontend route-migration issue, not a backend error.
+
+Goal:
+Find the old Visitor Settings / Account Settings page in the legacy PHP project, inspect its UI and available fields, then create the equivalent Next.js route at:
+
+frontend/app/visitor/settings/page.tsx
+
+Preserve the existing Visitor legacy UI/UX as closely as possible, reuse the current Visitor layout, and avoid inventing backend functionality that does not exist.
+
+Do not redesign the page.
+Do not modify unrelated routes.
+Do not modify backend code unless explicitly required and clearly justified.
+Do not invent profile fields or update APIs.
+
+==================================================
+LEGACY SOURCE LOCATION
+==================================================
+
+Old PHP project root:
+
+C:\xampp\htdocs\Project\JailMeet
+
+Search the legacy project for files and links related to:
+
+- visitor settings
+- account settings
+- profile settings
+- profile.php
+- settings.php
+- account.php
+- editprofile.php
+- visitor profile
+- change password
+- update account
+- visitor/settings
+- data-legacy-href values in the migrated Visitor sidebar
+
+Use VS Code search or PowerShell recursive search if needed.
+
+Likely PowerShell searches:
+
+Get-ChildItem "C:\xampp\htdocs\Project\JailMeet" -Recurse -File |
+Where-Object {
+    $_.Name -match "setting|profile|account|password"
+} |
+Select-Object FullName
+
+Get-ChildItem "C:\xampp\htdocs\Project\JailMeet" -Recurse -File |
+Select-String -Pattern "Account Settings|Visitor Settings|Edit Profile|Change Password|settings.php|profile.php" |
+Select-Object Path, LineNumber, Line
+
+First identify the exact legacy page used by the Visitor sidebar.
+
+==================================================
+CURRENT FRONTEND FILES TO INSPECT
+==================================================
+
+Inspect these files before coding:
+
+- frontend/app/visitor/layout.tsx
+- frontend/app/visitor/page.tsx
+- frontend/app/visitor/dashboard/page.tsx
+- frontend/components/legacy/visitor/VisitorLayout.tsx
+- all Visitor sidebar/navigation components
+- frontend/src/hooks/useAuth.ts
+- frontend/src/hooks/useProtectedPage.ts
+- frontend/src/services/auth.service.ts
+- frontend/src/types/auth.ts
+- frontend/src/lib/auth.ts
+- any existing profile/settings components
+- frontend/public/legacy/visitor/
+- frontend/legacy-reference/visitor/
+
+Also inspect the backend only to understand what data is currently available:
+
+- GET /api/auth/me response
+- existing user/profile services
+- existing VisitorProfile Prisma fields
+- any existing update-profile or change-password routes
+
+Do not modify backend unless a matching API already exists and only frontend wiring is needed.
+
+==================================================
+PHASE 1 — IDENTIFY THE LEGACY PAGE
+==================================================
+
+Determine:
+
+1. The exact old PHP file used for Visitor Settings.
+2. The visible page title.
+3. The sidebar/header/footer structure.
+4. The form sections and fields.
+5. Which fields are editable.
+6. Which fields are read-only.
+7. Whether the page includes:
+   - name
+   - email
+   - phone
+   - address
+   - state/district
+   - zip
+   - profile image
+   - password change
+8. Which CSS and assets it uses.
+9. Which PHP/MySQL actions it performs.
+10. Whether any unsafe behavior exists, such as:
+    - plaintext password handling
+    - direct SQL
+    - unvalidated uploads
+    - insecure session logic
+
+Use the old file only as a UI and workflow reference.
+
+Do not copy PHP database logic into React.
+
+==================================================
+PHASE 2 — CHECK CURRENT BACKEND CAPABILITY
+==================================================
+
+Inspect current backend routes and services to classify each old settings feature as:
+
+1. Supported now
+   - can be connected safely
+
+2. Read-only supported
+   - data can be displayed from /api/auth/me or another existing endpoint
+
+3. Not supported yet
+   - UI may be shown as read-only or clearly unavailable
+   - do not invent API calls
+
+4. Unsafe legacy behavior
+   - do not migrate
+
+Specifically verify whether the backend currently supports:
+
+- fetching current user identity
+- fetching VisitorProfile
+- updating name
+- updating email
+- updating phone
+- updating address/state/zip
+- changing password
+- uploading profile image
+
+Do not assume these APIs exist.
+
+==================================================
+PHASE 3 — CREATE THE NEXT.JS ROUTE
+==================================================
+
+Create:
+
+frontend/app/visitor/settings/page.tsx
+
+Requirements:
+
+1. It must use the existing Visitor route layout automatically.
+2. It must use the shared protected-page/auth hooks.
+3. No token:
+   - redirect to /login
+4. 401:
+   - clear token and redirect to /login
+5. 403:
+   - show Access denied
+6. Loading:
+   - show a visible loading state
+7. Error:
+   - show a visible error state
+8. Preserve the existing Visitor legacy layout and CSS classes.
+9. Do not create a separate duplicate sidebar or header.
+10. Do not load Visitor CSS globally.
+11. Do not add landing CSS globally.
+12. Do not invent unavailable data.
+
+==================================================
+PHASE 4 — CREATE A SETTINGS COMPONENT
+==================================================
+
+Create a reusable component in the currently active component structure.
+
+Preferred location:
+
+frontend/components/visitor/VisitorSettingsForm.tsx
+
+If the project’s current structure clearly uses another Visitor component folder, follow that structure consistently.
+
+For component-specific CSS, create:
+
+frontend/components/visitor/VisitorSettingsForm.module.css
+
+Use a CSS Module only for styles unique to this settings page.
+
+Preserve legacy Bootstrap/template classes where they are already required by the Visitor layout.
+
+The component may include:
+
+- Profile information section
+- Account information section
+- Change-password section only if backend support exists
+- Profile-image section only if backend support exists
+
+Do not show fake editable controls that appear functional when no API exists.
+
+==================================================
+PHASE 5 — DATA DISPLAY RULES
+==================================================
+
+Use only fields confirmed by current APIs.
+
+Likely identity fields from /api/auth/me:
+
+- id
+- name
+- email
+- role
+
+Possible VisitorProfile fields from registration/backend schema:
+
+- phone
+- address
+- state
+- zip
+
+Before using profile fields, confirm they are actually returned by an existing endpoint.
+
+Rules:
+
+1. Do not invent:
+   - age
+   - gender
+   - district unless mapped to state
+   - visitor ID number
+   - Aadhaar
+   - occupation
+   - prison assignment
+   - appointment history
+2. Missing values should show a safe placeholder such as:
+   - Not provided
+3. Never display:
+   - password
+   - password hash
+   - JWT token
+4. Do not place sensitive data in URL parameters.
+5. Do not log profile data unnecessarily.
+
+==================================================
+PHASE 6 — EDITING BEHAVIOR
+==================================================
+
+If an existing backend update-profile endpoint is found:
+
+1. Create or reuse a typed frontend service.
+2. Add matching TypeScript request/response types.
+3. Use controlled React form state.
+4. Validate basic input on frontend.
+5. Let backend validation remain authoritative.
+6. Show:
+   - saving state
+   - success state
+   - validation error
+   - conflict error
+   - network error
+7. Refresh displayed user/profile data after success.
+8. Do not allow role changes.
+9. Do not allow user ID changes.
+10. Do not allow insecure direct profile ownership changes.
+
+If no update endpoint exists:
+
+1. Create the page as a read-only settings/profile page.
+2. Clearly label fields as account information.
+3. Do not add a fake Save button.
+4. Report that editing requires a future backend profile module.
+5. Preserve the legacy page’s visual structure as closely as reasonable.
+
+==================================================
+PHASE 7 — CHANGE PASSWORD RULE
+==================================================
+
+Only implement Change Password if an existing secure backend route is confirmed.
+
+A secure route must:
+
+- require authentication
+- validate current password
+- validate new password
+- hash the new password with bcrypt
+- never return the password/hash
+- enforce ownership from JWT, not request body user ID
+
+If no such route exists:
+
+- do not implement password submission
+- either omit the section or show it as unavailable
+- report it as future work
+
+Do not reuse any plaintext legacy-password behavior.
+
+==================================================
+PHASE 8 — PROFILE IMAGE RULE
+==================================================
+
+Cloudinary is planned but may not be implemented yet.
+
+Only implement image upload if a current secure upload endpoint exists.
+
+If not:
+
+- preserve the current/default avatar
+- do not create a fake upload feature
+- do not store base64 images in localStorage
+- do not add Multer/Cloudinary backend changes in this task
+
+==================================================
+PHASE 9 — FIX THE SIDEBAR LINK
+==================================================
+
+Inspect the active Visitor sidebar link.
+
+Ensure Visitor Settings / Account Settings uses:
+
+/visitor/settings
+
+Use Next.js Link where appropriate.
+
+Preserve:
+
+- text
+- icon
+- classes
+- active state
+- layout
+- legacy metadata if it is inactive historical reference
+
+Do not point active navigation to any .php path.
+
+Expected behavior:
+
+Visitor sidebar
+→ click Settings
+→ /visitor/settings
+→ valid page renders
+→ no 404
+
+==================================================
+STRICT NON-GOALS
+==================================================
+
+Do not:
+
+- Redesign Visitor dashboard/layout
+- Move all components into src/components
+- Modify landing page
+- Modify login/register pages
+- Add appointment workflow
+- Add parole workflow
+- Add fake update endpoints
+- Add fake password change
+- Add fake Cloudinary upload
+- Change JWT/localStorage strategy
+- Add cookies or refresh tokens
+- Modify Prisma schema unless explicitly required by an already designed backend feature
+- Run npm audit fix --force
+- Delete legacy assets
+- Delete legacy-reference files
+- Refactor unrelated code
+
+==================================================
+VERIFICATION
+==================================================
+
+Run from:
+
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+Commands:
+
+npm run typecheck
+npm run build
+
+Also verify:
+
+- /visitor/settings no longer returns 404
+- no token redirects to /login
+- 401 clears token and redirects
+- 403 shows Access denied
+- Visitor layout/sidebar remains unchanged
+- active Settings link opens /visitor/settings
+- no active settings link points to .php
+- only real backend-supported actions are functional
+- missing backend features are not faked
+
+==================================================
+FINAL REPORT
+==================================================
+
+Report:
+
+1. Exact legacy PHP settings file found
+2. Old page fields and behavior
+3. Unsafe legacy behavior intentionally not migrated
+4. Current backend capabilities found
+5. Whether the new page is editable or read-only
+6. Files created
+7. Files modified
+8. Sidebar route fixed
+9. Data fields displayed
+10. APIs used
+11. Unsupported features deferred
+12. Confirmation that Visitor UI/layout/classes/assets are preserved
+13. Confirmation that /visitor/settings no longer returns 404
+14. Typecheck result
+15. Build result
+16. Recommended next backend/frontend task
+
+Stop after completing the Visitor Settings route migration.
+
+Do not continue to appointment, parole, premium UI, Cloudinary, or unrelated architecture work without explicit confirmation.

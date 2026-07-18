@@ -1,0 +1,160 @@
+Fix horizontal overflow across the entire JailMeet 2.0 frontend project.
+
+Project root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+Do NOT change any UI design, colors, themes, fonts, or component logic.
+Only fix the technical CAUSES of horizontal overflow/scrolling.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 1 — Fix the confirmed cause
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+File: frontend/app/page.tsx
+
+Replace:
+<section id="contact" className="contact section" style={{ width: '2300px' }}>
+
+With:
+<section id="contact" className="contact section">
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 2 — Search entire frontend for other overflow causes
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Search all files for: width:, min-width:, max-width:, 100vw, 2300px, 2000px,
+1500px, position: absolute, translateX, margin-left, margin-right,
+white-space: nowrap
+
+Inspect any unusually large fixed width (e.g. width: 1800px, min-width: 1200px).
+Do NOT delete valid desktop container widths blindly.
+Replace unsafe fixed widths with responsive values where appropriate:
+  width: 100%;
+  max-width: 100%;
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 3 — Add safe global foundation
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Add to app/globals.css:
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
+
+Note: overflow-x: hidden is the final safety guard, not the only fix —
+the actual overflowing element must still be corrected in Step 2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 4 — Make media responsive
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Add to globals.css:
+
+img, video, iframe { max-width: 100%; height: auto; }
+svg { max-width: 100%; }
+
+Do not apply height: auto to svg if it breaks existing icon sizing —
+keep svg limited to max-width only, as shown above.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 5 — Fix Flexbox overflow
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+For flex children that overflow their parent, add:
+  .flex-child { min-width: 0; }
+
+For rows that should wrap instead of overflowing:
+  .flex-container { display: flex; flex-wrap: wrap; }
+
+Avoid white-space: nowrap unless horizontal scroll is intentionally required.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 6 — Fix CSS Grid overflow
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Replace:
+  grid-template-columns: repeat(3, 1fr);
+With:
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+Add responsive breakpoint:
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+@media (max-width: 768px) {
+  .responsive-grid { grid-template-columns: 1fr; }
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 7 — Replace unsafe 100vw
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Replace width: 100vw with width: 100% wherever full viewport width isn't
+strictly intentional (100vw includes scrollbar width and causes overflow).
+Keep 100vw only where genuinely required.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 8 — Handle long text overflow
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Add to content areas handling emails, IDs, URLs, or unbroken text:
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 9 — Handle tables separately
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Wrap all admin/data tables:
+
+<div className="table-responsive-wrapper">
+  <table>{/* content */}</table>
+</div>
+
+.table-responsive-wrapper { width: 100%; overflow-x: auto; }
+
+Horizontal scroll is acceptable INSIDE the table wrapper only —
+the full page itself must never scroll horizontally.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 10 — Detect remaining overflow elements
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Use this browser console script to find any element still extending outside
+the viewport, then fix its width/margin/position/transform individually:
+
+[...document.querySelectorAll('body *')].filter((element) => {
+  const rect = element.getBoundingClientRect();
+  return (
+    rect.right > document.documentElement.clientWidth + 1 ||
+    rect.left < -1
+  );
+});
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 11 — Test all screen sizes and routes
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Test at: 375×667 (Mobile), 768×1024 (Tablet), 1366×768 (Laptop), 1920×1080 (Desktop)
+
+Verify on every route: Landing, Login, Register, Admin pages, Visitor pages,
+Officer pages, Prisoner pages, Appointment forms/tables, Parole forms/tables,
+Settings and password pages.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 12 — Final verification
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Run:
+cd C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+npm run typecheck
+npm run build
+
+Confirm ALL of the following before considering this complete:
+[ ] No page-level horizontal scrollbar anywhere
+[ ] No white area appears on the right of any page
+[ ] No content is cut off on any screen size
+[ ] Tables scroll only inside their own wrapper, never the full page
+[ ] Images remain fully responsive
+[ ] Desktop layouts are visually unchanged from before
+[ ] Mobile and tablet layouts work correctly with no overflow
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CONSTRAINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Do not change colors, fonts, themes, animations, or component logic.
+- Do not delete valid desktop container widths without checking their purpose first.
+- overflow-x: hidden alone is NOT an acceptable fix — the root cause element
+  in each case must be corrected.
+- The Step 1 fix (removing the 2300px inline style) must be applied first
+  and confirmed before searching for additional causes.

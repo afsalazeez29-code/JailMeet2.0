@@ -1,0 +1,376 @@
+You are working on the JailMeet 2.0 frontend architecture cleanup.
+
+Project root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0
+
+Frontend root:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+Current completed status:
+- Next.js frontend scaffold is working.
+- Landing page is migrated.
+- Login page is migrated.
+- Admin, Visitor, Officer, and Prisoner dashboards are migrated.
+- Shared API types and services are implemented.
+- Shared hooks are implemented:
+  - useAuth
+  - useProtectedPage
+  - useDashboard
+- All four dashboards use shared hooks and services.
+- Typecheck and build currently pass.
+- Existing old UI/UX, routes, layouts, classes, and assets must remain unchanged.
+- The main remaining structural risk is landing-page legacy CSS loaded globally from app/layout.tsx.
+- This previously caused AOS CSS to hide the login form because landing-only styles affected another route.
+
+Read and inspect these files before making changes:
+
+- frontend/app/layout.tsx
+- frontend/app/page.tsx
+- frontend/app/globals.css
+- frontend/app/login/page.tsx
+- frontend/components/auth/LoginForm.tsx
+- frontend/app/admin/layout.tsx
+- frontend/app/visitor/layout.tsx
+- frontend/app/officer/layout.tsx
+- frontend/app/prisoner/layout.tsx
+- frontend/public/legacy/landing/assets/css/main.css
+- all CSS imports or <link> elements currently used by the landing page
+- all client-side landing behavior currently implemented in app/page.tsx
+
+Also read:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\docs\14-frontend-backend-structure-audit-plan.md
+
+Goal:
+Remove landing-only legacy CSS and related landing-only asset loading from the global root layout, then scope it safely to the public landing page without changing the current landing page UI/UX or breaking login and role dashboards.
+
+Do not redesign anything.
+Do not change dashboard behavior.
+Do not modify backend code.
+Do not move components into src/components in this task.
+Do not add new workflow pages.
+
+==================================================
+PHASE 1 — AUDIT GLOBAL CSS AND ASSET LOADING
+==================================================
+
+Inspect frontend/app/layout.tsx and identify every stylesheet, font, script, icon, or legacy asset loaded globally.
+
+Classify each item into:
+
+1. Truly global:
+   - Tailwind base
+   - app/globals.css
+   - shared body/html defaults
+   - metadata/favicon if genuinely app-wide
+
+2. Landing-only:
+   - Dewi landing template CSS
+   - AOS CSS
+   - GLightbox CSS
+   - Swiper CSS
+   - Bootstrap CSS used only by landing
+   - landing-specific fonts
+   - landing-specific JS or script loaders
+   - landing-only icon packs if not used elsewhere
+
+3. Role-specific:
+   - Admin CSS
+   - Visitor CSS
+   - Officer CSS
+   - Prisoner CSS
+
+4. Shared but risky:
+   - styles that may affect login or dashboards through broad selectors such as:
+     body
+     html
+     a
+     img
+     section
+     .header
+     .footer
+     .container
+     .btn
+     [data-aos]
+
+Before coding, determine:
+- Which assets must leave app/layout.tsx
+- Which assets must stay
+- Whether the current landing page is a client component
+- Whether a route-specific wrapper or client loader is the safest approach
+
+Do not write a separate audit document unless useful.
+Do not stop after analysis; continue through all phases.
+
+==================================================
+PHASE 2 — KEEP ROOT LAYOUT MINIMAL
+==================================================
+
+Modify:
+
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend\app\layout.tsx
+
+Goal:
+Keep only truly global app concerns in the root layout.
+
+Allowed root-layout responsibilities:
+- html and body structure
+- app metadata
+- app-wide favicon if appropriate
+- app/globals.css
+- Tailwind/global design variables
+- truly shared app-wide fonts if confirmed safe
+
+Remove from the root layout:
+- landing-only CSS links
+- landing-only AOS CSS
+- landing-only Bootstrap CSS
+- landing-only GLightbox CSS
+- landing-only Swiper CSS
+- landing-only template CSS
+- landing-only script loading
+- landing-only attributes or classes on body/html
+- anything that exists only to support app/page.tsx
+
+Rules:
+1. Do not remove app/globals.css.
+2. Do not remove Tailwind setup.
+3. Do not change metadata unless required for correctness.
+4. Do not add role-specific CSS to the root layout.
+5. Do not change login or dashboard files in this phase unless required by the final scoped solution.
+6. Keep the root layout simple and framework-correct.
+
+==================================================
+PHASE 3 — CREATE LANDING-SPECIFIC CSS SCOPE
+==================================================
+
+Create the safest route-specific solution for the landing page.
+
+Preferred architecture:
+- Keep app/page.tsx as the "/" route.
+- Create a landing-specific wrapper or client component that loads landing assets only for the landing page.
+- Do not load landing CSS globally.
+
+Possible target files, choose the cleanest option based on the current project:
+
+Option A:
+- frontend/components/legacy/landing/LandingPageShell.tsx
+- frontend/components/legacy/landing/LandingAssets.tsx
+
+Option B:
+- frontend/src/components/legacy/landing/LandingPageShell.tsx
+- frontend/src/components/legacy/landing/LandingAssets.tsx
+
+Important:
+Do not move unrelated existing components into src/components during this task.
+Choose the location consistent with the current active component structure.
+
+The scoped landing solution must load only the assets needed by app/page.tsx, such as:
+
+- /legacy/landing/assets/vendor/bootstrap/css/bootstrap.min.css
+- /legacy/landing/assets/vendor/bootstrap-icons/bootstrap-icons.css
+- /legacy/landing/assets/vendor/aos/aos.css
+- /legacy/landing/assets/vendor/glightbox/css/glightbox.min.css
+- /legacy/landing/assets/vendor/swiper/swiper-bundle.min.css
+- /legacy/landing/assets/css/main.css
+
+Only include files that actually exist and are used.
+
+Requirements:
+1. Landing styles must apply when "/" is rendered.
+2. Landing styles must not remain active after navigating to /login or role routes.
+3. Do not inject duplicate <link> tags repeatedly.
+4. Clean up dynamically injected links/scripts on unmount if using a client loader.
+5. Avoid flash of unstyled content where reasonably possible.
+6. Avoid hydration errors.
+7. Do not use document APIs in a server component.
+8. If using document/head manipulation, isolate it in a "use client" component with useEffect.
+9. Preserve current landing visual appearance and responsive behavior.
+10. Preserve the current plain <img> behavior if legacy CSS relies on it.
+11. Do not convert images to next/image in this task.
+12. Do not redesign or rename landing classes.
+
+==================================================
+PHASE 4 — HANDLE LANDING-SPECIFIC JAVASCRIPT SAFELY
+==================================================
+
+Inspect the current landing page behavior.
+
+Preserve only behavior currently needed, such as:
+- mobile navigation
+- dropdown behavior
+- scroll-to-top
+- preloader removal
+- scrollspy
+- AOS initialization
+- video/lightbox behavior if currently functional
+- Swiper behavior if currently functional
+
+Rules:
+1. Prefer the existing React state/effect implementation over loading the old main.js.
+2. Do not blindly load all old vendor JS.
+3. Do not load jQuery.
+4. Do not add global scripts to app/layout.tsx.
+5. Load AOS only for the landing page if data-aos attributes are used there.
+6. Ensure AOS cleanup does not leave hidden opacity styles on other routes.
+7. Do not reintroduce the previous login invisibility bug.
+8. If GLightbox or Swiper are not currently used or initialized, do not add them just because their CSS exists.
+9. Do not load Google Analytics or old template analytics.
+10. Do not load old PHP-era scripts.
+
+==================================================
+PHASE 5 — VERIFY LOGIN PAGE IS INDEPENDENT
+==================================================
+
+Inspect:
+
+- frontend/app/login/page.tsx
+- frontend/components/auth/LoginForm.tsx
+
+Goal:
+Ensure /login no longer depends on globally loaded landing CSS or AOS.
+
+Requirements:
+1. Login must remain visible without landing CSS being global.
+2. If LoginForm still uses data-aos, choose one safe solution:
+   - remove the data-aos attribute from LoginForm while preserving visual appearance, or
+   - keep login-specific AOS initialization locally
+3. Prefer removing unnecessary landing-only animation dependencies from login.
+4. Do not redesign the login page.
+5. Preserve:
+   - API integration
+   - token storage
+   - role-based redirect
+   - loading state
+   - error state
+   - current visible layout
+6. Do not modify backend.
+7. Do not change auth services/hooks unless required for a compile fix.
+
+==================================================
+PHASE 6 — VERIFY ROLE-SPECIFIC CSS REMAINS SCOPED
+==================================================
+
+Inspect:
+
+- frontend/app/admin/layout.tsx
+- frontend/app/visitor/layout.tsx
+- frontend/app/officer/layout.tsx
+- frontend/app/prisoner/layout.tsx
+
+Confirm that:
+- Admin legacy CSS remains in admin layout only
+- Visitor legacy CSS remains in visitor layout only
+- Officer legacy CSS remains in officer layout only
+- Prisoner legacy CSS remains in prisoner layout only
+
+Rules:
+1. Do not move these CSS imports to root layout.
+2. Do not redesign these role layouts.
+3. Do not change component markup unless required to fix a CSS conflict caused by this task.
+4. Do not replace legacy CSS with Tailwind yet.
+5. Do not delete legacy assets.
+
+==================================================
+PHASE 7 — ROUTE AND VISUAL REGRESSION CHECK
+==================================================
+
+Verify these routes conceptually and through local checks where possible:
+
+Public:
+- /
+- /login
+
+Role routes:
+- /admin/dashboard
+- /visitor/dashboard
+- /officer/dashboard
+- /prisoner/dashboard
+
+Expected behavior:
+
+"/"
+- Landing page retains existing old UI/UX.
+- Bootstrap/template styling remains visible.
+- AOS elements become visible and animate if still used.
+- Mobile nav/dropdowns still work.
+- No missing critical CSS.
+
+"/login"
+- Login form is immediately visible.
+- No opacity: 0 issue.
+- No blank placeholder area.
+- No dependency on landing CSS.
+- Login auth flow remains unchanged.
+
+Role dashboards:
+- Existing role CSS/layout remains unchanged.
+- Landing CSS does not leak into them.
+- Shared hooks/services remain unchanged.
+- Loading/error/access-denied behavior remains unchanged.
+
+Also inspect the browser-facing asset paths and ensure they use:
+- /legacy/...
+not:
+- /public/legacy/...
+
+==================================================
+STRICT NON-GOALS
+==================================================
+
+Do not:
+
+- Redesign the landing page.
+- Redesign login.
+- Redesign dashboards.
+- Convert legacy UI to premium UI yet.
+- Move all components into src/components.
+- Create new UI library components.
+- Add Visitor registration, booking, status, appointment, prisoner, or parole pages.
+- Modify backend.
+- Modify Prisma schema, migrations, or seed.
+- Change JWT/localStorage strategy.
+- Add cookies or refresh tokens.
+- Add Axios.
+- Replace Bootstrap with Tailwind.
+- Delete public/legacy assets.
+- Delete legacy-reference files.
+- Run npm audit fix --force.
+- Add analytics.
+- Perform unrelated refactors.
+
+==================================================
+VERIFICATION
+==================================================
+
+Run from:
+
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\frontend
+
+Commands:
+
+npm run typecheck
+npm run build
+
+If build encounters only the known Windows sandbox spawn EPERM issue, rerun the same build in the approved environment without changing code.
+
+Also run a static search to confirm landing CSS links are no longer present in app/layout.tsx.
+
+After implementation, report:
+
+1. Files created
+2. Files modified
+3. CSS/scripts removed from root layout
+4. CSS/scripts now scoped to landing only
+5. Login AOS/data-aos decision
+6. Confirmation that role CSS remains route-specific
+7. Landing behavior preserved
+8. Login visibility preserved
+9. Dashboard UI behavior preserved
+10. Typecheck result
+11. Build result
+12. Missing assets or risks found
+13. Any recommended follow-up task
+
+Stop after completing this CSS architecture cleanup.
+
+Do not continue to component moving, premium UI redesign, or new workflow pages without explicit confirmation.
