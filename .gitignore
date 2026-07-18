@@ -1,3 +1,13 @@
+# Ignore everything at project root
+/*
+
+# Keep only these paths
+!/.gitignore
+!/Frontend/
+!/Frontend/**
+!/backend/
+!/backend/**
+
 # Dependencies
 node_modules/
 **/node_modules/
@@ -55,6 +65,3 @@ jailmeet-2-docs/
 **/jailmeet-2-docs/
 prompt*.txt
 **/prompt*.txt
-
-# Local disabled Git metadata left after permission-blocked cleanup
-.git-disabled-empty-stub/
