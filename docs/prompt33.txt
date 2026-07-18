@@ -1,0 +1,356 @@
+Set up Git version control for JailMeet 2.0 and connect it to an existing GitHub repository.
+
+Project folder:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0
+
+GitHub credentials:
+- GitHub-connected email: afsalazeez29@gmail.com
+- GitHub username: afsalazeez29-code
+- GitHub profile: https://github.com/afsalazeez29-code
+- GitHub repository: https://github.com/afsalazeez29-code/JailMeet2.0.git
+
+GitHub repository (already created, currently empty — do not create a new one):
+https://github.com/afsalazeez29-code/JailMeet2.0.git
+
+Note: Git is already installed on this machine — skip any installation instructions, but still verify the version as part of Step 1.
+
+Do this in exact order. Run each PowerShell command and show me the output at each step before moving to the next. Do not skip any step.
+
+==================================================
+STEP 1 — CONFIRM LOCATION AND GIT VERSION
+==================================================
+
+cd "C:\Users\afsal\OneDrive\Desktop\JailMeet2.0"
+Get-Location
+git --version
+
+Confirm:
+- Location is exactly C:\Users\afsal\OneDrive\Desktop\JailMeet2.0
+- Git version is displayed correctly
+
+==================================================
+STEP 2 — CHECK FOR AN EXISTING PARENT GIT REPOSITORY
+==================================================
+
+git rev-parse --show-toplevel
+
+Expected: "fatal: not a git repository" — this is normal, continue.
+
+If instead it shows a DIFFERENT folder path (meaning JailMeet2.0 is accidentally nested inside another git repo, e.g. a OneDrive-wide repo), STOP and report this to me before proceeding — do not initialize git until this is resolved.
+
+==================================================
+STEP 3 — CREATE .gitignore
+==================================================
+
+Create a file at:
+C:\Users\afsal\OneDrive\Desktop\JailMeet2.0\.gitignore
+
+With exactly this content:
+
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Next.js
+frontend/.next/
+frontend/out/
+
+# Build output
+frontend/dist/
+backend/dist/
+dist/
+build/
+
+# Environment files
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+
+# Prisma temporary/local database files
+*.db
+*.db-journal
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.old
+
+# OneDrive conflict files
+*conflicted copy*
+
+Important: do NOT commit real .env files — they may contain database URLs, JWT secrets, Cloudinary credentials, and passwords. Only .env.example files (and their prefixed variants like frontend/.env.example, backend/.env.example) should ever be committed.
+
+==================================================
+STEP 4 — CHECK FOR SENSITIVE FILES BEFORE INIT
+==================================================
+
+Run:
+
+Get-ChildItem -Path . -Recurse -Force -File |
+Where-Object {
+    $_.Name -eq ".env" -or
+    $_.Name -like ".env.*"
+} |
+Select-Object FullName
+
+Report the full list of matched files. Confirm which ones are real secret files that MUST stay ignored (e.g. frontend\.env.local, backend\.env, .env) versus which are safe template files that CAN be committed (e.g. frontend\.env.example, backend\.env.example).
+
+If any real .env file is found that is NOT covered by the .gitignore patterns from Step 3, stop and flag it — do not proceed to git init until every real secret file is confirmed to be ignorable.
+
+==================================================
+STEP 5 — INITIALIZE GIT
+==================================================
+
+git init
+
+Expected: "Initialized empty Git repository in ...\JailMeet2.0\.git\"
+
+git branch -M main
+
+==================================================
+STEP 6 — CONFIGURE GIT IDENTITY
+==================================================
+
+First check if identity is already configured:
+
+git config --global user.name
+git config --global user.email
+
+If BOTH return these correct values, skip setting them and just report the existing values:
+
+Git name:
+Afsal A Azeez
+
+GitHub-connected email:
+afsalazeez29@gmail.com
+
+If either value is empty or incorrect, set:
+
+git config --global user.name "Afsal A Azeez"
+git config --global user.email "afsalazeez29@gmail.com"
+
+Then confirm:
+
+git config --global user.name
+git config --global user.email
+git config --global --list
+
+Confirm:
+- user.name is exactly `Afsal A Azeez`
+- user.email is exactly `afsalazeez29@gmail.com`
+- GitHub username is `afsalazeez29-code`
+- GitHub profile is `https://github.com/afsalazeez29-code`
+
+Do not guess or replace these credentials with placeholders.
+
+==================================================
+STEP 7 — VERIFY GITIGNORE IS WORKING BEFORE STAGING
+==================================================
+
+Run:
+
+git status
+
+Confirm these do NOT appear in the untracked files list:
+- node_modules
+- .next
+- .env (any variant)
+- backend/dist
+- frontend/out
+
+Then explicitly test the ignore rules:
+
+git check-ignore -v frontend/.next
+git check-ignore -v frontend/node_modules
+git check-ignore -v backend/.env
+
+Report the output of each — confirm each shows the specific .gitignore rule that matches it. If any of these commands returns NOTHING (meaning the path is not being ignored), STOP and fix the .gitignore before proceeding — do not stage files with a broken ignore configuration.
+
+==================================================
+STEP 8 — CHECK FOR LARGE FILES
+==================================================
+
+Run:
+
+Get-ChildItem -Path . -Recurse -File |
+Where-Object {
+    $_.FullName -notmatch "\\node_modules\\" -and
+    $_.FullName -notmatch "\\.next\\" -and
+    $_.Length -gt 50MB
+} |
+Select-Object FullName, @{Name="SizeMB";Expression={[math]::Round($_.Length / 1MB, 2)}}
+
+Report any results. Flag any ZIP files, database backups, videos, build folders, or unnecessary archives found — these should NOT be committed. GitHub rejects individual files over 100MB, so anything approaching that size needs to be excluded (add to .gitignore) or removed from the repo before staging.
+
+==================================================
+STEP 9 — STAGE THE PROJECT
+==================================================
+
+git add .
+git status
+git diff --cached --name-only
+
+Report the full staged file list (or at least a summary — total file count, and explicitly confirm none of the following appear: any .env file that isn't .env.example, node_modules contents, .next contents, dist/build output, any file flagged as sensitive in Step 4).
+
+If ANY sensitive file appears staged, immediately unstage it:
+
+git restore --staged <path\to\file>
+
+Then add the correct pattern to .gitignore and re-run git add . — do not proceed to commit until git diff --cached --name-only shows zero sensitive files.
+
+==================================================
+STEP 10 — FIRST COMMIT
+==================================================
+
+git commit -m "chore: initialize JailMeet 2.0 repository"
+
+git log --oneline
+
+Confirm exactly one commit exists.
+
+==================================================
+STEP 11 — CONFIRM REPOSITORY STATE
+==================================================
+
+git status
+
+Expected: "On branch main / nothing to commit, working tree clean"
+
+git rev-parse --show-toplevel
+
+Expected: C:/Users/afsal/OneDrive/Desktop/JailMeet2.0
+
+==================================================
+STEP 12 — CONNECT TO THE EXISTING GITHUB REPOSITORY
+==================================================
+
+The GitHub account is:
+
+Username:
+afsalazeez29-code
+
+Profile:
+https://github.com/afsalazeez29-code
+
+The GitHub repository already exists and is empty at:
+https://github.com/afsalazeez29-code/JailMeet2.0.git
+
+Do NOT create a new repository — connect to this one.
+
+Run:
+
+git remote add origin https://github.com/afsalazeez29-code/JailMeet2.0.git
+git remote -v
+
+Confirm the output shows:
+origin  https://github.com/afsalazeez29-code/JailMeet2.0.git (fetch)
+origin  https://github.com/afsalazeez29-code/JailMeet2.0.git (push)
+
+If a remote named "origin" already exists pointing somewhere else, STOP and report this rather than overwriting it silently — ask me how to proceed.
+
+==================================================
+STEP 13 — PUSH TO GITHUB
+==================================================
+
+git push -u origin main
+
+Note: this may open a browser window for GitHub authentication (or prompt for credentials/a personal access token depending on how Git is configured on this machine) — this is expected, not an error.
+
+Authenticate using this GitHub account:
+
+Username:
+afsalazeez29-code
+
+Profile:
+https://github.com/afsalazeez29-code
+
+Repository:
+https://github.com/afsalazeez29-code/JailMeet2.0.git
+
+Do not request or expose my GitHub password. Use the normal browser/Git Credential Manager authentication flow when available.
+
+Report the outcome once it completes or if it requires manual action from me.
+
+After a successful push, tell me to refresh:
+https://github.com/afsalazeez29-code/JailMeet2.0
+
+to visually confirm the project files appear there.
+
+==================================================
+STEP 14 — FINAL CONFIRMATION
+==================================================
+
+Run all of these from the project root and report every result:
+
+git rev-parse --is-inside-work-tree
+git branch --show-current
+git status
+git log --oneline -5
+git remote -v
+
+Expected correct results:
+- true
+- main
+- working tree clean
+- at least one commit shown
+- origin pointing to https://github.com/afsalazeez29-code/JailMeet2.0.git for both fetch and push
+
+==================================================
+NOTE ON ONEDRIVE (report only, do not act on this)
+==================================================
+
+This project lives inside OneDrive (C:\Users\afsal\OneDrive\Desktop\JailMeet2.0). OneDrive can occasionally lock .next, duplicate files, or interfere with build temp files. Git itself will still work fine here. Do NOT move the project out of OneDrive in this task — just note in your final report that a safer long-term location would be something like C:\Projects\JailMeet2.0, and that moving it should only be considered later, after everything here is committed and pushed successfully.
+
+==================================================
+FINAL REPORT
+==================================================
+
+After completing all 14 steps, report:
+1. Confirmation git was already installed, with version
+2. .gitignore created and its exact location
+3. Sensitive files found (Step 4) and confirmed properly ignored
+4. Any large files found (Step 8) and how they were handled
+5. Full staged file summary (Step 9) with explicit confirmation no secrets were staged
+6. Configured Git identity:
+   - Name: Afsal A Azeez
+   - Email: afsalazeez29@gmail.com
+   - GitHub username: afsalazeez29-code
+   - GitHub profile: https://github.com/afsalazeez29-code
+7. First commit hash/message
+8. Remote configuration confirmed:
+   - https://github.com/afsalazeez29-code/JailMeet2.0.git
+9. Push result — success confirmation, or exactly what manual action (browser login or authorization) is still needed from me
+10. Final confirmation command outputs (Step 14)
+11. The OneDrive note, restated for the record
+12. Any issues, risks, or manual steps still required from me.
