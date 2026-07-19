@@ -45,6 +45,28 @@
   scroll-behavior: smooth;
 }
 
+.login-nav-button {
+  background: var(--accent-color) !important;
+  color: var(--contrast-color) !important;
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: 1px;
+  display: inline-block;
+  padding: 6px 6px !important;
+  border-radius: 4px;
+  transition: 0.3s;
+  text-transform: uppercase;
+}
+
+.login-nav-button span,
+.login-nav-button i {
+  color: var(--contrast-color) !important;
+}
+
+.login-nav-button:hover {
+  background: color-mix(in srgb, var(--accent-color), transparent 20%) !important;
+}
+
 /*--------------------------------------------------------------
 # General Styling & Shared Classes
 --------------------------------------------------------------*/
@@ -687,6 +709,77 @@ h6 {
 
 .footer .footer-contact p {
   margin-bottom: 5px;
+}
+
+.footer-contact-boxes {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.footer-contact-grid {
+  width: 75%;
+  max-width: 520px;
+  text-align: center;
+}
+
+.footer-location {
+  margin-bottom: 40px;
+}
+
+.footer-contact-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.footer-contact-item {
+  flex: 1;
+  text-align: center;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  transition: none !important;
+  transform: none !important;
+  animation: none !important;
+  padding: 0;
+}
+
+.footer-contact-item i {
+  color: #ffffff;
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.footer-contact-item h4 {
+  color: var(--heading-color);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.footer-contact-item p {
+  color: var(--default-color);
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (min-width: 992px) {
+  .footer-contact-boxes {
+    justify-content: flex-end;
+    padding-left: 100px;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-contact-row {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .footer-location {
+    margin-bottom: 24px;
+  }
 }
 
 .footer .footer-newsletter .newsletter-form {

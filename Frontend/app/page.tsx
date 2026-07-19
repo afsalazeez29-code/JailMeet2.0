@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { IoIosArrowForward } from 'react-icons/io';
+import { PiCopyright } from 'react-icons/pi';
 
 import LandingAssets from '../components/legacy/landing/LandingAssets';
 
@@ -81,20 +82,26 @@ export default function HomePage() {
               </li>
               <li className="dropdown">
                 <button
-                  className="border-0 bg-transparent"
+                  className="login-nav-button border-0"
                   type="button"
                   aria-expanded={isLoginDropdownOpen}
                   onClick={() => setIsLoginDropdownOpen((current) => !current)}
                 >
-                  <span>Login</span>{' '}
+                  <span>LOGIN</span>{' '}
                   <i className="bi bi-chevron-down toggle-dropdown"></i>
                 </button>
                 <ul className={isLoginDropdownOpen ? 'dropdown-active' : ''}>
                   <li>
-                    <Link href="/login">Login</Link>
+                    <Link href="/register">Visitor Login/Register</Link>
                   </li>
                   <li>
-                    <Link href="/register">Visitor Login/Register</Link>
+                    <Link href="/officer">Officers</Link>
+                  </li>
+                  <li>
+                    <Link href="/prisoner">Prisoners</Link>
+                  </li>
+                  <li>
+                    <Link href="/admin">Admin</Link>
                   </li>
                 </ul>
               </li>
@@ -115,13 +122,16 @@ export default function HomePage() {
       <main className="main">
         <section id="hero" className="hero section dark-background">
           <img src="/legacy/landing/prison1.jpg" alt="Prison corridor" />
-          <div className="container d-flex flex-column align-items-center">
+          <div
+            className="container d-flex flex-column align-items-center"
+            style={{ transform: 'translateY(55px)', gap:'15px', }}
+          >
             <h2 data-aos="fade-up" data-aos-delay="100">
-              Book , Arriver , Visit
+              BOOK , ARRIVER , VISIT,
             </h2>
             <p data-aos="fade-up" data-aos-delay="200">
-              Book appointments easily to visit and stay connected with your
-              loved ones in prison.
+              "Book appointments easily to visit and stay connected with your
+              loved ones in prison"
             </p>
             <div className="d-flex mt-4" data-aos="fade-up" data-aos-delay="300">
               <Link href="/register" className="btn-get-started">
@@ -141,18 +151,13 @@ export default function HomePage() {
                   className="img-fluid rounded-4 mb-4"
                   alt="Prison visit support"
                 />
-                <p>
-                  JailMeet is an innovative online platform designed to simplify
-                  the process of visiting incarcerated loved ones and managing
-                  parole requests. Our mission is to bridge the gap between
-                  inmates and their families by providing a seamless, secure, and
-                  user-friendly system for scheduling prison visits.
-                </p>
-                <p>
-                  With just a few clicks, visitors can book appointments,
-                  receive real-time updates, and access essential resources while
-                  ensuring compliance with correctional facility regulations.
-                </p>
+                <p>JailMeet is an innovative online platform designed to simplify the process of visiting incarcerated loved ones and managing parole requests.
+                   Our mission is to bridge the gap between inmates and their families by providing a seamless, secure, and user-friendly system for scheduling prison visits.
+                    With just a few clicks, visitors can book appointments, receive real-time updates, and access essential resources—all while ensuring compliance with correctional facility regulations.
+                     JailMeet saves time, reduces stress, and helps maintain vital family connections during challenging times.</p>
+            <p>We understand the emotional and logistical difficulties of staying in touch with someone in prison, which is why JailMeet also offers support for parole applications and legal guidance.
+               Our platform is built with privacy and convenience in mind, allowing users to submit requests, track their status, and receive notifications—all from one centralized location.
+                Whether you're planning a visit or navigating the parole process, JailMeet is your trusted partner in fostering hope, connection, and a smoother journey toward rehabilitation and reunification.</p>
               </div>
 
               <div className="col-lg-6" data-aos="fade-up" data-aos-delay="250">
@@ -186,10 +191,24 @@ export default function HomePage() {
                     </li>
                   </ul>
                   <p>
-                    At JailMeet, we believe that no barrier should keep you from
-                    supporting your loved ones. Our platform is designed to make
-                    every step simple and stress-free.
+             At JailMeet, we believe that no barrier should keep you from supporting your loved ones.
+              Our platform is designed to make every step—from scheduling visits to navigating parole—simple and stress-free.
+               With JailMeet, you can focus on what truly matters: maintaining hope, connection, and a path toward reunification. 
+                Start your journey today and experience a smoother, more compassionate way to stay close, even when miles apart.
                   </p>
+                  <div className="position-relative">
+                    <img
+                      src="/legacy/landing/video_thumbnail.jpg"
+                      className="img-fluid rounded-4"
+                      alt="JailMeet introduction video"
+                    />
+
+                    <a
+                      href="/legacy/landing/jailmeet_video.mp4"
+                      className="glightbox pulsating-play-btn"
+                      aria-label="Play JailMeet introduction video"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -203,7 +222,14 @@ export default function HomePage() {
                 <div className="stats-item d-flex align-items-center w-100 h-100">
                   <i className="bi bi-emoji-smile color-blue flex-shrink-0"></i>
                   <div>
-                    <span>232</span>
+                    <span
+                      data-purecounter-start="0"
+                      data-purecounter-end="232"
+                      data-purecounter-duration="1"
+                      className="purecounter"
+                    >
+                      232
+                    </span>
                     <p>Happy Clients</p>
                   </div>
                 </div>
@@ -212,7 +238,14 @@ export default function HomePage() {
                 <div className="stats-item d-flex align-items-center w-100 h-100">
                   <i className="bi bi-journal-richtext color-orange flex-shrink-0"></i>
                   <div>
-                    <span>521</span>
+                    <span
+                      data-purecounter-start="0"
+                      data-purecounter-end="521"
+                      data-purecounter-duration="1"
+                      className="purecounter"
+                    >
+                      521
+                    </span>
                     <p>Projects</p>
                   </div>
                 </div>
@@ -221,7 +254,14 @@ export default function HomePage() {
                 <div className="stats-item d-flex align-items-center w-100 h-100">
                   <i className="bi bi-headset color-green flex-shrink-0"></i>
                   <div>
-                    <span>1463</span>
+                    <span
+                      data-purecounter-start="0"
+                      data-purecounter-end="1463"
+                      data-purecounter-duration="1"
+                      className="purecounter"
+                    >
+                      1463
+                    </span>
                     <p>Hours Of Support</p>
                   </div>
                 </div>
@@ -230,7 +270,14 @@ export default function HomePage() {
                 <div className="stats-item d-flex align-items-center w-100 h-100">
                   <i className="bi bi-people color-pink flex-shrink-0"></i>
                   <div>
-                    <span>15</span>
+                    <span
+                      data-purecounter-start="0"
+                      data-purecounter-end="15"
+                      data-purecounter-duration="1"
+                      className="purecounter"
+                    >
+                      15
+                    </span>
                     <p>Hard Workers</p>
                   </div>
                 </div>
@@ -326,46 +373,6 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-
-        <section id="contact" className="contact section">
-          <div className="container section-title" data-aos="fade-up">
-            <h2>Contact</h2>
-            <p>JailMeet</p>
-          </div>
-
-          <div className="container" data-aos="fade-up" data-aos-delay="100">
-            <div className="row gy-4">
-              <div className="col-lg-6">
-                <div className="row gy-4">
-                  <div className="col-lg-12">
-                    <div className="info-item d-flex flex-column justify-content-center align-items-center">
-                      <i className="bi bi-geo-alt"></i>
-                      <h3>Location</h3>
-                      <p>
-                        ADX Florence - 5880 State Highway 67, Florence, CO
-                        81226, United States.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="info-item d-flex flex-column justify-content-center align-items-center">
-                      <i className="bi bi-telephone"></i>
-                      <h3>Call Us</h3>
-                      <p>+1 8848 219595</p>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="info-item d-flex flex-column justify-content-center align-items-center">
-                      <i className="bi bi-envelope"></i>
-                      <h3>Email Us</h3>
-                      <p>jailmeet@gmail.com</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
       <footer id="footer" className="footer dark-background">
@@ -421,15 +428,46 @@ export default function HomePage() {
                 </li>
               </ul>
             </div>
+
+            <div className="col-lg-6 col-md-12 footer-contact-boxes">
+              <div className="footer-contact-grid">
+                <div className="footer-contact-item footer-location">
+                  <i className="bi bi-geo-alt"></i>
+                  <h4>Location</h4>
+                  <p>
+                    ADX Florence - 5880 State Highway 67, Florence, CO
+                    81226, United States.
+                  </p>
+                </div>
+
+                <div className="footer-contact-row">
+                  <div className="footer-contact-item">
+                    <i className="bi bi-telephone"></i>
+                    <h4>Call Us</h4>
+                    <p>+1 8848 219595</p>
+                  </div>
+
+                  <div className="footer-contact-item">
+                    <i className="bi bi-envelope"></i>
+                    <h4>Email Us</h4>
+                    <p>jailmeet@gmail.com</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         <div className="container copyright text-center mt-4">
           <p>
+            <PiCopyright aria-hidden="true" className="d-inline-block" />{' '}
             <span>Copyright</span>{' '}
             <strong className="px-1 sitename">JailMeet</strong>{' '}
             <span>All Rights Reserved</span>
           </p>
+          <div className="credits">
+            Designed by <a href="https://github.com/afsalazeez29-code">Afsal A Azeez</a>
+          </div>
         </div>
       </footer>
 
