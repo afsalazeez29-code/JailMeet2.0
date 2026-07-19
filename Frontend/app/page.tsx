@@ -114,7 +114,7 @@ export default function HomePage() {
 
       <main className="main">
         <section id="hero" className="hero section dark-background">
-          <img src={`${landingAssets}/hero-bg.jpg`} alt="Prison corridor" />
+          <img src="/legacy/landing/prison1.jpg" alt="Prison corridor" />
           <div className="container d-flex flex-column align-items-center">
             <h2 data-aos="fade-up" data-aos-delay="100">
               Book , Arriver , Visit
