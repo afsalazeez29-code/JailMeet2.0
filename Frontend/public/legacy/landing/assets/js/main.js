@@ -15,6 +15,7 @@
   function toggleScrolled() {
     const selectBody = document.querySelector('body');
     const selectHeader = document.querySelector('#header');
+    if (!selectBody || !selectHeader) return;
     if (!selectHeader.classList.contains('scroll-up-sticky') && !selectHeader.classList.contains('sticky-top') && !selectHeader.classList.contains('fixed-top')) return;
     window.scrollY > 100 ? selectBody.classList.add('scrolled') : selectBody.classList.remove('scrolled');
   }
@@ -26,20 +27,25 @@
    * Mobile nav toggle
    */
   const mobileNavToggleBtn = document.querySelector('.mobile-nav-toggle');
+  const isNextLandingPage = document.querySelector('script[src*="/_next/"]');
 
   function mobileNavToogle() {
-    document.querySelector('body').classList.toggle('mobile-nav-active');
+    const selectBody = document.querySelector('body');
+    if (!selectBody || !mobileNavToggleBtn) return;
+    selectBody.classList.toggle('mobile-nav-active');
     mobileNavToggleBtn.classList.toggle('bi-list');
     mobileNavToggleBtn.classList.toggle('bi-x');
   }
-  mobileNavToggleBtn.addEventListener('click', mobileNavToogle);
+  if (mobileNavToggleBtn && !isNextLandingPage) {
+    mobileNavToggleBtn.addEventListener('click', mobileNavToogle);
+  }
 
   /**
    * Hide mobile nav on same-page/hash links
    */
   document.querySelectorAll('#navmenu a').forEach(navmenu => {
     navmenu.addEventListener('click', () => {
-      if (document.querySelector('.mobile-nav-active')) {
+      if (document.querySelector('.mobile-nav-active') && !isNextLandingPage) {
         mobileNavToogle();
       }
     });
@@ -50,10 +56,18 @@
    * Toggle mobile nav dropdowns
    */
   document.querySelectorAll('.navmenu .toggle-dropdown').forEach(navmenu => {
+    if (isNextLandingPage) return;
+
     navmenu.addEventListener('click', function(e) {
       e.preventDefault();
-      this.parentNode.classList.toggle('active');
-      this.parentNode.nextElementSibling.classList.toggle('dropdown-active');
+      const dropdownParent = this.parentNode;
+      const dropdownMenu = dropdownParent ? dropdownParent.nextElementSibling : null;
+      if (dropdownParent) {
+        dropdownParent.classList.toggle('active');
+      }
+      if (dropdownMenu) {
+        dropdownMenu.classList.toggle('dropdown-active');
+      }
       e.stopImmediatePropagation();
     });
   });
@@ -78,13 +92,15 @@
       window.scrollY > 100 ? scrollTop.classList.add('active') : scrollTop.classList.remove('active');
     }
   }
-  scrollTop.addEventListener('click', (e) => {
-    e.preventDefault();
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
+  if (scrollTop) {
+    scrollTop.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     });
-  });
+  }
 
   window.addEventListener('load', toggleScrollTop);
   document.addEventListener('scroll', toggleScrollTop);
@@ -119,8 +135,11 @@
    */
   function initSwiper() {
     document.querySelectorAll(".init-swiper").forEach(function(swiperElement) {
+      const swiperConfig = swiperElement.querySelector(".swiper-config");
+      if (!swiperConfig) return;
+
       let config = JSON.parse(
-        swiperElement.querySelector(".swiper-config").innerHTML.trim()
+        swiperConfig.innerHTML.trim()
       );
 
       if (swiperElement.classList.contains("swiper-tab")) {
@@ -153,7 +172,10 @@
 
     isotopeItem.querySelectorAll('.isotope-filters li').forEach(function(filters) {
       filters.addEventListener('click', function() {
-        isotopeItem.querySelector('.isotope-filters .filter-active').classList.remove('filter-active');
+        const activeFilter = isotopeItem.querySelector('.isotope-filters .filter-active');
+        if (activeFilter) {
+          activeFilter.classList.remove('filter-active');
+        }
         this.classList.add('filter-active');
         initIsotope.arrange({
           filter: this.getAttribute('data-filter')
