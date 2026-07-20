@@ -152,7 +152,20 @@ export default function VisitorRegisterForm() {
           <div
             className={`container d-flex flex-column align-items-center ${styles.content}`}
           >
-            <h2 className={styles.title}>Register for an Account</h2>
+            <h2 className={styles.title}>
+              Create your{' '}
+              <Link
+                href="/"
+                className={styles.titleLogoLink}
+                aria-label="Go to JailMeet landing page"
+              >
+                <img
+                  src="/legacy/logos/jmlogo.png"
+                  alt="JailMeet"
+                  className={styles.titleLogo}
+                />
+              </Link>{' '}
+            </h2>
             <p className={styles.subtitle}>
               "Book appointments easily to visit and stay connected with your
               loved ones in prison."

@@ -1,0 +1,335 @@
+.siteFooter {
+  --background-color: #000910;
+  --default-color: #ffffff;
+  --heading-color: #ffffff;
+  --surface-color: #28323a;
+  --contrast-color: #ffffff;
+  --accent-color: #ff4a17;
+  --heading-font: "Raleway", sans-serif;
+  color: var(--default-color);
+  background-color: var(--background-color);
+  font-size: 14px;
+  position: relative;
+}
+
+.siteFooter :global(a) {
+  color: var(--accent-color);
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.siteFooter :global(a:hover) {
+  color: color-mix(in srgb, var(--accent-color), transparent 25%);
+  text-decoration: none;
+}
+
+.siteFooter :global(h4) {
+  color: var(--heading-color);
+  font-family: var(--heading-font);
+  font-size: 16px;
+  font-weight: bold;
+  position: relative;
+  padding-bottom: 12px;
+}
+
+.siteFooter :global(.container) {
+  width: 100%;
+  padding-right: 12px;
+  padding-left: 12px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (min-width: 576px) {
+  .siteFooter :global(.container) {
+    max-width: 540px;
+  }
+}
+
+@media (min-width: 768px) {
+  .siteFooter :global(.container) {
+    max-width: 720px;
+  }
+}
+
+@media (min-width: 992px) {
+  .siteFooter :global(.container) {
+    max-width: 960px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .siteFooter :global(.container) {
+    max-width: 1140px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .siteFooter :global(.container) {
+    max-width: 1320px;
+  }
+}
+
+.siteFooter :global(.row) {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -12px;
+  margin-left: -12px;
+}
+
+.siteFooter :global(.row > *) {
+  width: 100%;
+  max-width: 100%;
+  padding-right: 12px;
+  padding-left: 12px;
+}
+
+.siteFooter :global(.gy-4) {
+  row-gap: 1.5rem;
+}
+
+.siteFooter :global(.d-flex) {
+  display: flex;
+}
+
+.siteFooter :global(.align-items-center) {
+  align-items: center;
+}
+
+.siteFooter :global(.text-center) {
+  text-align: center;
+}
+
+.siteFooter :global(.d-inline-block) {
+  display: inline-block;
+}
+
+.siteFooter :global(.pt-3) {
+  padding-top: 1rem;
+}
+
+.siteFooter :global(.mt-3) {
+  margin-top: 1rem;
+}
+
+.siteFooter :global(.mt-4) {
+  margin-top: 1.5rem;
+}
+
+.siteFooter :global(.px-1) {
+  padding-right: 0.25rem;
+  padding-left: 0.25rem;
+}
+
+@media (min-width: 768px) {
+  .siteFooter :global(.col-md-3) {
+    flex: 0 0 auto;
+    width: 25%;
+  }
+
+  .siteFooter :global(.col-md-6) {
+    flex: 0 0 auto;
+    width: 50%;
+  }
+
+  .siteFooter :global(.col-md-12) {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+}
+
+@media (min-width: 992px) {
+  .siteFooter :global(.col-lg-2) {
+    flex: 0 0 auto;
+    width: 16.66666667%;
+  }
+
+  .siteFooter :global(.col-lg-4) {
+    flex: 0 0 auto;
+    width: 33.33333333%;
+  }
+
+  .siteFooter :global(.col-lg-6) {
+    flex: 0 0 auto;
+    width: 50%;
+  }
+}
+
+.siteFooter :global(.footer-top) {
+  padding-top: 50px;
+  border-top: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
+}
+
+.siteFooter :global(.footer-about .logo) {
+  line-height: 1;
+  margin-bottom: 25px;
+}
+
+.siteFooter :global(.footer-about .logo img) {
+  max-height: 40px;
+  margin-right: 6px;
+}
+
+.siteFooter :global(.footer-brand-logo) {
+  width: 130px;
+  height: auto;
+  display: block;
+}
+
+.siteFooter :global(.footer-about .logo span) {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-family: var(--heading-font);
+  color: var(--heading-color);
+}
+
+.siteFooter :global(.footer-about p) {
+  font-size: 14px;
+  font-family: var(--heading-font);
+}
+
+.siteFooter :global(.social-links a) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--default-color), transparent 50%);
+  font-size: 16px;
+  color: color-mix(in srgb, var(--default-color), transparent 30%);
+  margin-right: 10px;
+  transition: 0.3s;
+}
+
+.siteFooter :global(.social-links a:hover) {
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.siteFooter :global(.footer-links) {
+  margin-bottom: 30px;
+}
+
+.siteFooter :global(.footer-links ul) {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.siteFooter :global(.footer-links ul i) {
+  padding-right: 3px;
+  font-size: 13px;
+  line-height: 0;
+  color: var(--accent-color);
+}
+
+.siteFooter :global(.footer-links ul li) {
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+}
+
+.siteFooter :global(.footer-links ul li:first-child) {
+  padding-top: 0;
+}
+
+.siteFooter :global(.footer-links ul a) {
+  color: color-mix(in srgb, var(--default-color), transparent 30%);
+  display: inline-block;
+  line-height: 1;
+}
+
+.siteFooter :global(.footer-links ul a:hover) {
+  color: var(--accent-color);
+}
+
+.siteFooter :global(.footer-contact p) {
+  margin-bottom: 5px;
+}
+
+.siteFooter :global(.footer-contact-boxes) {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.siteFooter :global(.footer-contact-grid) {
+  width: 75%;
+  max-width: 520px;
+  text-align: center;
+}
+
+.siteFooter :global(.footer-location) {
+  margin-bottom: 40px;
+}
+
+.siteFooter :global(.footer-contact-row) {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.siteFooter :global(.footer-contact-item) {
+  flex: 1;
+  text-align: center;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  transition: none !important;
+  transform: none !important;
+  animation: none !important;
+  padding: 0;
+}
+
+.siteFooter :global(.footer-contact-item i) {
+  color: #ffffff;
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.siteFooter :global(.footer-contact-item h4) {
+  color: var(--heading-color);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.siteFooter :global(.footer-contact-item p) {
+  color: var(--default-color);
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (min-width: 992px) {
+  .siteFooter :global(.footer-contact-boxes) {
+    justify-content: flex-end;
+    padding-left: 100px;
+  }
+}
+
+@media (max-width: 768px) {
+  .siteFooter :global(.footer-contact-row) {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .siteFooter :global(.footer-location) {
+    margin-bottom: 24px;
+  }
+}
+
+.siteFooter :global(.copyright) {
+  padding: 25px 0;
+  border-top: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
+}
+
+.siteFooter :global(.copyright p) {
+  margin-bottom: 0;
+}
+
+.siteFooter :global(.credits) {
+  margin-top: 6px;
+  font-size: 13px;
+}

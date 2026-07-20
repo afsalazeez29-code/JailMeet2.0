@@ -631,6 +631,12 @@ h6 {
   margin-right: 6px;
 }
 
+.footer-brand-logo {
+  width: 130px;
+  height: auto;
+  display: block;
+}
+
 .footer .footer-about .logo span {
   font-size: 26px;
   font-weight: 700;
