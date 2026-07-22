@@ -5,6 +5,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import VisitorFooter from './VisitorFooter';
 import VisitorNavbar from './VisitorNavbar';
 import VisitorSidebar from './VisitorSidebar';
+import { useAuth } from '@/hooks/useAuth';
 
 type VisitorLayoutProps = {
   children: ReactNode;
@@ -12,6 +13,7 @@ type VisitorLayoutProps = {
 
 export default function VisitorLayout({ children }: VisitorLayoutProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     document.body.classList.remove('index-page', 'admin-page');
@@ -31,7 +33,10 @@ export default function VisitorLayout({ children }: VisitorLayoutProps) {
       <div className="layout-container">
         <VisitorSidebar />
         <div className="layout-page">
-          <VisitorNavbar onToggleMenu={() => setMenuOpen((current) => !current)} />
+          <VisitorNavbar
+            user={user}
+            onToggleMenu={() => setMenuOpen((current) => !current)}
+          />
           <div className="content-wrapper">
             {children}
             <VisitorFooter />

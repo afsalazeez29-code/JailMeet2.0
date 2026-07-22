@@ -10,8 +10,9 @@
 }
 
 .avatarPreview {
-  width: 100px;
-  height: 100px;
+  width: 115px;
+  height: 115px;
+  flex-shrink: 0;
   object-fit: cover;
 }
 

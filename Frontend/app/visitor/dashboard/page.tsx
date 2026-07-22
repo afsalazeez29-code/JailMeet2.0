@@ -50,8 +50,10 @@ function VisitorStatCard({
       <div className="card">
         <div className="card-body">
           <div className="card-title d-flex align-items-start justify-content-between">
-            <div className={`avatar flex-shrink-0 ${colorClass} rounded`}>
-              <i className={`bx ${icon} fs-3`}></i>
+            <div
+              className={`avatar flex-shrink-0 ${colorClass} rounded d-flex align-items-center justify-content-center`}
+            >
+              <i className={`bx ${icon} fs-3 d-block lh-1`}></i>
             </div>
           </div>
           <span className="fw-semibold d-block mb-1">{label}</span>
@@ -115,7 +117,7 @@ export default function VisitorDashboardPage() {
         <div className="col-12 mb-4">
           <div className="card">
             <div className="card-body">
-              <h1>Welcome, {user?.name ?? 'Visitor'}!</h1>
+              <h1>Welcome {user?.name ?? 'Visitor'}</h1>
               <p>
                 Your Visitor ID: <strong>{user?.id ?? ''}</strong>
               </p>

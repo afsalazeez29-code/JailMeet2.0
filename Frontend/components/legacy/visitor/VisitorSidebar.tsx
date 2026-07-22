@@ -54,7 +54,7 @@ export default function VisitorSidebar() {
             src="/legacy/visitor/visitorpage/html/jmblack.png"
             alt="Logo"
             className="app-brand-logo"
-            style={{ maxWidth: '100px', height: 'auto' }}
+            style={{ maxWidth: '180px', height: 'auto' }}
           />
         </Link>
       </div>

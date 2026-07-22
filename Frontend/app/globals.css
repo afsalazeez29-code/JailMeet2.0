@@ -382,3 +382,24 @@ button {
     width: 145px;
   }
 }
+
+/* Fix: ensure visitor navbar profile dropdown is positioned inside and not clipped */
+body.visitor-page .layout-navbar .navbar-nav .nav-item.dropdown {
+  position: relative;
+}
+
+body.visitor-page .layout-navbar .navbar-nav .nav-item.dropdown .dropdown-menu {
+  position: absolute !important;
+  top: calc(100% + 0.25rem) !important;
+  right: 0.75rem !important;
+  left: auto !important;
+  z-index: 2050 !important;
+  min-width: 200px;
+}
+
+@media (max-width: 767.98px) {
+  body.visitor-page .layout-navbar .navbar-nav .nav-item.dropdown .dropdown-menu {
+    left: 0.75rem !important;
+    width: 92% !important;
+  }
+}
