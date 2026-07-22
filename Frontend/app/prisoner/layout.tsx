@@ -15,6 +15,28 @@ const prisonerStylesheets = [
   '/legacy/prisoner/assets/css/app-style.css',
 ];
 
+const prisonerFontOverrides = `
+  body.prisoner-page {
+    font-family: var(--font-body, "Montserrat", sans-serif);
+  }
+
+  body.prisoner-page h1,
+  body.prisoner-page h2,
+  body.prisoner-page h3,
+  body.prisoner-page h4,
+  body.prisoner-page h5,
+  body.prisoner-page h6 {
+    font-family: var(--font-heading, "Raleway", sans-serif);
+  }
+
+  body.prisoner-page input,
+  body.prisoner-page select,
+  body.prisoner-page textarea,
+  body.prisoner-page button {
+    font-family: var(--font-body, "Montserrat", sans-serif);
+  }
+`;
+
 export default function PrisonerRouteLayout({
   children,
 }: PrisonerRouteLayoutProps) {
@@ -28,6 +50,7 @@ export default function PrisonerRouteLayout({
       {prisonerStylesheets.map((href) => (
         <link href={href} key={href} rel="stylesheet" />
       ))}
+      <style>{prisonerFontOverrides}</style>
       <PrisonerLayout>{children}</PrisonerLayout>
     </>
   );

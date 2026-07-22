@@ -87,7 +87,12 @@ export default function HomePage() {
                   aria-expanded={isLoginDropdownOpen}
                   onClick={() => setIsLoginDropdownOpen((current) => !current)}
                 >
-                  <span>LOGIN</span>{' '}
+                  <span className="btn-hover-text">
+                    <span className="btn-hover-text-original">LOGIN</span>
+                    <span className="btn-hover-text-copy" aria-hidden="true">
+                      LOGIN
+                    </span>
+                  </span>{' '}
                   <i className="bi bi-chevron-down toggle-dropdown"></i>
                 </button>
                 <ul className={isLoginDropdownOpen ? 'dropdown-active' : ''}>
@@ -135,7 +140,12 @@ export default function HomePage() {
             </p>
             <div className="d-flex mt-4" data-aos="fade-up" data-aos-delay="300">
               <Link href="/register" className="btn-get-started">
-                Get Started
+                <span className="btn-hover-text">
+                  <span className="btn-hover-text-original">Get Started</span>
+                  <span className="btn-hover-text-copy" aria-hidden="true">
+                    Get Started
+                  </span>
+                </span>
               </Link>
             </div>
           </div>

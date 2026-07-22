@@ -4,6 +4,8 @@
 
 :root {
   color-scheme: light;
+  --font-body: var(--font-montserrat), "Montserrat", sans-serif;
+  --font-heading: var(--font-raleway), "Raleway", sans-serif;
 }
 
 *,
@@ -22,6 +24,16 @@ body {
 
 body {
   margin: 0;
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
 }
 
 img,
@@ -58,6 +70,7 @@ select,
 textarea,
 button {
   max-width: 100%;
+  font-family: var(--font-body);
 }
 
 .login-nav-button {
@@ -101,7 +114,7 @@ button {
   min-height: 100vh;
   color: #ffffff;
   background: #0d0d0d;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
 }
 
 .login-page .hero {

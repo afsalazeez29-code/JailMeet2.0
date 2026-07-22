@@ -5,11 +5,17 @@
   --surface-color: #28323a;
   --contrast-color: #ffffff;
   --accent-color: #ff4a17;
-  --heading-font: "Raleway", sans-serif;
+  --heading-font: var(--font-heading, "Raleway", sans-serif);
   color: var(--default-color);
   background-color: var(--background-color);
+  font-family: var(--font-body, "Montserrat", sans-serif);
   font-size: 14px;
   position: relative;
+  z-index: 2;
+  margin-top: -55px;
+  border-top-left-radius: 80px 60px;
+  border-top-right-radius: 80px 60px;
+  overflow: hidden;
 }
 
 .siteFooter :global(a) {
@@ -30,6 +36,14 @@
   font-weight: bold;
   position: relative;
   padding-bottom: 12px;
+}
+
+.siteFooter :global(h1),
+.siteFooter :global(h2),
+.siteFooter :global(h3),
+.siteFooter :global(h5),
+.siteFooter :global(h6) {
+  font-family: var(--heading-font);
 }
 
 .siteFooter :global(.container) {
@@ -208,6 +222,20 @@
   border-color: var(--accent-color);
 }
 
+.siteFooter :global(.social-links a svg) {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.footerLinkIcon {
+  color: var(--accent-color);
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  margin-right: 3px;
+}
+
 .siteFooter :global(.footer-links) {
   margin-bottom: 30px;
 }
@@ -273,6 +301,10 @@
 
 .siteFooter :global(.footer-contact-item) {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
   text-align: center;
   background: transparent !important;
   border: 0 !important;
@@ -287,6 +319,15 @@
   color: #ffffff;
   font-size: 18px;
   margin-bottom: 4px;
+}
+
+.footerContactIcon {
+  color: #ffffff;
+  display: block;
+  width: 22px;
+  height: 22px;
+  margin: 0 auto 8px;
+  stroke-width: 2;
 }
 
 .siteFooter :global(.footer-contact-item h4) {

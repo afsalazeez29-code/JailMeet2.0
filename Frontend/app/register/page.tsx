@@ -1,10 +1,10 @@
-import VisitorRegisterForm from '../../components/auth/VisitorRegisterForm';
+import AuthPanel from '../../components/auth/AuthPanel';
 import SiteFooter from '../../components/common/SiteFooter';
 
 export default function RegisterPage() {
   return (
     <>
-      <VisitorRegisterForm />
+      <AuthPanel initialMode="register" />
       <SiteFooter />
     </>
   );

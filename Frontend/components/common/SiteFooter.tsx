@@ -1,4 +1,12 @@
 import Link from 'next/link';
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaLinkedinIn,
+  FaXTwitter,
+} from 'react-icons/fa6';
+import { IoIosArrowForward } from 'react-icons/io';
+import { LuMail, LuMapPin, LuPhone } from 'react-icons/lu';
 import { PiCopyright } from 'react-icons/pi';
 
 import styles from './SiteFooter.module.css';
@@ -38,7 +46,7 @@ export default function SiteFooter() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <i className="bi bi-twitter-x"></i>
+                <FaXTwitter aria-hidden="true" />
               </a>
               <a
                 href="https://www.facebook.com/"
@@ -46,7 +54,7 @@ export default function SiteFooter() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <i className="bi bi-facebook"></i>
+                <FaFacebookF aria-hidden="true" />
               </a>
               <a
                 href="https://www.instagram.com/"
@@ -54,7 +62,7 @@ export default function SiteFooter() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <i className="bi bi-instagram"></i>
+                <FaInstagram aria-hidden="true" />
               </a>
               <a
                 href="https://in.linkedin.com/"
@@ -62,7 +70,7 @@ export default function SiteFooter() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <i className="bi bi-linkedin"></i>
+                <FaLinkedinIn aria-hidden="true" />
               </a>
             </div>
           </div>
@@ -71,19 +79,31 @@ export default function SiteFooter() {
             <h4>Useful Links</h4>
             <ul>
               <li>
-                <i className="bi bi-chevron-right"></i>
+                <IoIosArrowForward
+                  aria-hidden="true"
+                  className={styles.footerLinkIcon}
+                />
                 <Link href="/#hero">Home</Link>
               </li>
               <li>
-                <i className="bi bi-chevron-right"></i>
+                <IoIosArrowForward
+                  aria-hidden="true"
+                  className={styles.footerLinkIcon}
+                />
                 <Link href="/#about">About us</Link>
               </li>
               <li>
-                <i className="bi bi-chevron-right"></i>
+                <IoIosArrowForward
+                  aria-hidden="true"
+                  className={styles.footerLinkIcon}
+                />
                 <Link href="/#services">Services</Link>
               </li>
               <li>
-                <i className="bi bi-chevron-right"></i>
+                <IoIosArrowForward
+                  aria-hidden="true"
+                  className={styles.footerLinkIcon}
+                />
                 <Link href="/#contact">Contact</Link>
               </li>
             </ul>
@@ -92,7 +112,10 @@ export default function SiteFooter() {
           <div className="col-lg-6 col-md-12 footer-contact-boxes">
             <div className="footer-contact-grid">
               <div className="footer-contact-item footer-location">
-                <i className="bi bi-geo-alt"></i>
+                <LuMapPin
+                  aria-hidden="true"
+                  className={styles.footerContactIcon}
+                />
                 <h4>Location</h4>
                 <p>
                   ADX Florence - 5880 State Highway 67, Florence, CO 81226,
@@ -102,13 +125,19 @@ export default function SiteFooter() {
 
               <div className="footer-contact-row">
                 <div className="footer-contact-item">
-                  <i className="bi bi-telephone"></i>
+                  <LuPhone
+                    aria-hidden="true"
+                    className={styles.footerContactIcon}
+                  />
                   <h4>Call Us</h4>
                   <p>+1 8848 219595</p>
                 </div>
 
                 <div className="footer-contact-item">
-                  <i className="bi bi-envelope"></i>
+                  <LuMail
+                    aria-hidden="true"
+                    className={styles.footerContactIcon}
+                  />
                   <h4>Email Us</h4>
                   <p>jailmeet@gmail.com</p>
                 </div>

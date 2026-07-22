@@ -18,6 +18,45 @@ const adminStylesheets = [
   '/legacy/admin/assets1/css/demo.css',
 ];
 
+const adminFontOverrides = `
+  body.admin-page {
+    font-family: var(--font-body, "Montserrat", sans-serif) !important;
+  }
+
+  body.admin-page p,
+  body.admin-page a,
+  body.admin-page li,
+  body.admin-page label,
+  body.admin-page .nav,
+  body.admin-page .nav a,
+  body.admin-page .navbar,
+  body.admin-page .navbar a,
+  body.admin-page .sidebar,
+  body.admin-page .sidebar a,
+  body.admin-page .card,
+  body.admin-page .card p,
+  body.admin-page .card-category,
+  body.admin-page .page-inner {
+    font-family: var(--font-body, "Montserrat", sans-serif) !important;
+  }
+
+  body.admin-page h1,
+  body.admin-page h2,
+  body.admin-page h3,
+  body.admin-page h4,
+  body.admin-page h5,
+  body.admin-page h6 {
+    font-family: var(--font-heading, "Raleway", sans-serif) !important;
+  }
+
+  body.admin-page input,
+  body.admin-page select,
+  body.admin-page textarea,
+  body.admin-page button {
+    font-family: var(--font-body, "Montserrat", sans-serif) !important;
+  }
+`;
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -37,6 +76,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {adminStylesheets.map((href) => (
         <link href={href} key={href} rel="stylesheet" />
       ))}
+      <style>{adminFontOverrides}</style>
 
       <div className={sidebarOpen ? 'wrapper nav_open' : 'wrapper'}>
         <AdminSidebar onToggleSidebar={toggleSidebar} />
