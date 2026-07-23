@@ -157,7 +157,7 @@ export default function HomePage() {
               <div className="col-lg-6" data-aos="fade-up" data-aos-delay="100">
                 <h3>Our Mission: Keeping Families Connected</h3>
                 <img
-                  src={`${landingAssets}/prisoner_img1.jpg`}
+                  src="/images/landing/prisoner-img-1.jpg"
                   className="img-fluid rounded-4 mb-4"
                   alt="Prison visit support"
                 />
