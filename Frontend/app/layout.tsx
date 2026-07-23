@@ -33,7 +33,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       className={`${montserrat.variable} ${raleway.variable}`}
     >
       <head>
-        <link href="/legacy/logos/fvicon.jpg" rel="icon" />
+        <link href="/images/logos/favicon.jpg" rel="icon" />
       </head>
       <body>{children}</body>
     </html>

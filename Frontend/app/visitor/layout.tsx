@@ -165,7 +165,7 @@ export default function VisitorRouteLayout({
 }: VisitorRouteLayoutProps) {
   return (
     <>
-      <link href="/legacy/logos/fvicon.jpg" rel="icon" />
+      <link href="/images/logos/favicon.jpg" rel="icon" />
       {visitorStylesheets.map((href) => (
         <link href={href} key={href} rel="stylesheet" />
       ))}

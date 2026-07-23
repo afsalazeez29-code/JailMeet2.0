@@ -43,7 +43,7 @@ export default function PrisonerRouteLayout({
   return (
     <>
       <link
-        href="/legacy/logos/fvicon.jpg"
+        href="/images/logos/favicon.jpg"
         rel="icon"
         type="image/jpeg"
       />
