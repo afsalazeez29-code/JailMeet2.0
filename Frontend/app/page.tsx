@@ -208,7 +208,7 @@ export default function HomePage() {
                   </p>
                   <div className="position-relative">
                     <img
-                      src="/legacy/landing/video_thumbnail.jpg"
+                      src="/images/landing/video-thumbnail.jpg"
                       className="img-fluid rounded-4"
                       alt="JailMeet introduction video"
                     />
