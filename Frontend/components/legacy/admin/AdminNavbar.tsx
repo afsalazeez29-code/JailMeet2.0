@@ -26,7 +26,7 @@ export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
         <div className="logo-header" data-background-color="dark">
           <Link href="/admin/dashboard" className="logo">
             <img
-              src="/legacy/admin/assets1/img/kaiadmin/logo_light.svg"
+              src="/images/admin/kaiadmin-logo-light.svg"
               alt="navbar brand"
               className="navbar-brand"
               height="20"
