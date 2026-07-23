@@ -8,7 +8,7 @@
   color: #111111;
   background-image:
     linear-gradient(rgba(0, 9, 16, 0.65), rgba(0, 9, 16, 0.65)),
-    url("/legacy/landing/prison1.jpg");
+    url("/images/landing/prison1.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

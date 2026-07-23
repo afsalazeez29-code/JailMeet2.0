@@ -126,7 +126,7 @@ export default function HomePage() {
 
       <main className="main">
         <section id="hero" className="hero section dark-background">
-          <img src="/legacy/landing/prison1.jpg" alt="Prison corridor" />
+          <img src="/images/landing/prison1.jpg" alt="Prison corridor" />
           <div
             className="container d-flex flex-column align-items-center"
             style={{ transform: 'translateY(55px)', gap:'15px', }}
