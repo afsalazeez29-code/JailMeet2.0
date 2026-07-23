@@ -431,7 +431,7 @@ export default function AuthPanel({ initialMode }: AuthPanelProps) {
               </button>
               <Link href="/" aria-label="Go to JailMeet landing page">
                 <img
-                  src="/legacy/logos/logo.png"
+                  src="/images/logos/auth-logo.png"
                   alt="JailMeet logo"
                   className={styles.overlayLogo}
                 />
@@ -458,7 +458,7 @@ export default function AuthPanel({ initialMode }: AuthPanelProps) {
             <div className={`${styles.overlayPanel} ${styles.overlayRight}`}>
               <Link href="/" aria-label="Go to JailMeet landing page">
                 <img
-                  src="/legacy/logos/logo.png"
+                  src="/images/logos/auth-logo.png"
                   alt="JailMeet logo"
                   className={styles.overlayLogo}
                 />
