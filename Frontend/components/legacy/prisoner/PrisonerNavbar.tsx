@@ -10,7 +10,7 @@ type PrisonerNavbarProps = {
   onToggleSidebar: () => void;
 };
 
-const fallbackPrisonerImage = '/legacy/landing/images.png';
+const fallbackPrisonerImage = '/images/avatars/prisoner-fallback.png';
 
 export default function PrisonerNavbar({ onToggleSidebar }: PrisonerNavbarProps) {
   const router = useRouter();

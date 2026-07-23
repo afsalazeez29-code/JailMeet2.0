@@ -5,7 +5,7 @@ import { useProtectedPage } from '@/hooks/useProtectedPage';
 import { getPrisonerDashboard } from '@/services/dashboard.service';
 import { PrisonerDashboardData } from '@/types/dashboard';
 
-const fallbackPrisonerImage = '/legacy/landing/images.png';
+const fallbackPrisonerImage = '/images/avatars/prisoner-fallback.png';
 
 const statCards = [
   {
