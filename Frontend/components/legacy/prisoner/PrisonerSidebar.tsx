@@ -53,7 +53,7 @@ export default function PrisonerSidebar({ sidebarOpen }: PrisonerSidebarProps) {
       <div className="brand-logo">
         <Link href="/prisoner/dashboard" data-legacy-href="index.php">
           <img
-            src="/legacy/logos/jmlogo.png"
+            src="/images/logos/jmlogo.png"
             className="logo-icon"
             alt="JailMeet"
           />

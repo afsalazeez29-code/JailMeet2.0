@@ -68,7 +68,7 @@ export default function AdminSidebar({ onToggleSidebar }: AdminSidebarProps) {
         <div className="logo-header" data-background-color="dark">
           <Link href="/admin/dashboard" className="logo">
             <img
-              src="/legacy/logos/jmlogo.png"
+              src="/images/logos/jmlogo.png"
               alt="navbar brand"
               className="navbar-brand"
               height="20"

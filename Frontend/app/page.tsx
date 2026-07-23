@@ -61,7 +61,7 @@ export default function HomePage() {
             className="logo landing-brand-logo d-flex align-items-center me-auto"
           >
             <img
-              src="/legacy/logos/jmlogo.png"
+              src="/images/logos/jmlogo.png"
               alt="JailMeet"
               className="landing-brand-wordmark"
             />

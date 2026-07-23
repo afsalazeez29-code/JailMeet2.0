@@ -191,7 +191,7 @@ export default function OfficerSidebar({
         <div className="brand-logo">
           <Link href="/officer/dashboard" data-legacy-href="index.php">
             <img
-              src="/legacy/logos/jmlogo.png"
+              src="/images/logos/jmlogo.png"
               alt="JailMeet logo"
               style={{ right: '100px' }}
             />

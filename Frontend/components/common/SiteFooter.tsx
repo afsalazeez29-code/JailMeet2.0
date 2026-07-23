@@ -22,7 +22,7 @@ export default function SiteFooter() {
           <div className="col-lg-4 col-md-6 footer-about">
             <Link href="/" className="logo d-flex align-items-center">
               <img
-                src="/legacy/logos/jmlogo.png"
+                src="/images/logos/jmlogo.png"
                 alt="JailMeet"
                 className="footer-brand-logo"
               />
