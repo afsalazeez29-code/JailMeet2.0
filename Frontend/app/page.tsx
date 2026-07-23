@@ -311,7 +311,7 @@ export default function HomePage() {
                 <div className="service-item">
                   <div className="img">
                     <img
-                      src={`${landingAssets}/prisoner2.jpeg`}
+                      src="/images/landing/prisoner-2.jpeg"
                       className="img-fluid"
                       alt="Visit Scheduling"
                     />
@@ -336,7 +336,7 @@ export default function HomePage() {
                 <div className="service-item">
                   <div className="img">
                     <img
-                      src={`${landingAssets}/prisoner3.jpeg`}
+                      src="/images/landing/prisoner-3.jpeg"
                       className="img-fluid"
                       alt="Parole Support"
                     />
@@ -361,7 +361,7 @@ export default function HomePage() {
                 <div className="service-item">
                   <div className="img">
                     <img
-                      src={`${landingAssets}/prisoner.jpeg`}
+                      src="/images/landing/prisoner.jpeg"
                       className="img-fluid"
                       alt="Virtual Visitation"
                     />
