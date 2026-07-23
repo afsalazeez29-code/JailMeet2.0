@@ -114,7 +114,7 @@ export default function OfficerNavbar({ onToggleSidebar }: OfficerNavbarProps) {
               onClick={() => setProfileOpen((current) => !current)}
             >
               <span className="user-icon">
-                <img src="/legacy/officer/officer.png" alt="Officer profile" />
+                <img src="/images/officer/officer-profile.png" alt="Officer profile" />
               </span>
               <span className="user-name">Officer</span>
             </button>

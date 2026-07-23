@@ -51,7 +51,7 @@ export default function VisitorSidebar() {
       <div className="app-brand demo">
         <Link href="/visitor/dashboard" className="app-brand-link">
           <img
-            src="/legacy/visitor/visitorpage/html/jmblack.png"
+            src="/images/visitor/jmblack.png"
             alt="Logo"
             className="app-brand-logo"
             style={{ maxWidth: '180px', height: 'auto' }}
@@ -63,7 +63,7 @@ export default function VisitorSidebar() {
 
       <div className="user-info text-center p-3" style={{ display: 'none' }}>
         <img
-          src="/legacy/visitor/visitorpage/assets/img/avatars/1.png"
+          src="/images/visitor/sidebar-avatar.png"
           alt="User Avatar"
           className="w-px-50 h-auto rounded-circle mb-2"
         />

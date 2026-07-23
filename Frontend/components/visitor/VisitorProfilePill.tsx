@@ -1,6 +1,5 @@
 import Link from 'next/link';
 
-import defaultVisitorAvatar from '../../assets/default.PNG';
 import styles from './VisitorProfilePill.module.css';
 
 type VisitorProfilePillProps = {
@@ -13,7 +12,7 @@ export default function VisitorProfilePill({
   profileImage,
 }: VisitorProfilePillProps) {
   const displayName = fullName.trim() || 'Visitor';
-  const avatarSrc = profileImage || defaultVisitorAvatar.src;
+  const avatarSrc = profileImage || '/images/avatars/visitor-default.png';
 
   return (
     <Link

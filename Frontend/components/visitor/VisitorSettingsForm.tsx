@@ -4,7 +4,6 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-import defaultVisitorAvatar from '../../assets/default.PNG';
 import { clearAccessToken } from '@/lib/auth';
 import { updateVisitorProfile } from '@/services/visitor.service';
 import { isApiServiceError } from '@/types/api';
@@ -139,7 +138,7 @@ export default function VisitorSettingsForm({
             <div className="card-body">
               <div className="d-flex align-items-start align-items-sm-center gap-4 mb-4">
                 <img
-                  src={defaultVisitorAvatar.src}
+                  src="/images/avatars/visitor-default.png"
                   alt="Visitor avatar"
                   className={`d-block rounded ${styles.avatarPreview}`}
                 />
