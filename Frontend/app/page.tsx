@@ -214,7 +214,7 @@ export default function HomePage() {
                     />
 
                     <a
-                      href="/legacy/landing/jailmeet_video.mp4"
+                      href="/videos/jailmeet-introduction.mp4"
                       className="glightbox pulsating-play-btn"
                       aria-label="Play JailMeet introduction video"
                     />
