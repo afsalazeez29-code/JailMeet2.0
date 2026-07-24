@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { FaChevronLeft } from 'react-icons/fa';
+import { ChevronLeft } from 'lucide-react';
+import iconStyles from '../../../components/common/LucideIcon.module.css';
 
 import styles from './AuthPanel.module.css';
 
@@ -24,7 +25,10 @@ export default function AuthOverlay({
             aria-label="Go back to landing page"
             onClick={onGoHome}
           >
-            <FaChevronLeft className={styles.registerBackIcon} aria-hidden="true" />
+            <ChevronLeft
+              className={`${iconStyles.icon} ${iconStyles.action} ${styles.registerBackIcon}`}
+              aria-hidden="true"
+            />
             <span className={styles.buttonText}>
               <span className={styles.buttonTextOriginal}>Go Back</span>
               <span className={styles.buttonTextCopy} aria-hidden="true">
@@ -39,7 +43,7 @@ export default function AuthOverlay({
               className={styles.overlayLogo}
             />
           </Link>
-          <h1 className={styles.overlayTitle}>Welcome Back to JailMeet !</h1>
+          <h1 className={styles.overlayTitle}>Welcome Back to JailMeet</h1>
           <p className={styles.overlayCopy}>
             login to manage appointments and stay connected with your loved ones.
           </p>
@@ -61,7 +65,7 @@ export default function AuthOverlay({
               className={styles.overlayLogo}
             />
           </Link>
-          <h1 className={styles.overlayTitle}>Welcome to JailMeet !</h1>
+          <h1 className={styles.overlayTitle}>Welcome to JailMeet</h1>
           <p className={styles.overlayCopy}>
             create your account and stay connected with your loved ones.
           </p>

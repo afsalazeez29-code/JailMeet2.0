@@ -4,6 +4,8 @@ import { ErrorAlert, SuccessAlert, WarningAlert } from '../../../components/comm
 import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { UserRound } from 'lucide-react';
+import iconStyles from '../../../components/common/LucideIcon.module.css';
 
 import { clearAccessToken } from '@features/auth/services/token.service';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
@@ -128,7 +130,10 @@ export default function VisitorSettingsForm({
           <ul className="nav nav-pills flex-column flex-md-row mb-3">
             <li className="nav-item">
               <span className="nav-link active">
-                <i className="bx bx-user me-1"></i>
+                <UserRound
+                  className={`${iconStyles.icon} ${iconStyles.action} me-1`}
+                  aria-hidden="true"
+                />
                 My Profile
               </span>
             </li>

@@ -3,7 +3,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { Menu, MoreVertical, PanelLeftClose, Search } from 'lucide-react';
 
+import LogoutConfirmModal from '../../common/LogoutConfirmModal';
+import iconStyles from '../../common/LucideIcon.module.css';
 import { clearAccessToken } from '@features/auth/services/token.service';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
 
@@ -15,6 +18,7 @@ export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
   const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const handleLogout = () => {
     clearAccessToken();
@@ -39,14 +43,20 @@ export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
               type="button"
               onClick={onToggleSidebar}
             >
-              <i className="gg-menu-right"></i>
+              <Menu
+                aria-hidden="true"
+                className={`${iconStyles.icon} ${iconStyles.navbar}`}
+              />
             </button>
             <button
               className="btn btn-toggle sidenav-toggler"
               type="button"
               onClick={onToggleSidebar}
             >
-              <i className="gg-menu-left"></i>
+              <PanelLeftClose
+                aria-hidden="true"
+                className={`${iconStyles.icon} ${iconStyles.navbar}`}
+              />
             </button>
           </div>
           <button
@@ -54,7 +64,10 @@ export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
             type="button"
             onClick={() => setSearchOpen((current) => !current)}
           >
-            <i className="gg-more-vertical-alt"></i>
+            <MoreVertical
+              aria-hidden="true"
+              className={`${iconStyles.icon} ${iconStyles.navbar}`}
+            />
           </button>
         </div>
       </div>
@@ -68,7 +81,10 @@ export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
             <div className="input-group">
               <div className="input-group-prepend">
                 <button type="submit" className="btn btn-search pe-1">
-                  <i className="fa fa-search search-icon"></i>
+                  <Search
+                    aria-hidden="true"
+                    className={`search-icon ${iconStyles.icon} ${iconStyles.action}`}
+                  />
                 </button>
               </div>
               <input
@@ -88,7 +104,10 @@ export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
                 aria-haspopup="true"
                 onClick={() => setSearchOpen((current) => !current)}
               >
-                <i className="fa fa-search"></i>
+                <Search
+                  aria-hidden="true"
+                  className={`${iconStyles.icon} ${iconStyles.navbar}`}
+                />
               </button>
               <ul
                 className={`dropdown-menu dropdown-search animated fadeIn${
@@ -162,7 +181,7 @@ export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
                     <button
                       className="dropdown-item"
                       type="button"
-                      onClick={handleLogout}
+                      onClick={() => setLogoutOpen(true)}
                     >
                       Logout
                     </button>
@@ -173,7 +192,15 @@ export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
           </ul>
         </div>
       </nav>
+
+      <LogoutConfirmModal
+        open={logoutOpen}
+        onCancel={() => setLogoutOpen(false)}
+        onConfirm={() => {
+          setLogoutOpen(false);
+          handleLogout();
+        }}
+      />
     </div>
   );
 }
-

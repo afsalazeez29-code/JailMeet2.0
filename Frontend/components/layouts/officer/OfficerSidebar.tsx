@@ -1,8 +1,28 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, type ComponentType, type SVGProps } from 'react';
+import {
+  CalendarDays,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  ChevronsRight,
+  Circle,
+  FastForward,
+  FileText,
+  House,
+  LockKeyhole,
+  Minus,
+  Plus,
+  UsersRound,
+  X,
+} from 'lucide-react';
+
+import iconStyles from '../../common/LucideIcon.module.css';
+
+type SidebarIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 type OfficerSidebarProps = {
   sidebarOpen: boolean;
@@ -87,7 +107,10 @@ export default function OfficerSidebar({
             aria-label="Close layout settings"
             onClick={() => setSettingsOpen(false)}
           >
-            <i className="icon-copy ion-close-round"></i>
+            <X
+              aria-hidden="true"
+              className={`${iconStyles.icon} ${iconStyles.navbar}`}
+            />
           </button>
         </div>
         <div className="right-sidebar-body customscroll">
@@ -124,7 +147,10 @@ export default function OfficerSidebar({
                   value="icon-style-1"
                 />
                 <label className="custom-control-label" htmlFor="sidebaricon-1">
-                  <i className="fa fa-angle-down"></i>
+                  <ChevronDown
+                    aria-hidden="true"
+                    className={`${iconStyles.icon} ${iconStyles.action}`}
+                  />
                 </label>
               </div>
               <div className="custom-control custom-radio custom-control-inline">
@@ -136,7 +162,10 @@ export default function OfficerSidebar({
                   value="icon-style-2"
                 />
                 <label className="custom-control-label" htmlFor="sidebaricon-2">
-                  <i className="ion-plus-round"></i>
+                  <Plus
+                    aria-hidden="true"
+                    className={`${iconStyles.icon} ${iconStyles.action}`}
+                  />
                 </label>
               </div>
               <div className="custom-control custom-radio custom-control-inline">
@@ -148,34 +177,44 @@ export default function OfficerSidebar({
                   value="icon-style-3"
                 />
                 <label className="custom-control-label" htmlFor="sidebaricon-3">
-                  <i className="fa fa-angle-double-right"></i>
+                  <ChevronsRight
+                    aria-hidden="true"
+                    className={`${iconStyles.icon} ${iconStyles.action}`}
+                  />
                 </label>
               </div>
             </div>
 
             <h4 className="weight-600 font-18 pb-10">Menu List Icon</h4>
             <div className="sidebar-radio-group pb-30 mb-10">
-              {[1, 2, 3, 4, 5, 6].map((number) => (
-                <div
-                  className="custom-control custom-radio custom-control-inline"
-                  key={number}
-                >
-                  <input
-                    className="custom-control-input"
-                    defaultChecked={number === 1 || number === 4}
-                    id={`sidebariconlist-${number}`}
-                    name="menu-list-icon"
-                    type="radio"
-                    value={`icon-list-style-${number}`}
-                  />
-                  <label
-                    className="custom-control-label"
-                    htmlFor={`sidebariconlist-${number}`}
+              {[1, 2, 3, 4, 5, 6].map((number) => {
+                const Icon = getMenuListIcon(number);
+
+                return (
+                  <div
+                    className="custom-control custom-radio custom-control-inline"
+                    key={number}
                   >
-                    <i className={getMenuListIcon(number)}></i>
-                  </label>
-                </div>
-              ))}
+                    <input
+                      className="custom-control-input"
+                      defaultChecked={number === 1 || number === 4}
+                      id={`sidebariconlist-${number}`}
+                      name="menu-list-icon"
+                      type="radio"
+                      value={`icon-list-style-${number}`}
+                    />
+                    <label
+                      className="custom-control-label"
+                      htmlFor={`sidebariconlist-${number}`}
+                    >
+                      <Icon
+                        aria-hidden="true"
+                        className={`${iconStyles.icon} ${iconStyles.action}`}
+                      />
+                    </label>
+                  </div>
+                );
+              })}
             </div>
 
             <div className="reset-options pt-30 text-center">
@@ -202,7 +241,10 @@ export default function OfficerSidebar({
             aria-label="Close sidebar"
             onClick={onCloseSidebar}
           >
-            <i className="ion-close-round"></i>
+            <X
+              aria-hidden="true"
+              className={`${iconStyles.icon} ${iconStyles.navbar}`}
+            />
           </button>
         </div>
         <div className="menu-block customscroll">
@@ -216,7 +258,12 @@ export default function OfficerSidebar({
                   }`}
                   data-legacy-href="index.php"
                 >
-                  <span className="micon dw dw-house-1"></span>
+                  <span className="micon">
+                    <House
+                      aria-hidden="true"
+                      className={`${iconStyles.icon} ${iconStyles.sidebar}`}
+                    />
+                  </span>
                   <span className="mtext">Home</span>
                 </Link>
               </li>
@@ -234,7 +281,12 @@ export default function OfficerSidebar({
                   aria-expanded={bookingsOpen}
                   onClick={() => setBookingsOpen((current) => !current)}
                 >
-                  <span className="micon dw dw-diagram"></span>
+                  <span className="micon">
+                    <CalendarDays
+                      aria-hidden="true"
+                      className={`${iconStyles.icon} ${iconStyles.sidebar}`}
+                    />
+                  </span>
                   <span className="mtext"> Bookings </span>
                 </button>
                 <ul
@@ -267,7 +319,12 @@ export default function OfficerSidebar({
                   aria-disabled="true"
                   title="Prisoner management is not implemented for officers yet"
                 >
-                  <span className="micon dw dw-diagram"></span>
+                  <span className="micon">
+                    <UsersRound
+                      aria-hidden="true"
+                      className={`${iconStyles.icon} ${iconStyles.sidebar}`}
+                    />
+                  </span>
                   <span className="mtext">Prisoners</span>
                 </span>
               </li>
@@ -279,7 +336,12 @@ export default function OfficerSidebar({
                   aria-disabled="true"
                   title="FIR management is not implemented yet"
                 >
-                  <span className="micon dw dw-diagram"></span>
+                  <span className="micon">
+                    <FileText
+                      aria-hidden="true"
+                      className={`${iconStyles.icon} ${iconStyles.sidebar}`}
+                    />
+                  </span>
                   <span className="mtext">FIR</span>
                 </span>
               </li>
@@ -295,7 +357,9 @@ export default function OfficerSidebar({
                   aria-expanded={paroleOpen}
                   onClick={() => setParoleOpen((current) => !current)}
                 >
-                  <span className="micon dw dw-diagram"></span>
+                  <span className="micon">
+                    <ClipboardListIcon />
+                  </span>
                   <span className="mtext"> Parole </span>
                 </button>
                 <ul
@@ -331,7 +395,12 @@ export default function OfficerSidebar({
                   }`}
                   data-legacy-href="changepassword.php"
                 >
-                  <span className="micon dw dw-padlock1"></span>
+                  <span className="micon">
+                    <LockKeyhole
+                      aria-hidden="true"
+                      className={`${iconStyles.icon} ${iconStyles.sidebar}`}
+                    />
+                  </span>
                   <span className="mtext">Change Password</span>
                 </Link>
               </li>
@@ -358,19 +427,28 @@ export default function OfficerSidebar({
   );
 }
 
-function getMenuListIcon(number: number): string {
+function ClipboardListIcon() {
+  return (
+    <FileText
+      aria-hidden="true"
+      className={`${iconStyles.icon} ${iconStyles.sidebar}`}
+    />
+  );
+}
+
+function getMenuListIcon(number: number): SidebarIcon {
   switch (number) {
     case 1:
-      return 'ion-minus-round';
+      return Minus;
     case 2:
-      return 'fa fa-circle-o';
+      return Circle;
     case 3:
-      return 'dw dw-check';
+      return Check;
     case 4:
-      return 'icon-copy dw dw-next-2';
+      return ChevronsRight;
     case 5:
-      return 'dw dw-fast-forward-1';
+      return FastForward;
     default:
-      return 'dw dw-next';
+      return ChevronRight;
   }
 }

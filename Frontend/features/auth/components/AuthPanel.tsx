@@ -2,7 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
-import { FaChevronLeft } from 'react-icons/fa';
+import { ChevronLeft } from 'lucide-react';
+import iconStyles from '../../../components/common/LucideIcon.module.css';
 
 import { login, saveAccessToken } from '@features/auth/services/token.service';
 import { registerVisitor } from '@features/auth/services/auth.service';
@@ -222,7 +223,10 @@ export default function AuthPanel({ initialMode }: AuthPanelProps) {
             type="button"
             onClick={goHome}
           >
-            <FaChevronLeft className={styles.goBackIcon} aria-hidden="true" />
+            <ChevronLeft
+              className={`${iconStyles.icon} ${iconStyles.action} ${styles.goBackIcon}`}
+              aria-hidden="true"
+            />
             <span className={styles.buttonText}>
               <span className={styles.buttonTextOriginal}>Go Back</span>
               <span className={styles.buttonTextCopy} aria-hidden="true">

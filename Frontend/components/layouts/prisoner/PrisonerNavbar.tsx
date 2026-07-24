@@ -3,7 +3,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { LogOut, Menu, Search, WalletCards } from 'lucide-react';
 
+import LogoutConfirmModal from '../../common/LogoutConfirmModal';
+import iconStyles from '../../common/LucideIcon.module.css';
 import { clearAccessToken } from '@features/auth/services/token.service';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
 
@@ -17,6 +20,7 @@ export default function PrisonerNavbar({ onToggleSidebar }: PrisonerNavbarProps)
   const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const handleLogout = () => {
     clearAccessToken();
@@ -34,7 +38,10 @@ export default function PrisonerNavbar({ onToggleSidebar }: PrisonerNavbarProps)
               aria-label="Toggle prisoner sidebar"
               onClick={onToggleSidebar}
             >
-              <i className="icon-menu menu-icon"></i>
+              <Menu
+                aria-hidden="true"
+                className={`menu-icon ${iconStyles.icon} ${iconStyles.navbar}`}
+              />
             </button>
           </li>
           <li className="nav-item">
@@ -53,7 +60,10 @@ export default function PrisonerNavbar({ onToggleSidebar }: PrisonerNavbarProps)
                 aria-label="Toggle search"
                 onClick={() => setSearchOpen((current) => !current)}
               >
-                <i className="icon-magnifier"></i>
+                <Search
+                  aria-hidden="true"
+                  className={`${iconStyles.icon} ${iconStyles.navbar}`}
+                />
               </button>
             </form>
           </li>
@@ -104,7 +114,11 @@ export default function PrisonerNavbar({ onToggleSidebar }: PrisonerNavbarProps)
               <li className="dropdown-divider"></li>
               <li className="dropdown-item">
                 <Link href="/prisoner/dashboard" className="text-white">
-                  <i className="icon-wallet mr-2"></i> Account
+                  <WalletCards
+                    aria-hidden="true"
+                    className={`mr-2 ${iconStyles.icon} ${iconStyles.action}`}
+                  />{' '}
+                  Account
                 </Link>
               </li>
               <li className="dropdown-divider"></li>
@@ -112,16 +126,28 @@ export default function PrisonerNavbar({ onToggleSidebar }: PrisonerNavbarProps)
                 <button
                   className="text-white border-0 bg-transparent p-0"
                   type="button"
-                  onClick={handleLogout}
+                  onClick={() => setLogoutOpen(true)}
                 >
-                  <i className="icon-power mr-2"></i> Logout
+                  <LogOut
+                    aria-hidden="true"
+                    className={`mr-2 ${iconStyles.icon} ${iconStyles.action}`}
+                  />{' '}
+                  Logout
                 </button>
               </li>
             </ul>
           </li>
         </ul>
       </nav>
+
+      <LogoutConfirmModal
+        open={logoutOpen}
+        onCancel={() => setLogoutOpen(false)}
+        onConfirm={() => {
+          setLogoutOpen(false);
+          handleLogout();
+        }}
+      />
     </header>
   );
 }
-

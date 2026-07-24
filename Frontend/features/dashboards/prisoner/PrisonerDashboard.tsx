@@ -1,6 +1,10 @@
 ﻿'use client';
 
+import { type ComponentType, type SVGProps } from 'react';
+import { CalendarCheck, CircleCheck, CircleX, Clock3, FileText } from 'lucide-react';
+
 import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
+import iconStyles from '../../../components/common/LucideIcon.module.css';
 import { useDashboard } from '@features/dashboards/services/useDashboard';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { getPrisonerDashboard } from '@features/dashboards/services/dashboard.service';
@@ -8,50 +12,57 @@ import { PrisonerDashboardData } from '@features/dashboards/types';
 
 const fallbackPrisonerImage = '/images/avatars/prisoner-fallback.png';
 
+type CardIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
 const statCards = [
   {
     label: 'My Parole Requests',
     field: 'myParoleRequests',
-    icon: 'zmdi zmdi-assignment',
+    icon: FileText,
     colorClass: 'bg-primary',
   },
   {
     label: 'Pending Parole Requests',
     field: 'pendingParoleRequests',
-    icon: 'zmdi zmdi-time',
+    icon: Clock3,
     colorClass: 'bg-warning',
   },
   {
     label: 'Approved Parole Requests',
     field: 'approvedParoleRequests',
-    icon: 'zmdi zmdi-check-circle',
+    icon: CircleCheck,
     colorClass: 'bg-success',
   },
   {
     label: 'Rejected Parole Requests',
     field: 'rejectedParoleRequests',
-    icon: 'zmdi zmdi-close-circle',
+    icon: CircleX,
     colorClass: 'bg-danger',
   },
   {
     label: 'My Appointments',
     field: 'myAppointments',
-    icon: 'zmdi zmdi-calendar-check',
+    icon: CalendarCheck,
     colorClass: 'bg-info',
   },
-] as const;
+] satisfies ReadonlyArray<{
+  label: string;
+  field: keyof PrisonerDashboardData;
+  icon: CardIcon;
+  colorClass: string;
+}>;
 
 function PrisonerStatCard({
   colorClass,
   data,
   field,
-  icon,
+  icon: Icon,
   label,
 }: {
   colorClass: string;
   data: PrisonerDashboardData;
   field: keyof PrisonerDashboardData;
-  icon: string;
+  icon: CardIcon;
   label: string;
 }) {
   return (
@@ -64,7 +75,10 @@ function PrisonerStatCard({
               <h4 className="text-white mb-0">{data[field] ?? 0}</h4>
             </div>
             <div className="w-icon">
-              <i className={`${icon} text-white`}></i>
+              <Icon
+                aria-hidden="true"
+                className={`text-white ${iconStyles.icon} ${iconStyles.card}`}
+              />
             </div>
           </div>
         </div>
@@ -225,5 +239,3 @@ export default function PrisonerDashboardPage() {
     </>
   );
 }
-
-

@@ -3,7 +3,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { IdCard, LogOut, Mail, Menu, Search, Settings, UserRound } from 'lucide-react';
 
+import LogoutConfirmModal from '../../common/LogoutConfirmModal';
+import iconStyles from '../../common/LucideIcon.module.css';
 import { clearAccessToken } from '@features/auth/services/token.service';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
 
@@ -15,6 +18,7 @@ export default function OfficerNavbar({ onToggleSidebar }: OfficerNavbarProps) {
   const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const handleLogout = () => {
     clearAccessToken();
@@ -25,18 +29,28 @@ export default function OfficerNavbar({ onToggleSidebar }: OfficerNavbarProps) {
     <div className="header">
       <div className="header-left">
         <button
-          className="menu-icon dw dw-menu border-0 bg-transparent"
+          className="menu-icon border-0 bg-transparent"
           type="button"
           aria-label="Toggle officer sidebar"
           onClick={onToggleSidebar}
-        ></button>
+        >
+          <Menu
+            aria-hidden="true"
+            className={`${iconStyles.icon} ${iconStyles.navbar}`}
+          />
+        </button>
         <button
-          className="search-toggle-icon dw dw-search2 border-0 bg-transparent"
+          className="search-toggle-icon border-0 bg-transparent"
           type="button"
           aria-expanded={searchOpen}
           aria-label="Toggle search"
           onClick={() => setSearchOpen((current) => !current)}
-        ></button>
+        >
+          <Search
+            aria-hidden="true"
+            className={`${iconStyles.icon} ${iconStyles.navbar}`}
+          />
+        </button>
         <div className={`header-search${searchOpen ? ' show' : ''}`}>
           <form>
             <div className="form-group mb-0">
@@ -125,30 +139,58 @@ export default function OfficerNavbar({ onToggleSidebar }: OfficerNavbarProps) {
               }`}
             >
               <span className="dropdown-item">
-                <i className="dw dw-id-card"></i> ID: Officer
+                <IdCard
+                  aria-hidden="true"
+                  className={`${iconStyles.icon} ${iconStyles.action}`}
+                />{' '}
+                ID: Officer
               </span>
               <span className="dropdown-item">
-                <i className="dw dw-envelope"></i> Email: officer@jailmeet.com
+                <Mail
+                  aria-hidden="true"
+                  className={`${iconStyles.icon} ${iconStyles.action}`}
+                />{' '}
+                Email: officer@jailmeet.com
               </span>
               <div className="dropdown-divider"></div>
               <Link className="dropdown-item" href="/officer/profile">
-                <i className="dw dw-user1"></i> Profile
+                <UserRound
+                  aria-hidden="true"
+                  className={`${iconStyles.icon} ${iconStyles.action}`}
+                />{' '}
+                Profile
               </Link>
               <Link className="dropdown-item" href="/officer/profile/settings">
-                <i className="dw dw-settings2"></i> Setting
+                <Settings
+                  aria-hidden="true"
+                  className={`${iconStyles.icon} ${iconStyles.action}`}
+                />{' '}
+                Setting
               </Link>
               <button
                 className="dropdown-item"
                 type="button"
-                onClick={handleLogout}
+                onClick={() => setLogoutOpen(true)}
               >
-                <i className="dw dw-logout"></i> Log Out
+                <LogOut
+                  aria-hidden="true"
+                  className={`${iconStyles.icon} ${iconStyles.action}`}
+                />{' '}
+                Log Out
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      <LogoutConfirmModal
+        open={logoutOpen}
+        onCancel={() => setLogoutOpen(false)}
+        onConfirm={() => {
+          setLogoutOpen(false);
+          handleLogout();
+        }}
+      />
     </div>
   );
 }
-

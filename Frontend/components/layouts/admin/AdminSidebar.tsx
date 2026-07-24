@@ -1,59 +1,81 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Fragment } from 'react';
+import { Fragment, type ComponentType, type SVGProps } from 'react';
+import {
+  CalendarDays,
+  Ellipsis,
+  FileText,
+  House,
+  LockKeyhole,
+  Menu,
+  MoreVertical,
+  PanelLeftClose,
+  UserCheck,
+  UserRound,
+  UsersRound,
+} from 'lucide-react';
+
+import iconStyles from '../../common/LucideIcon.module.css';
+
+type SidebarIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 const navItems = [
   {
     href: '/admin/dashboard',
     legacyHref: 'adindex.php',
-    icon: 'fas fa-home',
+    icon: House,
     label: 'Dashboard',
   },
   {
     href: '/admin/users',
     legacyHref: 'users.php',
-    icon: 'fas fa-users',
+    icon: UsersRound,
     label: 'Users',
   },
   {
     href: '/admin/visitors',
     legacyHref: 'userdetails.php',
-    icon: 'fas fa-user-circle',
+    icon: UserCheck,
     label: 'Visitors',
   },
   {
     href: '/admin/officers',
     legacyHref: 'officersdetails.php',
-    icon: 'fas fa-user-circle',
+    icon: UserRound,
     label: 'Officers',
   },
   {
     href: '/admin/prisoners',
     legacyHref: 'prisonerdetails.php',
-    icon: 'fas fa-user-circle',
+    icon: UserRound,
     label: 'Prisoners',
   },
   {
     href: '/admin/appointments',
     legacyHref: 'appointments.php',
-    icon: 'fas fa-th',
+    icon: CalendarDays,
     label: 'Appointments',
   },
   {
     href: '/admin/parole',
     legacyHref: 'parolerequests.php',
-    icon: 'fas fa-file-alt',
+    icon: FileText,
     label: 'Parole Requests',
   },
   {
     href: '/admin/change-password',
     legacyHref: 'changepassword.php',
-    icon: 'fas fa-lock',
+    icon: LockKeyhole,
     label: 'Change Password',
   },
-];
+] satisfies ReadonlyArray<{
+  href: string;
+  legacyHref: string;
+  icon: SidebarIcon;
+  label: string;
+}>;
 
 type AdminSidebarProps = {
   onToggleSidebar: () => void;
@@ -80,14 +102,20 @@ export default function AdminSidebar({ onToggleSidebar }: AdminSidebarProps) {
               type="button"
               onClick={onToggleSidebar}
             >
-              <i className="gg-menu-right"></i>
+              <Menu
+                aria-hidden="true"
+                className={`${iconStyles.icon} ${iconStyles.navbar}`}
+              />
             </button>
             <button
               className="btn btn-toggle sidenav-toggler"
               type="button"
               onClick={onToggleSidebar}
             >
-              <i className="gg-menu-left"></i>
+              <PanelLeftClose
+                aria-hidden="true"
+                className={`${iconStyles.icon} ${iconStyles.navbar}`}
+              />
             </button>
           </div>
           <button
@@ -95,7 +123,10 @@ export default function AdminSidebar({ onToggleSidebar }: AdminSidebarProps) {
             type="button"
             onClick={onToggleSidebar}
           >
-            <i className="gg-more-vertical-alt"></i>
+            <MoreVertical
+              aria-hidden="true"
+              className={`${iconStyles.icon} ${iconStyles.navbar}`}
+            />
           </button>
         </div>
       </div>
@@ -103,28 +134,38 @@ export default function AdminSidebar({ onToggleSidebar }: AdminSidebarProps) {
       <div className="sidebar-wrapper scrollbar scrollbar-inner">
         <div className="sidebar-content">
           <ul className="nav nav-secondary">
-            {navItems.map((item, index) => (
-              <Fragment key={item.href}>
-                {index === 1 ? (
-                  <li className="nav-section">
-                    <span className="sidebar-mini-icon">
-                      <i className="fa fa-ellipsis-h"></i>
-                    </span>
-                    <h4 className="text-section">Components</h4>
+            {navItems.map((item, index) => {
+              const Icon = item.icon;
+
+              return (
+                <Fragment key={item.href}>
+                  {index === 1 ? (
+                    <li className="nav-section">
+                      <span className="sidebar-mini-icon">
+                        <Ellipsis
+                          aria-hidden="true"
+                          className={`${iconStyles.icon} ${iconStyles.sidebar}`}
+                        />
+                      </span>
+                      <h4 className="text-section">Components</h4>
+                    </li>
+                  ) : null}
+                  <li
+                    className={`nav-item${
+                      pathname === item.href ? ' active' : ''
+                    }`}
+                  >
+                    <Link href={item.href} data-legacy-href={item.legacyHref}>
+                      <Icon
+                        aria-hidden="true"
+                        className={`${iconStyles.icon} ${iconStyles.sidebar}`}
+                      />
+                      <p>{item.label}</p>
+                    </Link>
                   </li>
-                ) : null}
-                <li
-                  className={`nav-item${
-                    pathname === item.href ? ' active' : ''
-                  }`}
-                >
-                  <Link href={item.href} data-legacy-href={item.legacyHref}>
-                    <i className={item.icon}></i>
-                    <p>{item.label}</p>
-                  </Link>
-                </li>
-              </Fragment>
-            ))}
+                </Fragment>
+              );
+            })}
           </ul>
         </div>
       </div>

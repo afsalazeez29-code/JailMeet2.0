@@ -1,7 +1,13 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { type ComponentType, type SVGProps } from 'react';
+import { CalendarDays, FileText, History, LayoutDashboard, LockKeyhole } from 'lucide-react';
+
+import iconStyles from '../../common/LucideIcon.module.css';
+
+type SidebarIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 type PrisonerSidebarProps = {
   sidebarOpen: boolean;
@@ -11,19 +17,19 @@ const menuItems = [
   {
     href: '/prisoner/dashboard',
     legacyHref: 'index.php',
-    icon: 'zmdi zmdi-view-dashboard',
+    icon: LayoutDashboard,
     label: 'Dashboard',
   },
   {
     href: '/prisoner/parole/request',
     legacyHref: 'parole.php',
-    icon: 'zmdi zmdi-invert-colors',
+    icon: FileText,
     label: 'Submit Parole Request',
   },
   {
     href: '/prisoner/visits/history',
     legacyHref: 'visitorhistory.php',
-    icon: 'zmdi zmdi-face',
+    icon: History,
     label: 'Visitors History',
     disabled: true,
     title: 'Visitor history is not implemented yet',
@@ -31,16 +37,23 @@ const menuItems = [
   {
     href: '/prisoner/parole',
     legacyHref: 'parolestatus.php',
-    icon: 'zmdi zmdi-invert-colors',
+    icon: CalendarDays,
     label: 'Parole Status',
   },
   {
     href: '/prisoner/change-password',
     legacyHref: 'changepassword.php',
-    icon: 'zmdi zmdi-lock',
+    icon: LockKeyhole,
     label: 'Change Password',
   },
-];
+] satisfies ReadonlyArray<{
+  href: string;
+  legacyHref: string;
+  icon: SidebarIcon;
+  label: string;
+  disabled?: boolean;
+  title?: string;
+}>;
 
 export default function PrisonerSidebar({ sidebarOpen }: PrisonerSidebarProps) {
   const pathname = usePathname();
@@ -64,23 +77,33 @@ export default function PrisonerSidebar({ sidebarOpen }: PrisonerSidebarProps) {
       </div>
       <ul className="sidebar-menu do-nicescrol">
         <li className="sidebar-header"></li>
-        {menuItems.map((item) => (
-          <li className={pathname === item.href ? 'active' : undefined} key={item.href}>
-            {item.disabled ? (
-              <span
-                data-legacy-href={item.legacyHref}
-                aria-disabled="true"
-                title={item.title}
-              >
-                <i className={item.icon}></i> <span>{item.label}</span>
-              </span>
-            ) : (
-              <Link href={item.href} data-legacy-href={item.legacyHref}>
-                <i className={item.icon}></i> <span>{item.label}</span>
-              </Link>
-            )}
-          </li>
-        ))}
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          const renderedIcon = (
+            <Icon
+              aria-hidden="true"
+              className={`${iconStyles.icon} ${iconStyles.sidebar}`}
+            />
+          );
+
+          return (
+            <li className={pathname === item.href ? 'active' : undefined} key={item.href}>
+              {item.disabled ? (
+                <span
+                  data-legacy-href={item.legacyHref}
+                  aria-disabled="true"
+                  title={item.title}
+                >
+                  {renderedIcon} <span>{item.label}</span>
+                </span>
+              ) : (
+                <Link href={item.href} data-legacy-href={item.legacyHref}>
+                  {renderedIcon} <span>{item.label}</span>
+                </Link>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

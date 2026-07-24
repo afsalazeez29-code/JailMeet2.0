@@ -1,76 +1,95 @@
 ﻿'use client';
 
-import { ErrorAlert, ForbiddenAlert, LoadingAlert, StatusAlert } from '../../../components/common/StatusAlert';
 import Link from 'next/link';
+import { type ComponentType, type SVGProps } from 'react';
+import {
+  CalendarDays,
+  CircleCheck,
+  Clock3,
+  FileText,
+  UserCheck,
+  UserRound,
+  UsersRound,
+} from 'lucide-react';
 
+import { ErrorAlert, ForbiddenAlert, LoadingAlert, StatusAlert } from '../../../components/common/StatusAlert';
+import iconStyles from '../../../components/common/LucideIcon.module.css';
 import { useDashboard } from '@features/dashboards/services/useDashboard';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { getAdminDashboard } from '@features/dashboards/services/dashboard.service';
 import { AdminDashboardData } from '@features/dashboards/types';
 
+type CardIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
 const statCards = [
   {
     label: 'Total Users',
     field: 'totalUsers',
-    icon: 'fas fa-users',
+    icon: UsersRound,
     iconClass: 'icon-primary',
     href: '/admin/users',
   },
   {
     label: 'Visitors',
     field: 'totalVisitors',
-    icon: 'fas fa-user-check',
+    icon: UserCheck,
     iconClass: 'icon-info',
     href: '/admin/visitors',
   },
   {
     label: 'Officers',
     field: 'totalOfficers',
-    icon: 'fas fa-user-circle',
+    icon: UserRound,
     iconClass: 'icon-success',
     href: '/admin/officers',
   },
   {
     label: 'Prisoners',
     field: 'totalPrisoners',
-    icon: 'fas fa-user-circle',
+    icon: UserRound,
     iconClass: 'icon-secondary',
     href: '/admin/prisoners',
   },
   {
     label: 'Appointments',
     field: 'totalAppointments',
-    icon: 'fas fa-luggage-cart',
+    icon: CalendarDays,
     iconClass: 'icon-primary',
     href: '/admin/appointments',
   },
   {
     label: 'Pending Appointments',
     field: 'pendingAppointments',
-    icon: 'far fa-check-circle',
+    icon: CircleCheck,
     iconClass: 'icon-info',
     href: '/admin/appointments?status=PENDING',
   },
   {
     label: 'Pending Parole Requests',
     field: 'pendingParoleRequests',
-    icon: 'fas fa-th',
+    icon: FileText,
     iconClass: 'icon-warning',
     href: '/admin/parole?status=PENDING',
   },
-] as const;
+] satisfies ReadonlyArray<{
+  label: string;
+  field: keyof AdminDashboardData;
+  icon: CardIcon;
+  iconClass: string;
+  href: string;
+}>;
 
 function AdminStatCard({
   data,
   field,
-  icon,
+  icon: Icon,
   iconClass,
   label,
   href,
 }: {
   data: AdminDashboardData;
   field: keyof AdminDashboardData;
-  icon: string;
+  icon: CardIcon;
   iconClass: string;
   label: string;
   href: string;
@@ -84,7 +103,10 @@ function AdminStatCard({
               <div
                 className={`icon-big text-center ${iconClass} bubble-shadow-small`}
               >
-                <i className={icon}></i>
+                <Icon
+                  aria-hidden="true"
+                  className={`${iconStyles.icon} ${iconStyles.card}`}
+                />
               </div>
             </div>
             <div className="col col-stats ms-3 ms-sm-0">
@@ -198,10 +220,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-
-
-
-
-
-

@@ -1,55 +1,66 @@
 ﻿'use client';
 
+import { type ComponentType, type SVGProps } from 'react';
+import { CircleX, Clock3, ThumbsUp, UsersRound } from 'lucide-react';
+
 import { ErrorAlert, ForbiddenAlert, LoadingAlert, SuccessAlert } from '../../../components/common/StatusAlert';
+import iconStyles from '../../../components/common/LucideIcon.module.css';
 import { useDashboard } from '@features/dashboards/services/useDashboard';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { getOfficerDashboard } from '@features/dashboards/services/dashboard.service';
 import { OfficerDashboardData } from '@features/dashboards/types';
 
+type CardIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
 const statCards = [
   {
     label: 'Total Prisoners',
     field: 'totalPrisoners',
-    icon: 'dw dw-user-12',
+    icon: UsersRound,
     cardClass: 'bg-primary text-white',
   },
   {
     label: 'Pending Appointments',
     field: 'pendingAppointments',
-    icon: 'fa fa-hourglass-half',
+    icon: Clock3,
     cardClass: 'bg-info text-white',
   },
   {
     label: 'Approved Appointments',
     field: 'approvedAppointments',
-    icon: 'fa fa-thumbs-up',
+    icon: ThumbsUp,
     cardClass: 'bg-secondary text-white',
   },
   {
     label: 'Rejected Appointments',
     field: 'rejectedAppointments',
-    icon: 'fa fa-times-circle',
+    icon: CircleX,
     cardClass: 'bg-danger text-white',
   },
   {
     label: 'Pending Parole Requests',
     field: 'pendingParoleRequests',
-    icon: 'fa fa-clock-o',
+    icon: Clock3,
     cardClass: 'bg-warning text-dark',
   },
-] as const;
+] satisfies ReadonlyArray<{
+  label: string;
+  field: keyof OfficerDashboardData;
+  icon: CardIcon;
+  cardClass: string;
+}>;
 
 function OfficerStatCard({
   cardClass,
   data,
   field,
-  icon,
+  icon: Icon,
   label,
 }: {
   cardClass: string;
   data: OfficerDashboardData;
   field: keyof OfficerDashboardData;
-  icon: string;
+  icon: CardIcon;
   label: string;
 }) {
   return (
@@ -60,8 +71,11 @@ function OfficerStatCard({
             <div className="h4 mb-0">{data[field] ?? 0}</div>
             <div className="weight-600 font-14">{label}</div>
           </div>
-          <div className="progress-data">
-            <i className={`${icon} fa-3x opacity-50`}></i>
+          <div className="progress-data opacity-50">
+            <Icon
+              aria-hidden="true"
+              className={`${iconStyles.icon} ${iconStyles.card}`}
+            />
           </div>
         </div>
       </div>
@@ -143,9 +157,3 @@ export default function OfficerDashboardPage() {
     </>
   );
 }
-
-
-
-
-
-

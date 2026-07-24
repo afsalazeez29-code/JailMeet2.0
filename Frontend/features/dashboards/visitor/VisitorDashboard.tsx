@@ -1,48 +1,59 @@
 ﻿'use client';
 
+import { type ComponentType, type SVGProps } from 'react';
+import { CalendarCheck, CircleCheck, CircleX, Clock3 } from 'lucide-react';
+
 import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
+import iconStyles from '../../../components/common/LucideIcon.module.css';
 import { useDashboard } from '@features/dashboards/services/useDashboard';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { getVisitorDashboard } from '@features/dashboards/services/dashboard.service';
 import { VisitorDashboardData } from '@features/dashboards/types';
 
+type CardIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
 const statCards = [
   {
     label: 'My Appointments',
     field: 'myAppointments',
-    icon: 'bx-calendar-check',
+    icon: CalendarCheck,
     colorClass: 'bg-label-primary',
   },
   {
     label: 'Pending Appointments',
     field: 'pendingAppointments',
-    icon: 'bx-time-five',
+    icon: Clock3,
     colorClass: 'bg-label-warning',
   },
   {
     label: 'Approved Appointments',
     field: 'approvedAppointments',
-    icon: 'bx-check-circle',
+    icon: CircleCheck,
     colorClass: 'bg-label-success',
   },
   {
     label: 'Rejected Appointments',
     field: 'rejectedAppointments',
-    icon: 'bx-x-circle',
+    icon: CircleX,
     colorClass: 'bg-label-danger',
   },
-] as const;
+] satisfies ReadonlyArray<{
+  label: string;
+  field: keyof VisitorDashboardData;
+  icon: CardIcon;
+  colorClass: string;
+}>;
 
 function VisitorStatCard({
   data,
   field,
-  icon,
+  icon: Icon,
   colorClass,
   label,
 }: {
   data: VisitorDashboardData;
   field: keyof VisitorDashboardData;
-  icon: string;
+  icon: CardIcon;
   colorClass: string;
   label: string;
 }) {
@@ -54,7 +65,10 @@ function VisitorStatCard({
             <div
               className={`avatar flex-shrink-0 ${colorClass} rounded d-flex align-items-center justify-content-center`}
             >
-              <i className={`bx ${icon} fs-3 d-block lh-1`}></i>
+              <Icon
+                aria-hidden="true"
+                className={`${iconStyles.icon} ${iconStyles.card}`}
+              />
             </div>
           </div>
           <span className="fw-semibold d-block mb-1">{label}</span>
@@ -141,5 +155,3 @@ export default function VisitorDashboardPage() {
     </div>
   );
 }
-
-

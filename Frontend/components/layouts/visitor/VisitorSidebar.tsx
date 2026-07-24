@@ -1,47 +1,64 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Fragment } from 'react';
+import { Fragment, type ComponentType, type SVGProps } from 'react';
+import {
+  CalendarCheck,
+  CalendarPlus,
+  ClipboardList,
+  House,
+  LockKeyhole,
+  UserRoundPen,
+} from 'lucide-react';
+
+import iconStyles from '../../common/LucideIcon.module.css';
+
+type SidebarIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 const menuItems = [
   {
     href: '/visitor/dashboard',
     legacyHref: 'vhome.php',
-    icon: 'bx bx-home-circle',
+    icon: House,
     label: 'Dashboard',
   },
   {
     href: '/visitor/prisoners',
     legacyHref: 'prisoners.php',
-    icon: 'bx bx-cube-alt',
+    icon: ClipboardList,
     label: 'View Prisoner',
   },
   {
     href: '/visitor/appointments/book',
     legacyHref: 'booking.php',
-    icon: 'bx bx-cube-alt',
+    icon: CalendarPlus,
     label: 'Book Appointment',
   },
   {
     href: '/visitor/appointments',
     legacyHref: 'status.php',
-    icon: 'bx bx-cube-alt',
+    icon: CalendarCheck,
     label: 'View Booking Status',
   },
   {
     href: '/visitor/settings',
     legacyHref: 'accountsettings.php',
-    icon: 'bx bx-cube-alt',
+    icon: UserRoundPen,
     label: 'Edit Profile',
   },
   {
     href: '/visitor/change-password',
     legacyHref: 'changepassword.php',
-    icon: 'bx bx-lock',
+    icon: LockKeyhole,
     label: 'Change Password',
   },
-];
+] satisfies ReadonlyArray<{
+  href: string;
+  legacyHref: string;
+  icon: SidebarIcon;
+  label: string;
+}>;
 
 export default function VisitorSidebar() {
   const pathname = usePathname();
@@ -74,27 +91,34 @@ export default function VisitorSidebar() {
       </div>
 
       <ul className="menu-inner py-1">
-        {menuItems.map((item, index) => (
-          <Fragment key={item.href}>
-            {index === 1 ? (
-              <li className="menu-header small text-uppercase">
-                <span className="menu-header-text">Pages</span>
-              </li>
-            ) : null}
-            <li
-              className={`menu-item${pathname === item.href ? ' active' : ''}`}
-            >
-              <Link
-                href={item.href}
-                className="menu-link"
-                data-legacy-href={item.legacyHref}
+        {menuItems.map((item, index) => {
+          const Icon = item.icon;
+
+          return (
+            <Fragment key={item.href}>
+              {index === 1 ? (
+                <li className="menu-header small text-uppercase">
+                  <span className="menu-header-text">Pages</span>
+                </li>
+              ) : null}
+              <li
+                className={`menu-item${pathname === item.href ? ' active' : ''}`}
               >
-                <i className={`menu-icon tf-icons ${item.icon}`}></i>
-                <div>{item.label}</div>
-              </Link>
-            </li>
-          </Fragment>
-        ))}
+                <Link
+                  href={item.href}
+                  className="menu-link"
+                  data-legacy-href={item.legacyHref}
+                >
+                  <Icon
+                    aria-hidden="true"
+                    className={`menu-icon tf-icons ${iconStyles.icon} ${iconStyles.sidebar}`}
+                  />
+                  <div>{item.label}</div>
+                </Link>
+              </li>
+            </Fragment>
+          );
+        })}
       </ul>
     </aside>
   );
