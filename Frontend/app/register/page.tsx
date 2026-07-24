@@ -1,4 +1,4 @@
-import AuthPanel from '../../components/auth/AuthPanel';
+import AuthPanel from '@features/auth/components/AuthPanel';
 import SiteFooter from '../../components/common/SiteFooter';
 
 export default function RegisterPage() {

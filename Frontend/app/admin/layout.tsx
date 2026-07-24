@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import AdminLayout from '../../components/legacy/admin/AdminLayout';
+import AdminLayout from '../../components/layouts/admin/AdminLayout';
 
 type AdminRouteLayoutProps = {
   children: ReactNode;

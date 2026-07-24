@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import VisitorLayout from '../../components/legacy/visitor/VisitorLayout';
+import VisitorLayout from '../../components/layouts/visitor/VisitorLayout';
 
 type VisitorRouteLayoutProps = {
   children: ReactNode;

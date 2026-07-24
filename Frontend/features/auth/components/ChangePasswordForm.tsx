@@ -1,0 +1,121 @@
+'use client';
+
+import { FormEvent, useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+import { clearAccessToken } from '@features/auth/services/token.service';
+import { changePassword } from '@features/auth/services/auth.service';
+import { isApiServiceError } from '@/types/api';
+import styles from './ChangePasswordForm.module.css';
+
+type VisibilityField = 'current' | 'new' | 'confirm';
+
+export default function ChangePasswordForm() {
+  const router = useRouter();
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [visible, setVisible] = useState<Record<VisibilityField, boolean>>({
+    current: false,
+    new: false,
+    confirm: false,
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const toggleVisibility = (field: VisibilityField) => {
+    setVisible((current) => ({ ...current, [field]: !current[field] }));
+  };
+
+  const validate = (): string | null => {
+    if (!currentPassword) return 'Current password is required';
+    if (!newPassword) return 'New password is required';
+    if (newPassword.length < 8) {
+      return 'New password must contain at least 8 characters';
+    }
+    if (newPassword !== confirmPassword) return 'New passwords do not match';
+    return null;
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+    setSuccess(null);
+
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      await changePassword({ currentPassword, newPassword });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setSuccess('Password changed. Please log in again.');
+      clearAccessToken();
+      window.setTimeout(() => router.replace('/login'), 900);
+    } catch (caughtError) {
+      setError(
+        isApiServiceError(caughtError)
+          ? caughtError.message
+          : 'Unable to change password',
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const passwordInput = (
+    field: VisibilityField,
+    label: string,
+    value: string,
+    onChange: (value: string) => void,
+  ) => (
+    <div className="form-group">
+      <label>{label}</label>
+      <div className={styles.passwordRow}>
+        <input
+          className="form-control"
+          onChange={(event) => onChange(event.target.value)}
+          type={visible[field] ? 'text' : 'password'}
+          value={value}
+        />
+        <button
+          aria-label={`${visible[field] ? 'Hide' : 'Show'} ${label.toLowerCase()}`}
+          className="btn btn-outline-secondary"
+          onClick={() => toggleVisibility(field)}
+          type="button"
+        >
+          {visible[field] ? 'Hide' : 'Show'}
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className={styles.formShell}>
+      <div className="card">
+        <div className="card-header">
+          <h5 className="mb-0">Change Password</h5>
+        </div>
+        <div className="card-body">
+          {success ? <div className="alert alert-success">{success}</div> : null}
+          {error ? <div className="alert alert-danger">{error}</div> : null}
+          <form onSubmit={handleSubmit}>
+            {passwordInput('current', 'Current password', currentPassword, setCurrentPassword)}
+            {passwordInput('new', 'New password', newPassword, setNewPassword)}
+            {passwordInput('confirm', 'Confirm password', confirmPassword, setConfirmPassword)}
+            <button className="btn btn-primary" disabled={submitting} type="submit">
+              {submitting ? 'Changing...' : 'Change Password'}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import PrisonerLayout from '../../components/legacy/prisoner/PrisonerLayout';
+import PrisonerLayout from '../../components/layouts/prisoner/PrisonerLayout';
 
 type PrisonerRouteLayoutProps = {
   children: ReactNode;

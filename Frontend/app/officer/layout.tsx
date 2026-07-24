@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import OfficerLayout from '../../components/legacy/officer/OfficerLayout';
+import OfficerLayout from '../../components/layouts/officer/OfficerLayout';
 
 type OfficerRouteLayoutProps = {
   children: ReactNode;
