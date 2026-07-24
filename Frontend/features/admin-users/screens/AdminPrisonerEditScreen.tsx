@@ -1,5 +1,6 @@
 'use client';
 
+import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
@@ -27,8 +28,10 @@ export default function EditPrisonerPage() {
     catch (caughtError) { setError(isApiServiceError(caughtError) ? caughtError.message : 'Unable to update prisoner'); }
     finally { setSubmitting(false); }
   };
-  if (protectedPage.isLoading || loading || (!protectedPage.isReady && !protectedPage.error && !protectedPage.isForbidden)) return <Shell><div className="alert alert-info">Loading prisoner...</div></Shell>;
-  if (protectedPage.isForbidden) return <Shell><div className="alert alert-danger">Access denied</div></Shell>;
-  return <Shell><h3 className="fw-bold mb-3">Edit Prisoner</h3>{prisoner ? <PrisonerForm mode="edit" initialValues={{ email: prisoner.user.email ?? '', name: prisoner.name, age: prisoner.age, gender: prisoner.gender, admissionDate: prisoner.admissionDate, caseDetails: prisoner.caseDetails, sentencePeriod: prisoner.sentencePeriod, jailType: prisoner.jailType, jailName: prisoner.jailName, cellNumber: prisoner.cellNumber }} isSubmitting={submitting} error={error || protectedPage.error} onSubmit={submit} /> : <div className="alert alert-danger">{error || 'Prisoner not found'}</div>}</Shell>;
+  if (protectedPage.isLoading || loading || (!protectedPage.isReady && !protectedPage.error && !protectedPage.isForbidden)) return <Shell><LoadingAlert>Loading prisoner...</LoadingAlert></Shell>;
+  if (protectedPage.isForbidden) return <Shell><ForbiddenAlert /></Shell>;
+  return <Shell><h3 className="fw-bold mb-3">Edit Prisoner</h3>{prisoner ? <PrisonerForm mode="edit" initialValues={{ email: prisoner.user.email ?? '', name: prisoner.name, age: prisoner.age, gender: prisoner.gender, admissionDate: prisoner.admissionDate, caseDetails: prisoner.caseDetails, sentencePeriod: prisoner.sentencePeriod, jailType: prisoner.jailType, jailName: prisoner.jailName, cellNumber: prisoner.cellNumber }} isSubmitting={submitting} error={error || protectedPage.error} onSubmit={submit} /> : <ErrorAlert>{error || 'Prisoner not found'}</ErrorAlert>}</Shell>;
 }
 function Shell({ children }: { children: React.ReactNode }) { return <div className="container" style={{ position: 'absolute', top: '70px' }}><div className="page-inner">{children}</div></div>; }
+
+

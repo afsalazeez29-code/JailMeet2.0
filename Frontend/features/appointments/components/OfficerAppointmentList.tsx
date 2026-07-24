@@ -1,9 +1,11 @@
-'use client';
+﻿'use client';
 
+import { EmptyStateAlert, ErrorAlert } from '../../../components/common/StatusAlert';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { clearAccessToken } from '@features/auth/services/token.service';
+import { navigateToLogin } from '@features/auth/services/navigation.service';
 import { reviewAppointment } from '@features/appointments/services/appointment.service';
 import { isApiServiceError } from '@/types/api';
 import {
@@ -78,7 +80,7 @@ export default function OfficerAppointmentList({
       if (isApiServiceError(caughtError)) {
         if (caughtError.status === 401) {
           clearAccessToken();
-          router.replace('/login');
+          navigateToLogin(router);
           return;
         }
 
@@ -122,15 +124,11 @@ export default function OfficerAppointmentList({
           </div>
 
           {error ? (
-            <div className="alert alert-danger" role="alert">
-              {error}
-            </div>
+            <ErrorAlert role="alert">{error}</ErrorAlert>
           ) : null}
 
           {appointments.length === 0 ? (
-            <div className="alert alert-info mb-0">
-              No appointment requests found.
-            </div>
+            <EmptyStateAlert className="mb-0">No appointment requests found.</EmptyStateAlert>
           ) : (
             <div className="table-responsive">
               <table className="data-table table stripe hover nowrap">
@@ -226,3 +224,6 @@ export default function OfficerAppointmentList({
     </div>
   );
 }
+
+
+

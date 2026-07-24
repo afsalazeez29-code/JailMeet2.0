@@ -1,9 +1,11 @@
-'use client';
+﻿'use client';
 
+import { EmptyStateAlert, ErrorAlert, SuccessAlert } from '../../../components/common/StatusAlert';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { clearAccessToken } from '@features/auth/services/token.service';
+import { navigateToLogin } from '@features/auth/services/navigation.service';
 import { reviewParoleRequest } from '@features/parole/services/parole.service';
 import { isApiServiceError } from '@/types/api';
 import {
@@ -79,7 +81,7 @@ export default function OfficerParoleList({
       if (isApiServiceError(caughtError)) {
         if (caughtError.status === 401) {
           clearAccessToken();
-          router.replace('/login');
+          navigateToLogin(router);
           return;
         }
 
@@ -108,21 +110,15 @@ export default function OfficerParoleList({
 
         <div className="pd-20 pt-0">
           {success ? (
-            <div className="alert alert-success" role="status">
-              {success}
-            </div>
+            <SuccessAlert role="status">{success}</SuccessAlert>
           ) : null}
 
           {error ? (
-            <div className="alert alert-danger" role="alert">
-              {error}
-            </div>
+            <ErrorAlert role="alert">{error}</ErrorAlert>
           ) : null}
 
           {requests.length === 0 ? (
-            <div className="alert alert-info mb-0">
-              No pending parole requests found.
-            </div>
+            <EmptyStateAlert className="mb-0">No pending parole requests found.</EmptyStateAlert>
           ) : (
             <div className="table-responsive">
               <table className="data-table table stripe hover nowrap">
@@ -184,3 +180,6 @@ export default function OfficerParoleList({
     </div>
   );
 }
+
+
+

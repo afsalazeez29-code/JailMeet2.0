@@ -1,5 +1,6 @@
-'use client';
+﻿'use client';
 
+import { EmptyStateAlert } from '../../../components/common/StatusAlert';
 import Link from 'next/link';
 import { AdminOfficer } from '@features/admin-users/types';
 
@@ -12,7 +13,7 @@ const formatDate = (value: string) =>
   new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium' }).format(new Date(value));
 
 export default function AdminOfficerTable({ officers, onToggleStatus }: Props) {
-  if (officers.length === 0) return <div className="alert alert-info mb-0">No officers found.</div>;
+  if (officers.length === 0) return <EmptyStateAlert className="mb-0">No officers found.</EmptyStateAlert>;
   return (
     <div className="table-responsive">
       <table className="table table-hover">
@@ -34,3 +35,5 @@ export default function AdminOfficerTable({ officers, onToggleStatus }: Props) {
     </div>
   );
 }
+
+

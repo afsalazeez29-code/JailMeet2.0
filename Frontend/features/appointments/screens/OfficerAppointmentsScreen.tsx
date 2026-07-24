@@ -10,6 +10,8 @@ import {
   OfficerAppointment,
 } from '@features/appointments/types';
 
+import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
+
 import OfficerAppointmentList from '@features/appointments/components/OfficerAppointmentList';
 
 export default function OfficerAppointmentsPage() {
@@ -83,7 +85,7 @@ export default function OfficerAppointmentsPage() {
   ) {
     return (
       <div className="pd-20">
-        <div className="alert alert-info">Loading appointment requests...</div>
+        <LoadingAlert>Loading appointment requests...</LoadingAlert>
       </div>
     );
   }
@@ -91,7 +93,7 @@ export default function OfficerAppointmentsPage() {
   if (protectedPage.isForbidden || error === 'Access denied') {
     return (
       <div className="pd-20">
-        <div className="alert alert-danger">Access denied</div>
+        <ForbiddenAlert />
       </div>
     );
   }
@@ -99,9 +101,7 @@ export default function OfficerAppointmentsPage() {
   if (protectedPage.error || error) {
     return (
       <div className="pd-20">
-        <div className="alert alert-danger">
-          {protectedPage.error || error}
-        </div>
+        <ErrorAlert>{protectedPage.error || error}</ErrorAlert>
       </div>
     );
   }
@@ -115,3 +115,6 @@ export default function OfficerAppointmentsPage() {
     />
   );
 }
+
+
+

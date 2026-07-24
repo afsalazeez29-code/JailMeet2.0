@@ -1,5 +1,6 @@
-'use client';
+﻿'use client';
 
+import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
 import { useEffect, useState } from 'react';
 
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
@@ -83,7 +84,7 @@ export default function VisitorSettingsPage() {
   ) {
     return (
       <div className="container-xxl flex-grow-1 container-p-y">
-        <div className="alert alert-info">Loading visitor settings...</div>
+        <LoadingAlert>Loading visitor settings...</LoadingAlert>
       </div>
     );
   }
@@ -91,7 +92,7 @@ export default function VisitorSettingsPage() {
   if (protectedPage.isForbidden) {
     return (
       <div className="container-xxl flex-grow-1 container-p-y">
-        <div className="alert alert-danger">Access denied</div>
+        <ForbiddenAlert />
       </div>
     );
   }
@@ -99,7 +100,7 @@ export default function VisitorSettingsPage() {
   if (profileError === 'Access denied') {
     return (
       <div className="container-xxl flex-grow-1 container-p-y">
-        <div className="alert alert-danger">Access denied</div>
+        <ForbiddenAlert />
       </div>
     );
   }
@@ -107,7 +108,7 @@ export default function VisitorSettingsPage() {
   if (protectedPage.error) {
     return (
       <div className="container-xxl flex-grow-1 container-p-y">
-        <div className="alert alert-danger">{protectedPage.error}</div>
+        <ErrorAlert>{protectedPage.error}</ErrorAlert>
       </div>
     );
   }
@@ -115,7 +116,7 @@ export default function VisitorSettingsPage() {
   if (profileError) {
     return (
       <div className="container-xxl flex-grow-1 container-p-y">
-        <div className="alert alert-danger">{profileError}</div>
+        <ErrorAlert>{profileError}</ErrorAlert>
       </div>
     );
   }
@@ -126,3 +127,5 @@ export default function VisitorSettingsPage() {
 
   return <VisitorSettingsForm profileData={profileData} />;
 }
+
+

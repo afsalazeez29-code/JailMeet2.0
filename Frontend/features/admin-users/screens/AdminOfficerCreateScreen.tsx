@@ -1,5 +1,6 @@
 'use client';
 
+import { ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -28,11 +29,13 @@ export default function NewOfficerPage() {
     }
   };
 
-  if (protectedPage.isLoading || (!protectedPage.isReady && !protectedPage.error && !protectedPage.isForbidden)) return <Shell><div className="alert alert-info">Loading form...</div></Shell>;
-  if (protectedPage.isForbidden) return <Shell><div className="alert alert-danger">Access denied</div></Shell>;
+  if (protectedPage.isLoading || (!protectedPage.isReady && !protectedPage.error && !protectedPage.isForbidden)) return <Shell><LoadingAlert>Loading form...</LoadingAlert></Shell>;
+  if (protectedPage.isForbidden) return <Shell><ForbiddenAlert /></Shell>;
   return <Shell><h3 className="fw-bold mb-3">Create Officer</h3><OfficerForm mode="create" isSubmitting={submitting} error={error || protectedPage.error} onSubmit={submit} /></Shell>;
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
   return <div className="container" style={{ position: 'absolute', top: '70px' }}><div className="page-inner">{children}</div></div>;
 }
+
+

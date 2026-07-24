@@ -1,5 +1,6 @@
-'use client';
+﻿'use client';
 
+import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
 import { useDashboard } from '@features/dashboards/services/useDashboard';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { getVisitorDashboard } from '@features/dashboards/services/dashboard.service';
@@ -80,7 +81,7 @@ export default function VisitorDashboardPage() {
   ) {
     return (
       <div className="container-xxl flex-grow-1 container-p-y">
-        <div className="alert alert-info">Loading visitor dashboard...</div>
+        <LoadingAlert>Loading visitor dashboard...</LoadingAlert>
       </div>
     );
   }
@@ -88,7 +89,7 @@ export default function VisitorDashboardPage() {
   if (protectedPage.isForbidden || dashboard.isForbidden) {
     return (
       <div className="container-xxl flex-grow-1 container-p-y">
-        <div className="alert alert-danger">Access denied</div>
+        <ForbiddenAlert />
       </div>
     );
   }
@@ -99,7 +100,7 @@ export default function VisitorDashboardPage() {
   if (protectedPage.error || dashboard.error) {
     return (
       <div className="container-xxl flex-grow-1 container-p-y">
-        <div className="alert alert-danger">{errorMessage}</div>
+        <ErrorAlert>{errorMessage}</ErrorAlert>
       </div>
     );
   }
@@ -140,3 +141,5 @@ export default function VisitorDashboardPage() {
     </div>
   );
 }
+
+

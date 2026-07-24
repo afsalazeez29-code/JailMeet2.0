@@ -1,8 +1,10 @@
 'use client';
 
+import { ErrorAlert } from '../../../components/common/StatusAlert';
 import { FormEvent, useEffect, useState } from 'react';
 
 import { CreatePrisonerInput, UpdatePrisonerInput } from '@features/admin-users/types';
+import { validateAdminCreateCredentials, validateRequiredName } from '@features/admin-users/admin-users.validation';
 
 type PrisonerFormProps = {
   mode: 'create' | 'edit';
@@ -50,9 +52,10 @@ export default function PrisonerForm({
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setValidationError(null);
-    if (mode === 'create' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setValidationError('Valid email is required');
-    if (mode === 'create' && password.length < 8) return setValidationError('Password must be at least 8 characters');
-    if (!name.trim()) return setValidationError('Name is required');
+    const credentialError = mode === 'create' ? validateAdminCreateCredentials(email, password) : null;
+    if (credentialError) return setValidationError(credentialError);
+    const nameError = validateRequiredName(name);
+    if (nameError) return setValidationError(nameError);
     if (!Number(age) || Number(age) < 1) return setValidationError('Valid age is required');
     if (!gender.trim()) return setValidationError('Gender is required');
     if (!admissionDate) return setValidationError('Admission date is required');
@@ -73,7 +76,7 @@ export default function PrisonerForm({
   return (
     <form className="card" onSubmit={submit}>
       <div className="card-body">
-        {validationError || error ? <div className="alert alert-danger">{validationError || error}</div> : null}
+        {validationError || error ? <ErrorAlert>{validationError || error}</ErrorAlert> : null}
         {mode === 'create' ? (
           <div className="row">
             <div className="form-group col-md-6"><label>Email</label><input className="form-control" onChange={(event) => setEmail(event.target.value)} required type="email" value={email} /></div>
@@ -100,3 +103,5 @@ export default function PrisonerForm({
     </form>
   );
 }
+
+

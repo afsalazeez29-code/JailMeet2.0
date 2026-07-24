@@ -1,8 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useRouter } from 'next/navigation';
 
 import { clearAccessToken } from '@features/auth/services/token.service';
+import { navigateToLogin } from '@features/auth/services/navigation.service';
 import { AuthUser } from '@features/auth/types';
 import VisitorProfilePill from '@features/visitor-profile/components/VisitorProfilePill';
 import styles from '@features/visitor-profile/components/VisitorProfilePill.module.css';
@@ -17,7 +18,7 @@ export default function VisitorNavbar({ user, onToggleMenu }: VisitorNavbarProps
 
   const handleLogout = () => {
     clearAccessToken();
-    router.push('/login');
+    navigateToLogin(router, 'push');
   };
 
   return (
@@ -63,3 +64,4 @@ export default function VisitorNavbar({ user, onToggleMenu }: VisitorNavbarProps
     </nav>
   );
 }
+

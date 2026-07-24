@@ -1,3 +1,5 @@
+import type { PaginatedData } from '@/types/api';
+
 export type AppointmentStatus =
   | 'PENDING'
   | 'ACCEPTED'
@@ -12,15 +14,8 @@ export type AppointmentListFilters = {
   status?: AppointmentStatus;
 };
 
-export type PaginatedResponse<T> = {
-  items: T[];
-  pagination: {
-    page: number;
-    limit: number;
-    totalItems: number;
-    totalPages: number;
-  };
-};
+export type PaginatedResponse<T> = PaginatedData<T>;
+
 
 export type PrisonerOption = {
   id: string;

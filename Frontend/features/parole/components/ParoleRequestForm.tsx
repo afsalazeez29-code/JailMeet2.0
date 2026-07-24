@@ -1,9 +1,11 @@
-'use client';
+﻿'use client';
 
+import { ErrorAlert, SuccessAlert } from '../../../components/common/StatusAlert';
 import { FormEvent, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { clearAccessToken } from '@features/auth/services/token.service';
+import { navigateToLogin } from '@features/auth/services/navigation.service';
 import { createParoleRequest } from '@features/parole/services/parole.service';
 import { isApiServiceError } from '@/types/api';
 
@@ -90,7 +92,7 @@ export default function ParoleRequestForm() {
       if (isApiServiceError(caughtError)) {
         if (caughtError.status === 401) {
           clearAccessToken();
-          router.replace('/login');
+          navigateToLogin(router);
           return;
         }
 
@@ -121,15 +123,11 @@ export default function ParoleRequestForm() {
       </div>
       <div className="card-body">
         {success ? (
-          <div className="alert alert-success" role="status">
-            {success}
-          </div>
+          <SuccessAlert role="status">{success}</SuccessAlert>
         ) : null}
 
         {error ? (
-          <div className="alert alert-danger" role="alert">
-            {error}
-          </div>
+          <ErrorAlert role="alert">{error}</ErrorAlert>
         ) : null}
 
         <form onSubmit={handleSubmit}>
@@ -230,3 +228,6 @@ export default function ParoleRequestForm() {
     </div>
   );
 }
+
+
+

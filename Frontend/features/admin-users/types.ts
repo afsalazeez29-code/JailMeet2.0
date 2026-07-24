@@ -1,17 +1,10 @@
-export type AdminUserRole = 'ADMIN' | 'OFFICER' | 'VISITOR' | 'PRISONER';
-export type AdminAccountStatus = 'ACTIVE' | 'INACTIVE';
+import type { PaginatedData } from '@/types/api';
+import type { AccountStatus, UserRole } from '@/types/user';
 
-export type AdminUsersPagination = {
-  page: number;
-  limit: number;
-  totalItems: number;
-  totalPages: number;
-};
+export type AdminUserRole = UserRole;
+export type AdminAccountStatus = AccountStatus;
 
-export type AdminUsersPaginatedResponse<T> = {
-  items: T[];
-  pagination: AdminUsersPagination;
-};
+export type AdminUsersPaginatedResponse<T> = PaginatedData<T>;
 
 export type PaginatedResponse<T> = AdminUsersPaginatedResponse<T>;
 

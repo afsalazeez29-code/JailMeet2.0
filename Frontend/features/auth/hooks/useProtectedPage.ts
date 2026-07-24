@@ -1,9 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { clearAccessToken } from '@features/auth/services/token.service';
+import { navigateToLogin } from '@features/auth/services/navigation.service';
 import { useAuth } from '@features/auth/hooks/useAuth';
 
 export const useProtectedPage = () => {
@@ -18,7 +19,7 @@ export const useProtectedPage = () => {
 
     hasRedirectedRef.current = true;
     clearAccessToken();
-    router.replace('/login');
+    navigateToLogin(router);
   }, [router]);
 
   useEffect(() => {
@@ -43,3 +44,5 @@ export const useProtectedPage = () => {
     redirectToLogin,
   };
 };
+
+

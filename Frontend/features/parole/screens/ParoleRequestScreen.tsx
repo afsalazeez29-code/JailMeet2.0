@@ -1,5 +1,6 @@
-'use client';
+﻿'use client';
 
+import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 
 import ParoleRequestForm from '@features/parole/components/ParoleRequestForm';
@@ -16,9 +17,7 @@ export default function PrisonerParoleRequestPage() {
     return (
       <div className="card">
         <div className="card-body">
-          <div className="alert alert-info mb-0">
-            Loading parole request form...
-          </div>
+          <LoadingAlert className="mb-0">Loading parole request form...</LoadingAlert>
         </div>
       </div>
     );
@@ -28,7 +27,7 @@ export default function PrisonerParoleRequestPage() {
     return (
       <div className="card">
         <div className="card-body">
-          <div className="alert alert-danger mb-0">Access denied</div>
+          <ForbiddenAlert className="mb-0" />
         </div>
       </div>
     );
@@ -38,7 +37,7 @@ export default function PrisonerParoleRequestPage() {
     return (
       <div className="card">
         <div className="card-body">
-          <div className="alert alert-danger mb-0">{protectedPage.error}</div>
+          <ErrorAlert className="mb-0">{protectedPage.error}</ErrorAlert>
         </div>
       </div>
     );
@@ -46,3 +45,5 @@ export default function PrisonerParoleRequestPage() {
 
   return <ParoleRequestForm />;
 }
+
+

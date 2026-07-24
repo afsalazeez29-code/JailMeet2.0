@@ -1,5 +1,6 @@
-'use client';
+﻿'use client';
 
+import { ErrorAlert, ForbiddenAlert, LoadingAlert, StatusAlert, SuccessAlert } from '../../../components/common/StatusAlert';
 import { useEffect, useState } from 'react';
 
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
@@ -114,18 +115,18 @@ export default function AdminUsersPage() {
   };
 
   if (protectedPage.isLoading || loading || (!protectedPage.isReady && !protectedPage.error && !protectedPage.isForbidden)) {
-    return <AdminShell><div className="alert alert-info">Loading users...</div></AdminShell>;
+    return <AdminShell><LoadingAlert>Loading users...</LoadingAlert></AdminShell>;
   }
 
   if (protectedPage.isForbidden || error === 'Access denied') {
-    return <AdminShell><div className="alert alert-danger">Access denied</div></AdminShell>;
+    return <AdminShell><ForbiddenAlert /></AdminShell>;
   }
 
   return (
     <AdminShell>
       <h3 className="fw-bold mb-3">Users</h3>
-      {success ? <div className="alert alert-success">{success}</div> : null}
-      {error || protectedPage.error ? <div className="alert alert-danger">{error || protectedPage.error}</div> : null}
+      {success ? <SuccessAlert>{success}</SuccessAlert> : null}
+      {error || protectedPage.error ? <ErrorAlert>{error || protectedPage.error}</ErrorAlert> : null}
       <AdminFilters
         search={search}
         onSearchChange={(value) => {
@@ -148,9 +149,9 @@ export default function AdminUsersPage() {
         </div>
       </div>
       {selectedUser ? (
-        <div className="alert alert-info mt-3">
+        <StatusAlert className="mt-3" variant="info">
           Selected: {selectedUser.name || selectedUser.email} ({selectedUser.role})
-        </div>
+        </StatusAlert>
       ) : null}
       <UserStatusModal
         user={modalUser}
@@ -169,3 +170,9 @@ function AdminShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
+
+
+
+
+

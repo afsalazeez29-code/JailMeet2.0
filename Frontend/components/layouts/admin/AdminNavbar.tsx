@@ -1,10 +1,11 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { clearAccessToken } from '@features/auth/services/token.service';
+import { navigateToLogin } from '@features/auth/services/navigation.service';
 
 type AdminNavbarProps = {
   onToggleSidebar: () => void;
@@ -17,7 +18,7 @@ export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
 
   const handleLogout = () => {
     clearAccessToken();
-    router.push('/login');
+    navigateToLogin(router, 'push');
   };
 
   return (
@@ -175,3 +176,4 @@ export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
     </div>
   );
 }
+

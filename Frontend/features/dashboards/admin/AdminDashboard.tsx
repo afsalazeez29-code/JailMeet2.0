@@ -1,5 +1,6 @@
-'use client';
+﻿'use client';
 
+import { ErrorAlert, ForbiddenAlert, LoadingAlert, StatusAlert } from '../../../components/common/StatusAlert';
 import Link from 'next/link';
 
 import { useDashboard } from '@features/dashboards/services/useDashboard';
@@ -116,7 +117,7 @@ export default function AdminDashboardPage() {
     return (
       <div className="container" style={{ position: 'absolute', top: '70px' }}>
         <div className="page-inner">
-          <div className="alert alert-info">Loading admin dashboard...</div>
+          <LoadingAlert>Loading admin dashboard...</LoadingAlert>
         </div>
       </div>
     );
@@ -126,7 +127,7 @@ export default function AdminDashboardPage() {
     return (
       <div className="container" style={{ position: 'absolute', top: '70px' }}>
         <div className="page-inner">
-          <div className="alert alert-danger">Access denied</div>
+          <ForbiddenAlert />
         </div>
       </div>
     );
@@ -139,7 +140,7 @@ export default function AdminDashboardPage() {
     return (
       <div className="container" style={{ position: 'absolute', top: '70px' }}>
         <div className="page-inner">
-          <div className="alert alert-danger">{errorMessage}</div>
+          <ErrorAlert>{errorMessage}</ErrorAlert>
         </div>
       </div>
     );
@@ -178,9 +179,7 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="alert alert-info">
-          Welcome, Admin ID: <strong>{user?.id ?? ''}</strong>
-        </div>
+        <StatusAlert variant="info">Welcome, Admin ID: <strong>{user?.id ?? ''}</strong></StatusAlert>
 
         <div className="row">
           {statCards.map((card) => (
@@ -199,5 +198,10 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
+
+
+
+
 
 

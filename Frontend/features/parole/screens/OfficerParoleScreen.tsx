@@ -1,5 +1,6 @@
-'use client';
+﻿'use client';
 
+import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
 import { useEffect, useState } from 'react';
 
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
@@ -83,7 +84,7 @@ export default function OfficerParolePage() {
   ) {
     return (
       <div className="pd-20">
-        <div className="alert alert-info">Loading parole requests...</div>
+        <LoadingAlert>Loading parole requests...</LoadingAlert>
       </div>
     );
   }
@@ -91,7 +92,7 @@ export default function OfficerParolePage() {
   if (protectedPage.isForbidden || error === 'Access denied') {
     return (
       <div className="pd-20">
-        <div className="alert alert-danger">Access denied</div>
+        <ForbiddenAlert />
       </div>
     );
   }
@@ -99,12 +100,12 @@ export default function OfficerParolePage() {
   if (protectedPage.error || error) {
     return (
       <div className="pd-20">
-        <div className="alert alert-danger">
-          {protectedPage.error || error}
-        </div>
+        <ErrorAlert>{protectedPage.error || error}</ErrorAlert>
       </div>
     );
   }
 
   return <OfficerParoleList onReviewed={handleReviewed} requests={requests} />;
 }
+
+

@@ -1,5 +1,6 @@
-'use client';
+﻿'use client';
 
+import { EmptyStateAlert } from '../../../components/common/StatusAlert';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 
@@ -82,9 +83,7 @@ export default function VisitorAppointmentList({
           </div>
 
           {filteredAppointments.length === 0 ? (
-            <div className={`alert alert-info ${styles.emptyState}`}>
-              No appointment requests found.
-            </div>
+            <EmptyStateAlert className={styles.emptyState}>No appointment requests found.</EmptyStateAlert>
           ) : (
             <div className="table-responsive text-nowrap">
               <table className="table table-hover">
@@ -124,3 +123,5 @@ export default function VisitorAppointmentList({
     </div>
   );
 }
+
+

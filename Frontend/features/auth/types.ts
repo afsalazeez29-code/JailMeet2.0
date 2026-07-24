@@ -1,6 +1,7 @@
 import { ApiResponse } from '@/types/api';
+import type { UserRole } from '@/types/user';
 
-export type Role = 'ADMIN' | 'OFFICER' | 'VISITOR' | 'PRISONER';
+export type Role = UserRole;
 
 export type AuthUser = {
   id: string;
@@ -44,12 +45,8 @@ export type VisitorRegistrationData = {
 
 export type LoginResponse = ApiResponse<LoginData>;
 
-export type CurrentUserResponse = ApiResponse<CurrentUserData>;
-
 export type VisitorRegistrationResponse =
   ApiResponse<VisitorRegistrationData>;
-
-export type AuthErrorResponse = ApiResponse<never>;
 
 export interface ChangePasswordInput {
   currentPassword: string;

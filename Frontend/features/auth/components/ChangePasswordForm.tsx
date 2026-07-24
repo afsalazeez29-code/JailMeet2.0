@@ -1,10 +1,12 @@
-'use client';
+﻿'use client';
 
+import { ErrorAlert, SuccessAlert } from '../../../components/common/StatusAlert';
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { clearAccessToken } from '@features/auth/services/token.service';
 import { changePassword } from '@features/auth/services/auth.service';
+import { navigateToLoginAfterPasswordChange } from '@features/auth/services/navigation.service';
 import { isApiServiceError } from '@/types/api';
 import styles from './ChangePasswordForm.module.css';
 
@@ -58,7 +60,7 @@ export default function ChangePasswordForm() {
       setConfirmPassword('');
       setSuccess('Password changed. Please log in again.');
       clearAccessToken();
-      window.setTimeout(() => router.replace('/login'), 900);
+      navigateToLoginAfterPasswordChange(router);
     } catch (caughtError) {
       setError(
         isApiServiceError(caughtError)
@@ -104,8 +106,8 @@ export default function ChangePasswordForm() {
           <h5 className="mb-0">Change Password</h5>
         </div>
         <div className="card-body">
-          {success ? <div className="alert alert-success">{success}</div> : null}
-          {error ? <div className="alert alert-danger">{error}</div> : null}
+          {success ? <SuccessAlert>{success}</SuccessAlert> : null}
+          {error ? <ErrorAlert>{error}</ErrorAlert> : null}
           <form onSubmit={handleSubmit}>
             {passwordInput('current', 'Current password', currentPassword, setCurrentPassword)}
             {passwordInput('new', 'New password', newPassword, setNewPassword)}
@@ -119,3 +121,7 @@ export default function ChangePasswordForm() {
     </div>
   );
 }
+
+
+
+

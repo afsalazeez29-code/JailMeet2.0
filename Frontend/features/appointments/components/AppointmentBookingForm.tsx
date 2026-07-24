@@ -1,10 +1,12 @@
-'use client';
+﻿'use client';
 
+import { ErrorAlert, SuccessAlert, WarningAlert } from '../../../components/common/StatusAlert';
 import Link from 'next/link';
 import { FormEvent, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { clearAccessToken } from '@features/auth/services/token.service';
+import { navigateToLogin } from '@features/auth/services/navigation.service';
 import { createVisitorAppointment } from '@features/appointments/services/appointment.service';
 import { isApiServiceError } from '@/types/api';
 import { PrisonerOption } from '@features/appointments/types';
@@ -86,7 +88,7 @@ export default function AppointmentBookingForm({
       if (isApiServiceError(caughtError)) {
         if (caughtError.status === 401) {
           clearAccessToken();
-          router.replace('/login');
+          navigateToLogin(router);
           return;
         }
 
@@ -115,24 +117,15 @@ export default function AppointmentBookingForm({
         <h5 className="card-header">Book Appointment</h5>
         <div className="card-body">
           {success ? (
-            <div className="alert alert-success" role="status">
-              {success}{' '}
-              <Link href="/visitor/appointments" className="alert-link">
-                View booking status
-              </Link>
-            </div>
+            <SuccessAlert role="status">{success}{' '}<Link href="/visitor/appointments" className="alert-link">View booking status</Link></SuccessAlert>
           ) : null}
 
           {error ? (
-            <div className="alert alert-danger" role="alert">
-              {error}
-            </div>
+            <ErrorAlert role="alert">{error}</ErrorAlert>
           ) : null}
 
           {prisoners.length === 0 ? (
-            <div className="alert alert-warning">
-              No prisoners are available for appointment booking yet.
-            </div>
+            <WarningAlert>No prisoners are available for appointment booking yet.</WarningAlert>
           ) : null}
 
           <form onSubmit={handleSubmit}>
@@ -228,3 +221,7 @@ export default function AppointmentBookingForm({
     </div>
   );
 }
+
+
+
+

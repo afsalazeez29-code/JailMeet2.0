@@ -1,5 +1,6 @@
-'use client';
+﻿'use client';
 
+import { EmptyStateAlert, WarningAlert } from '../../../components/common/StatusAlert';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
@@ -57,9 +58,7 @@ export default function PrisonerParoleList({
             </Link>
           </div>
           {hasPendingRequest ? (
-            <div className="alert alert-warning mt-3 mb-0">
-              You already have a pending parole request.
-            </div>
+            <WarningAlert className="mt-3 mb-0">You already have a pending parole request.</WarningAlert>
           ) : null}
         </div>
       </div>
@@ -86,9 +85,7 @@ export default function PrisonerParoleList({
       {filteredRequests.length === 0 ? (
         <div className="card">
           <div className="card-body">
-            <div className="alert alert-info mb-0">
-              No parole requests found for this filter.
-            </div>
+            <EmptyStateAlert className="mb-0">No parole requests found for this filter.</EmptyStateAlert>
           </div>
         </div>
       ) : (
@@ -99,3 +96,5 @@ export default function PrisonerParoleList({
     </>
   );
 }
+
+

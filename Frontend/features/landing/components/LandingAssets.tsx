@@ -8,7 +8,7 @@ const landingStylesheets = [
   '/legacy/landing/assets/vendor/aos/aos.css',
   '/legacy/landing/assets/vendor/glightbox/css/glightbox.min.css',
   '/legacy/landing/assets/vendor/swiper/swiper-bundle.min.css',
-  '/legacy/landing/assets/css/main.css',
+  '/styles/landing/main.css',
 ];
 
 const landingScripts = [

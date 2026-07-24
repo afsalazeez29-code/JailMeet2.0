@@ -1,8 +1,10 @@
 'use client';
 
+import { ErrorAlert } from '../../../components/common/StatusAlert';
 import { FormEvent, useEffect, useState } from 'react';
 
 import { CreateOfficerInput, UpdateOfficerInput } from '@features/admin-users/types';
+import { validateAdminCreateCredentials, validateRequiredName } from '@features/admin-users/admin-users.validation';
 
 type OfficerFormProps = {
   mode: 'create' | 'edit';
@@ -35,18 +37,19 @@ export default function OfficerForm({
     event.preventDefault();
     setValidationError(null);
 
-    if (mode === 'create' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setValidationError('Valid email is required');
+    const credentialError = mode === 'create'
+      ? validateAdminCreateCredentials(email, password)
+      : null;
+
+    if (credentialError) {
+      setValidationError(credentialError);
       return;
     }
 
-    if (mode === 'create' && password.length < 8) {
-      setValidationError('Password must be at least 8 characters');
-      return;
-    }
+    const nameError = validateRequiredName(name);
 
-    if (!name.trim()) {
-      setValidationError('Name is required');
+    if (nameError) {
+      setValidationError(nameError);
       return;
     }
 
@@ -61,7 +64,7 @@ export default function OfficerForm({
     <form className="card" onSubmit={handleSubmit}>
       <div className="card-body">
         {validationError || error ? (
-          <div className="alert alert-danger">{validationError || error}</div>
+          <ErrorAlert>{validationError || error}</ErrorAlert>
         ) : null}
         {mode === 'create' ? (
           <>
@@ -96,3 +99,5 @@ export default function OfficerForm({
     </form>
   );
 }
+
+

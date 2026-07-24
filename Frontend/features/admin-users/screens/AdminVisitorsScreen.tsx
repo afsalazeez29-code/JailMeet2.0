@@ -1,5 +1,6 @@
 'use client';
 
+import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
 import { useEffect, useState } from 'react';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { clearAccessToken } from '@features/auth/services/token.service';
@@ -57,12 +58,14 @@ export default function AdminVisitorsPage() {
     } finally { setProcessing(false); }
   };
 
-  if (protectedPage.isLoading || loading || (!protectedPage.isReady && !protectedPage.error && !protectedPage.isForbidden)) return <Shell><div className="alert alert-info">Loading visitors...</div></Shell>;
-  if (protectedPage.isForbidden || error === 'Access denied') return <Shell><div className="alert alert-danger">Access denied</div></Shell>;
+  if (protectedPage.isLoading || loading || (!protectedPage.isReady && !protectedPage.error && !protectedPage.isForbidden)) return <Shell><LoadingAlert>Loading visitors...</LoadingAlert></Shell>;
+  if (protectedPage.isForbidden || error === 'Access denied') return <Shell><ForbiddenAlert /></Shell>;
 
-  return <Shell><h3 className="fw-bold mb-3">Visitors</h3>{error || protectedPage.error ? <div className="alert alert-danger">{error || protectedPage.error}</div> : null}<AdminFilters search={search} onSearchChange={(value) => { setSearch(value); setPage(1); }} /><div className="card"><div className="card-body"><AdminVisitorTable visitors={data?.items ?? []} onToggleStatus={(visitor) => setModalUser(toUser(visitor))} />{data ? <Pagination pagination={data.pagination} onPageChange={setPage} /> : null}</div></div><UserStatusModal user={modalUser} processing={processing} onCancel={() => setModalUser(null)} onConfirm={confirm} /></Shell>;
+  return <Shell><h3 className="fw-bold mb-3">Visitors</h3>{error || protectedPage.error ? <ErrorAlert>{error || protectedPage.error}</ErrorAlert> : null}<AdminFilters search={search} onSearchChange={(value) => { setSearch(value); setPage(1); }} /><div className="card"><div className="card-body"><AdminVisitorTable visitors={data?.items ?? []} onToggleStatus={(visitor) => setModalUser(toUser(visitor))} />{data ? <Pagination pagination={data.pagination} onPageChange={setPage} /> : null}</div></div><UserStatusModal user={modalUser} processing={processing} onCancel={() => setModalUser(null)} onConfirm={confirm} /></Shell>;
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
   return <div className="container" style={{ position: 'absolute', top: '70px' }}><div className="page-inner">{children}</div></div>;
 }
+
+

@@ -1,5 +1,6 @@
-'use client';
+﻿'use client';
 
+import { ErrorAlert, ForbiddenAlert, LoadingAlert, SuccessAlert } from '../../../components/common/StatusAlert';
 import { useDashboard } from '@features/dashboards/services/useDashboard';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { getOfficerDashboard } from '@features/dashboards/services/dashboard.service';
@@ -84,7 +85,7 @@ export default function OfficerDashboardPage() {
   ) {
     return (
       <div className="pd-20">
-        <div className="alert alert-info">Loading officer dashboard...</div>
+        <LoadingAlert>Loading officer dashboard...</LoadingAlert>
       </div>
     );
   }
@@ -92,7 +93,7 @@ export default function OfficerDashboardPage() {
   if (protectedPage.isForbidden || dashboard.isForbidden) {
     return (
       <div className="pd-20">
-        <div className="alert alert-danger">Access denied</div>
+        <ForbiddenAlert />
       </div>
     );
   }
@@ -103,7 +104,7 @@ export default function OfficerDashboardPage() {
   if (protectedPage.error || dashboard.error) {
     return (
       <div className="pd-20">
-        <div className="alert alert-danger">{errorMessage}</div>
+        <ErrorAlert>{errorMessage}</ErrorAlert>
       </div>
     );
   }
@@ -118,13 +119,13 @@ export default function OfficerDashboardPage() {
   return (
     <>
       <div className="pd-20">
-        <div className="alert alert-success">
+        <SuccessAlert>
           Welcome, {user?.name ?? 'Officer'}!
           <br />
           Email: {user?.email ?? ''}
           <br />
           Officer ID: {user?.id ?? ''}
-        </div>
+        </SuccessAlert>
       </div>
 
       <div className="row">
@@ -142,3 +143,9 @@ export default function OfficerDashboardPage() {
     </>
   );
 }
+
+
+
+
+
+

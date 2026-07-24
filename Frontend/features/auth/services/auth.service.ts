@@ -1,71 +1,25 @@
-import { API_BASE_URL } from '@/lib/api';
+import {
+  API_BASE_URL,
+  parseApiResponse,
+  requestWithAuth as requestWithAuthUsingToken,
+  requireData,
+} from '@/lib/api';
 import { getAccessToken, login as loginWithCredentials } from '@features/auth/services/token.service';
 import { ApiResponse, ApiServiceError } from '@/types/api';
 import {
   AuthUser,
   ChangePasswordInput,
   CurrentUserData,
-  CurrentUserResponse,
   LoginResponse,
   VisitorRegistrationData,
   VisitorRegistrationPayload,
 } from '@features/auth/types';
 
-const parseApiResponse = async <TData>(
-  response: Response,
-): Promise<ApiResponse<TData>> => {
-  const fallback: ApiResponse<TData> = {
-    success: false,
-    message: 'Unable to parse server response',
-  };
-
-  return (await response.json().catch(() => fallback)) as ApiResponse<TData>;
-};
-
-const requireData = <TData>(
-  payload: ApiResponse<TData>,
-  status: number,
-): TData => {
-  if (!payload.data) {
-    throw new ApiServiceError(
-      status,
-      payload.message || 'Response data was missing',
-      payload as ApiResponse<unknown>,
-    );
-  }
-
-  return payload.data;
-};
-
 export const requestWithAuth = async <TData>(
   path: string,
   token = getAccessToken(),
   options: RequestInit = {},
-): Promise<TData> => {
-  if (!token) {
-    throw new ApiServiceError(401, 'Authentication token is missing');
-  }
-
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      ...(options.headers ?? {}),
-    },
-  });
-  const payload = await parseApiResponse<TData>(response);
-
-  if (!response.ok || !payload.success) {
-    throw new ApiServiceError(
-      response.status,
-      payload.message || `Request failed with status ${response.status}`,
-      payload as ApiResponse<unknown>,
-    );
-  }
-
-  return requireData(payload, response.status);
-};
+): Promise<TData> => requestWithAuthUsingToken<TData>(path, token, options);
 
 export const login = async (
   email: string,
@@ -113,4 +67,3 @@ export const changePassword = async (
     body: JSON.stringify(payload),
   });
 
-export type { CurrentUserResponse };

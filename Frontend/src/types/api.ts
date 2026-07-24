@@ -23,3 +23,15 @@ export class ApiServiceError extends Error {
 export const isApiServiceError = (
   error: unknown,
 ): error is ApiServiceError => error instanceof ApiServiceError;
+
+export type PaginationMeta = {
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+};
+
+export type PaginatedData<TItem> = {
+  items: TItem[];
+  pagination: PaginationMeta;
+};

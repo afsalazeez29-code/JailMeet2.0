@@ -1,14 +1,9 @@
 'use client';
 
-type PaginationData = {
-  page: number;
-  limit: number;
-  totalItems: number;
-  totalPages: number;
-};
+import type { PaginationMeta } from '@/types/api';
 
 type PaginationProps = {
-  pagination: PaginationData;
+  pagination: PaginationMeta;
   onPageChange: (page: number) => void;
 };
 

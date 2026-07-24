@@ -1,5 +1,6 @@
-'use client';
+﻿'use client';
 
+import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
 import { useDashboard } from '@features/dashboards/services/useDashboard';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { getPrisonerDashboard } from '@features/dashboards/services/dashboard.service';
@@ -89,9 +90,7 @@ export default function PrisonerDashboardPage() {
     return (
       <div className="card">
         <div className="card-body">
-          <div className="alert alert-info mb-0">
-            Loading prisoner dashboard...
-          </div>
+          <LoadingAlert className="mb-0">Loading prisoner dashboard...</LoadingAlert>
         </div>
       </div>
     );
@@ -101,7 +100,7 @@ export default function PrisonerDashboardPage() {
     return (
       <div className="card">
         <div className="card-body">
-          <div className="alert alert-danger mb-0">Access denied</div>
+          <ForbiddenAlert className="mb-0" />
         </div>
       </div>
     );
@@ -116,7 +115,7 @@ export default function PrisonerDashboardPage() {
     return (
       <div className="card">
         <div className="card-body">
-          <div className="alert alert-danger mb-0">{errorMessage}</div>
+          <ErrorAlert className="mb-0">{errorMessage}</ErrorAlert>
         </div>
       </div>
     );
@@ -226,3 +225,5 @@ export default function PrisonerDashboardPage() {
     </>
   );
 }
+
+

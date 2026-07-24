@@ -1,5 +1,6 @@
-'use client';
+﻿'use client';
 
+import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
 import { useEffect, useState } from 'react';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { clearAccessToken } from '@features/auth/services/token.service';
@@ -30,8 +31,10 @@ export default function AdminAppointmentsPage() {
     const load = async () => { setLoading(true); setError(null); try { const appointments = await getAdminAppointments({ page, limit: 20, status: status ? status as AppointmentStatus : undefined }); if (mounted) setData(appointments); } catch (caughtError) { if (!mounted) return; if (isApiServiceError(caughtError)) { if (caughtError.status === 401) { clearAccessToken(); protectedPage.redirectToLogin(); return; } setError(caughtError.status === 403 ? 'Access denied' : caughtError.message); return; } setError('Unable to load appointments'); } finally { if (mounted) setLoading(false); } };
     void load(); return () => { mounted = false; };
   }, [protectedPage.isReady, protectedPage.redirectToLogin, status, page]);
-  if (protectedPage.isLoading || loading || (!protectedPage.isReady && !protectedPage.error && !protectedPage.isForbidden)) return <Shell><div className="alert alert-info">Loading appointments...</div></Shell>;
-  if (protectedPage.isForbidden || error === 'Access denied') return <Shell><div className="alert alert-danger">Access denied</div></Shell>;
-  return <Shell><h3 className="fw-bold mb-3">Appointments</h3>{error || protectedPage.error ? <div className="alert alert-danger">{error || protectedPage.error}</div> : null}<AdminFilters search="" onSearchChange={() => undefined} selects={[{ label: 'Status', value: status, options: statusOptions, onChange: (value) => { setStatus(value); setPage(1); } }]} /><div className="card"><div className="card-body"><AdminAppointmentTable appointments={data?.items ?? []} />{data ? <Pagination pagination={data.pagination} onPageChange={setPage} /> : null}</div></div></Shell>;
+  if (protectedPage.isLoading || loading || (!protectedPage.isReady && !protectedPage.error && !protectedPage.isForbidden)) return <Shell><LoadingAlert>Loading appointments...</LoadingAlert></Shell>;
+  if (protectedPage.isForbidden || error === 'Access denied') return <Shell><ForbiddenAlert /></Shell>;
+  return <Shell><h3 className="fw-bold mb-3">Appointments</h3>{error || protectedPage.error ? <ErrorAlert>{error || protectedPage.error}</ErrorAlert> : null}<AdminFilters search="" onSearchChange={() => undefined} selects={[{ label: 'Status', value: status, options: statusOptions, onChange: (value) => { setStatus(value); setPage(1); } }]} /><div className="card"><div className="card-body"><AdminAppointmentTable appointments={data?.items ?? []} />{data ? <Pagination pagination={data.pagination} onPageChange={setPage} /> : null}</div></div></Shell>;
 }
 function Shell({ children }: { children: React.ReactNode }) { return <div className="container" style={{ position: 'absolute', top: '70px' }}><div className="page-inner">{children}</div></div>; }
+
+

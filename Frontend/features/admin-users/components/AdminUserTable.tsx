@@ -1,5 +1,6 @@
-'use client';
+﻿'use client';
 
+import { EmptyStateAlert } from '../../../components/common/StatusAlert';
 import { AdminUser } from '@features/admin-users/types';
 
 type AdminUserTableProps = {
@@ -19,7 +20,7 @@ export default function AdminUserTable({
   users,
 }: AdminUserTableProps) {
   if (users.length === 0) {
-    return <div className="alert alert-info mb-0">No users found.</div>;
+    return <EmptyStateAlert className="mb-0">No users found.</EmptyStateAlert>;
   }
 
   return (
@@ -62,3 +63,5 @@ export default function AdminUserTable({
     </div>
   );
 }
+
+

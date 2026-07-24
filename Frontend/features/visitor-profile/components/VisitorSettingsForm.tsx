@@ -1,10 +1,12 @@
-'use client';
+﻿'use client';
 
+import { ErrorAlert, SuccessAlert, WarningAlert } from '../../../components/common/StatusAlert';
 import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import { clearAccessToken } from '@features/auth/services/token.service';
+import { navigateToLogin } from '@features/auth/services/navigation.service';
 import { updateVisitorProfile } from '@features/visitor-profile/services/visitor.service';
 import { isApiServiceError } from '@/types/api';
 import {
@@ -96,7 +98,7 @@ export default function VisitorSettingsForm({
       if (isApiServiceError(caughtError)) {
         if (caughtError.status === 401) {
           clearAccessToken();
-          router.replace('/login');
+          navigateToLogin(router);
           return;
         }
 
@@ -151,15 +153,11 @@ export default function VisitorSettingsForm({
               </div>
 
               {success ? (
-                <div className="alert alert-success text-center" role="status">
-                  {success}
-                </div>
+                <SuccessAlert className="text-center" role="status">{success}</SuccessAlert>
               ) : null}
 
               {error ? (
-                <div className="alert alert-danger" role="alert">
-                  {error}
-                </div>
+                <ErrorAlert role="alert">{error}</ErrorAlert>
               ) : null}
 
               <form id="formAccountSettings" onSubmit={handleSubmit}>
@@ -279,9 +277,7 @@ export default function VisitorSettingsForm({
           <div className="card">
             <h5 className="card-header">Security</h5>
             <div className="card-body">
-              <div className={`alert alert-warning ${styles.notice}`}>
-                Password changes are handled separately from profile updates.
-              </div>
+              <WarningAlert className={styles.notice}>Password changes are handled separately from profile updates.</WarningAlert>
               <Link href="/visitor/change-password" className="btn btn-primary mt-3">
                 Change Password
               </Link>
@@ -292,3 +288,7 @@ export default function VisitorSettingsForm({
     </div>
   );
 }
+
+
+
+

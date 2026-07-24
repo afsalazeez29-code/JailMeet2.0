@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 
@@ -6,6 +6,7 @@ import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { getAvailablePrisoners } from '@features/appointments/services/appointment.service';
 import { isApiServiceError } from '@/types/api';
 import { PrisonerOption } from '@features/appointments/types';
+import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
 
 import AppointmentBookingForm from '@features/appointments/components/AppointmentBookingForm';
 
@@ -77,7 +78,7 @@ export default function VisitorAppointmentBookingPage() {
   ) {
     return (
       <div className="container-xxl flex-grow-1 container-p-y">
-        <div className="alert alert-info">Loading appointment form...</div>
+        <LoadingAlert>Loading appointment form...</LoadingAlert>
       </div>
     );
   }
@@ -85,7 +86,7 @@ export default function VisitorAppointmentBookingPage() {
   if (protectedPage.isForbidden || error === 'Access denied') {
     return (
       <div className="container-xxl flex-grow-1 container-p-y">
-        <div className="alert alert-danger">Access denied</div>
+        <ForbiddenAlert />
       </div>
     );
   }
@@ -93,12 +94,13 @@ export default function VisitorAppointmentBookingPage() {
   if (protectedPage.error || error) {
     return (
       <div className="container-xxl flex-grow-1 container-p-y">
-        <div className="alert alert-danger">
-          {protectedPage.error || error}
-        </div>
+        <ErrorAlert>{protectedPage.error || error}</ErrorAlert>
       </div>
     );
   }
 
   return <AppointmentBookingForm prisoners={prisoners} />;
 }
+
+
+

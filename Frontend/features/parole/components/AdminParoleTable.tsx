@@ -1,5 +1,6 @@
-'use client';
+﻿'use client';
 
+import { EmptyStateAlert } from '../../../components/common/StatusAlert';
 import { AdminParoleRequest } from '@features/parole/types';
 
 type Props = { requests: AdminParoleRequest[] };
@@ -10,7 +11,7 @@ const formatDateTime = (value: string) =>
   new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
 
 export default function AdminParoleTable({ requests }: Props) {
-  if (requests.length === 0) return <div className="alert alert-info mb-0">No parole requests found.</div>;
+  if (requests.length === 0) return <EmptyStateAlert className="mb-0">No parole requests found.</EmptyStateAlert>;
   return (
     <div className="table-responsive">
       <table className="table table-hover">
@@ -26,3 +27,5 @@ export default function AdminParoleTable({ requests }: Props) {
     </div>
   );
 }
+
+

@@ -1,3 +1,5 @@
+import type { PaginatedData } from '@/types/api';
+
 export type ParoleStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
 
 export type ParoleListFilters = {
@@ -7,15 +9,8 @@ export type ParoleListFilters = {
   status?: ParoleStatus;
 };
 
-export type PaginatedResponse<T> = {
-  items: T[];
-  pagination: {
-    page: number;
-    limit: number;
-    totalItems: number;
-    totalPages: number;
-  };
-};
+export type PaginatedResponse<T> = PaginatedData<T>;
+
 
 export type CreateParoleRequestInput = {
   relativeName: string;

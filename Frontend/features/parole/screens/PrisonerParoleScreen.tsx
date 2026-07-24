@@ -1,5 +1,6 @@
-'use client';
+﻿'use client';
 
+import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -81,9 +82,7 @@ export default function PrisonerParolePage() {
     return (
       <div className="card">
         <div className="card-body">
-          <div className="alert alert-info mb-0">
-            Loading parole requests...
-          </div>
+          <LoadingAlert className="mb-0">Loading parole requests...</LoadingAlert>
         </div>
       </div>
     );
@@ -93,7 +92,7 @@ export default function PrisonerParolePage() {
     return (
       <div className="card">
         <div className="card-body">
-          <div className="alert alert-danger mb-0">Access denied</div>
+          <ForbiddenAlert className="mb-0" />
         </div>
       </div>
     );
@@ -103,9 +102,7 @@ export default function PrisonerParolePage() {
     return (
       <div className="card">
         <div className="card-body">
-          <div className="alert alert-danger mb-0">
-            {protectedPage.error || error}
-          </div>
+          <ErrorAlert className="mb-0">{protectedPage.error || error}</ErrorAlert>
         </div>
       </div>
     );
@@ -129,3 +126,5 @@ export default function PrisonerParolePage() {
 
   return <PrisonerParoleList requests={requests} />;
 }
+
+

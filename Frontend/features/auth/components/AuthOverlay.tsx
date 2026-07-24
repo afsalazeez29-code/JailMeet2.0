@@ -1,0 +1,80 @@
+import Link from 'next/link';
+import { FaChevronLeft } from 'react-icons/fa';
+
+import styles from './AuthPanel.module.css';
+
+type AuthOverlayProps = {
+  onGoHome: () => void;
+  onShowLogin: () => void;
+  onShowRegister: () => void;
+};
+
+export default function AuthOverlay({
+  onGoHome,
+  onShowLogin,
+  onShowRegister,
+}: AuthOverlayProps) {
+  return (
+    <div className={styles.overlayContainer}>
+      <div className={styles.overlay}>
+        <div className={`${styles.overlayPanel} ${styles.overlayLeft}`}>
+          <button
+            className={`${styles.outlineButton} ${styles.registerBackButton}`}
+            type="button"
+            aria-label="Go back to landing page"
+            onClick={onGoHome}
+          >
+            <FaChevronLeft className={styles.registerBackIcon} aria-hidden="true" />
+            <span className={styles.buttonText}>
+              <span className={styles.buttonTextOriginal}>Go Back</span>
+              <span className={styles.buttonTextCopy} aria-hidden="true">
+                Go Back
+              </span>
+            </span>
+          </button>
+          <Link href="/" aria-label="Go to JailMeet landing page">
+            <img
+              src="/images/logos/auth-logo.png"
+              alt="JailMeet logo"
+              className={styles.overlayLogo}
+            />
+          </Link>
+          <h1 className={styles.overlayTitle}>Welcome Back to JailMeet !</h1>
+          <p className={styles.overlayCopy}>
+            login to manage appointments and stay connected with your loved ones.
+          </p>
+          <button className={styles.outlineButton} type="button" onClick={onShowLogin}>
+            <span className={styles.buttonText}>
+              <span className={styles.buttonTextOriginal}>Login</span>
+              <span className={styles.buttonTextCopy} aria-hidden="true">
+                Login
+              </span>
+            </span>
+          </button>
+        </div>
+
+        <div className={`${styles.overlayPanel} ${styles.overlayRight}`}>
+          <Link href="/" aria-label="Go to JailMeet landing page">
+            <img
+              src="/images/logos/auth-logo.png"
+              alt="JailMeet logo"
+              className={styles.overlayLogo}
+            />
+          </Link>
+          <h1 className={styles.overlayTitle}>Welcome to JailMeet !</h1>
+          <p className={styles.overlayCopy}>
+            create your account and stay connected with your loved ones.
+          </p>
+          <button className={styles.outlineButton} type="button" onClick={onShowRegister}>
+            <span className={styles.buttonText}>
+              <span className={styles.buttonTextOriginal}>Register</span>
+              <span className={styles.buttonTextCopy} aria-hidden="true">
+                Register
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
