@@ -3,12 +3,10 @@ import { ParoleStatus } from '@prisma/client';
 import prisma from '../../config/prisma';
 import {
   CreateParoleRequestInput,
-  ParoleStatusFilterInput,
-  ReviewParoleRequestInput,
-} from './parole.validation';
-import {
   OfficerParoleRequestResult,
+  ParoleStatusFilterInput,
   PrisonerParoleRequestResult,
+  ReviewParoleRequestInput,
 } from './parole.types';
 
 export class ParoleError extends Error {

@@ -3,30 +3,12 @@ import { Router } from 'express';
 
 import { authenticate } from '../../middlewares/auth.middleware';
 import { authorizeRoles } from '../../middlewares/role.middleware';
-import {
-  validateAppointmentParams,
-  validateAppointmentStatusFilter,
-  validateReviewAppointment,
-} from '../appointment';
-import {
-  listOfficerAppointments,
-  reviewOfficerAppointment,
-} from './officer.controller';
+import { registerOfficerRoutes } from './officer.controller';
 
 const officerRoutes = Router();
 
 officerRoutes.use(authenticate, authorizeRoles([Role.OFFICER]));
 
-officerRoutes.get(
-  '/appointments',
-  validateAppointmentStatusFilter,
-  listOfficerAppointments,
-);
-officerRoutes.patch(
-  '/appointments/:appointmentId/status',
-  validateAppointmentParams,
-  validateReviewAppointment,
-  reviewOfficerAppointment,
-);
+registerOfficerRoutes(officerRoutes);
 
 export default officerRoutes;

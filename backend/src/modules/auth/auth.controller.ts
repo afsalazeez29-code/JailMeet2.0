@@ -11,7 +11,7 @@ import {
   changePasswordSchema,
   loginSchema,
   registerVisitorSchema,
-} from './auth.validation';
+} from './auth.schema';
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   const parsedBody = loginSchema.safeParse(req.body);

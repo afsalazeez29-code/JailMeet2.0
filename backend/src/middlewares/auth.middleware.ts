@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
 import config from '../config';
-import { AuthUserPayload } from '../modules/auth/auth.service';
+import { AuthUserPayload } from '../modules/auth/auth.types';
 
 declare global {
   namespace Express {

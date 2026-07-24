@@ -8,10 +8,12 @@ import {
   reviewParoleRequest,
 } from './parole.service';
 import {
+} from './parole.schema';
+import {
   CreateParoleRequestInput,
   ParoleStatusFilterInput,
   ReviewParoleRequestInput,
-} from './parole.validation';
+} from './parole.types';
 
 const handleParoleError = (
   error: unknown,

@@ -31,11 +31,6 @@ export const appointmentParamsSchema = z.object({
   appointmentId: z.string().trim().min(1, 'Appointment ID is required'),
 });
 
-export type CreateAppointmentInput = z.infer<typeof createAppointmentSchema>;
-export type AppointmentStatusFilterInput = z.infer<
-  typeof appointmentStatusFilterSchema
->;
-export type ReviewAppointmentInput = z.infer<typeof reviewAppointmentSchema>;
 
 const validate =
   (

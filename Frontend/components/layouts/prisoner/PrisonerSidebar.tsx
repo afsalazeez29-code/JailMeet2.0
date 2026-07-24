@@ -25,6 +25,8 @@ const menuItems = [
     legacyHref: 'visitorhistory.php',
     icon: 'zmdi zmdi-face',
     label: 'Visitors History',
+    disabled: true,
+    title: 'Visitor history is not implemented yet',
   },
   {
     href: '/prisoner/parole',
@@ -64,9 +66,19 @@ export default function PrisonerSidebar({ sidebarOpen }: PrisonerSidebarProps) {
         <li className="sidebar-header"></li>
         {menuItems.map((item) => (
           <li className={pathname === item.href ? 'active' : undefined} key={item.href}>
-            <Link href={item.href} data-legacy-href={item.legacyHref}>
-              <i className={item.icon}></i> <span>{item.label}</span>
-            </Link>
+            {item.disabled ? (
+              <span
+                data-legacy-href={item.legacyHref}
+                aria-disabled="true"
+                title={item.title}
+              >
+                <i className={item.icon}></i> <span>{item.label}</span>
+              </span>
+            ) : (
+              <Link href={item.href} data-legacy-href={item.legacyHref}>
+                <i className={item.icon}></i> <span>{item.label}</span>
+              </Link>
+            )}
           </li>
         ))}
       </ul>

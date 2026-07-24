@@ -3,35 +3,23 @@ import { Router } from 'express';
 
 import { authenticate } from '../../middlewares/auth.middleware';
 import { authorizeRoles } from '../../middlewares/role.middleware';
+import { registerPrisonerRoutes } from '../prisoner';
 import {
   listOfficerParoleRequests,
-  listPrisonerParoleRequests,
   reviewOfficerParoleRequest,
-  submitParoleRequest,
 } from './parole.controller';
 import {
-  validateCreateParoleRequest,
   validateParoleParams,
   validateParoleStatusFilter,
   validateReviewParoleRequest,
-} from './parole.validation';
+} from './parole.schema';
 
 const paroleRoutes = Router();
+const prisonerParoleRoutes = Router();
 
-paroleRoutes.post(
-  '/prisoner/parole',
-  authenticate,
-  authorizeRoles([Role.PRISONER]),
-  validateCreateParoleRequest,
-  submitParoleRequest,
-);
-
-paroleRoutes.get(
-  '/prisoner/parole',
-  authenticate,
-  authorizeRoles([Role.PRISONER]),
-  listPrisonerParoleRequests,
-);
+prisonerParoleRoutes.use(authenticate, authorizeRoles([Role.PRISONER]));
+registerPrisonerRoutes(prisonerParoleRoutes);
+paroleRoutes.use('/prisoner', prisonerParoleRoutes);
 
 paroleRoutes.get(
   '/officer/parole',

@@ -5,35 +5,13 @@ import { Role } from '@prisma/client';
 import config from '../../config';
 import prisma from '../../config/prisma';
 import {
+  AuthUser,
+  AuthUserPayload,
   ChangePasswordInput,
   LoginInput,
   RegisterVisitorInput,
-} from './auth.validation';
-
-export type AuthUser = {
-  id: string;
-  name: string;
-  email: string;
-  role: Role;
-};
-
-export type AuthUserPayload = {
-  id: string;
-  email: string;
-  role: Role;
-};
-
-export type VisitorRegistrationResult = {
-  user: AuthUser;
-  visitorProfile: {
-    id: string;
-    name: string;
-    phone: string;
-    address: string | null;
-    state: string | null;
-    zip: string | null;
-  };
-};
+  VisitorRegistrationResult,
+} from './auth.types';
 
 const userSelect = {
   id: true,

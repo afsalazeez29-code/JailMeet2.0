@@ -27,6 +27,3 @@ export const changePasswordSchema = z
   })
   .strict();
 
-export type LoginInput = z.infer<typeof loginSchema>;
-export type RegisterVisitorInput = z.infer<typeof registerVisitorSchema>;
-export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

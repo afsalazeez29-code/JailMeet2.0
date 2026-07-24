@@ -5,8 +5,14 @@ import {
 } from '@prisma/client';
 
 import prisma from '../../config/prisma';
+import {
+  AdminDashboardSummary,
+  OfficerDashboardSummary,
+  PrisonerDashboardSummary,
+  VisitorDashboardSummary,
+} from './dashboard.types';
 
-export const getAdminDashboard = async () => {
+export const getAdminDashboard = async (): Promise<AdminDashboardSummary> => {
   const [
     totalUsers,
     totalVisitors,
@@ -40,7 +46,7 @@ export const getAdminDashboard = async () => {
   };
 };
 
-export const getOfficerDashboard = async () => {
+export const getOfficerDashboard = async (): Promise<OfficerDashboardSummary> => {
   const [
     totalPrisoners,
     pendingAppointments,
@@ -72,7 +78,9 @@ export const getOfficerDashboard = async () => {
   };
 };
 
-export const getVisitorDashboard = async (userId: string) => {
+export const getVisitorDashboard = async (
+  userId: string,
+): Promise<VisitorDashboardSummary> => {
   const visitorWhere = { visitor: { userId } };
 
   const [
@@ -110,7 +118,9 @@ export const getVisitorDashboard = async (userId: string) => {
   };
 };
 
-export const getPrisonerDashboard = async (userId: string) => {
+export const getPrisonerDashboard = async (
+  userId: string,
+): Promise<PrisonerDashboardSummary> => {
   const prisonerWhere = { prisoner: { userId } };
 
   const [

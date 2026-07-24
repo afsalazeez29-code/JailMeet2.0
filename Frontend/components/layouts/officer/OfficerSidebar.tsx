@@ -261,29 +261,27 @@ export default function OfficerSidebar({
               </li>
 
               <li>
-                <Link
-                  href="/officer/prisoners"
-                  className={`dropdown-toggle no-arrow${
-                    isActive('/officer/prisoners') ? ' active' : ''
-                  }`}
+                <span
+                  className="dropdown-toggle no-arrow"
                   data-legacy-href="prisoners.php"
+                  aria-disabled="true"
+                  title="Prisoner management is not implemented for officers yet"
                 >
                   <span className="micon dw dw-diagram"></span>
                   <span className="mtext">Prisoners</span>
-                </Link>
+                </span>
               </li>
 
               <li>
-                <Link
-                  href="/officer/fir"
-                  className={`dropdown-toggle no-arrow${
-                    isActive('/officer/fir') ? ' active' : ''
-                  }`}
+                <span
+                  className="dropdown-toggle no-arrow"
                   data-legacy-href="fir.php"
+                  aria-disabled="true"
+                  title="FIR management is not implemented yet"
                 >
                   <span className="micon dw dw-diagram"></span>
                   <span className="mtext">FIR</span>
-                </Link>
+                </span>
               </li>
 
               <li

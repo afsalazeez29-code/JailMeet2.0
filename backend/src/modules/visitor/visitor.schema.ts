@@ -21,9 +21,6 @@ export const updateVisitorProfileSchema = z
     message: 'At least one visitor profile field is required',
   });
 
-export type UpdateVisitorProfileInput = z.infer<
-  typeof updateVisitorProfileSchema
->;
 
 export const validateUpdateVisitorProfile = (
   req: Request,

@@ -4,32 +4,11 @@ import prisma from '../../config/prisma';
 import {
   AppointmentStatusFilterInput,
   CreateAppointmentInput,
+  OfficerAppointmentResult,
+  PrisonerOption,
   ReviewAppointmentInput,
-} from './appointment.validation';
-
-export type PrisonerOption = {
-  id: string;
-  name: string;
-};
-
-export type VisitorAppointmentResult = {
-  id: string;
-  appointmentAt: string;
-  reason: string;
-  status: AppointmentStatus;
-  officerNote: string | null;
-  createdAt: string;
-  updatedAt: string;
-  prisoner: PrisonerOption;
-};
-
-export type OfficerAppointmentResult = VisitorAppointmentResult & {
-  visitor: {
-    id: string;
-    name: string;
-    phone: string;
-  };
-};
+  VisitorAppointmentResult,
+} from './appointment.types';
 
 export class AppointmentError extends Error {
   statusCode: number;

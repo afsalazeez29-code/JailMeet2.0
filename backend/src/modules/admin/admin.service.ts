@@ -18,13 +18,13 @@ import {
   AppointmentListQuery,
   CreateOfficerInput,
   CreatePrisonerInput,
-  UpdateOfficerInput,
-  UpdatePrisonerInput,
   ParoleListQuery,
   ProfileListQuery,
+  UpdateOfficerInput,
+  UpdatePrisonerInput,
   UpdateUserStatusInput,
   UserListQuery,
-} from './admin.validation';
+} from './admin.types';
 
 export class AdminError extends Error {
   statusCode: number;

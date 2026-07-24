@@ -1,22 +1,10 @@
 import { Role } from '@prisma/client';
 
 import prisma from '../../config/prisma';
-import { UpdateVisitorProfileInput } from './visitor.validation';
-
-export type VisitorProfileResult = {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: Role;
-  };
-  visitorProfile: {
-    phone: string;
-    address: string | null;
-    state: string | null;
-    zip: string | null;
-  };
-};
+import {
+  UpdateVisitorProfileInput,
+  VisitorProfileResult,
+} from './visitor.types';
 
 const visitorProfileSelect = {
   id: true,

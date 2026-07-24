@@ -46,15 +46,6 @@ export const paroleParamsSchema = z.object({
   paroleRequestId: z.string().trim().min(1, 'Parole request ID is required'),
 });
 
-export type CreateParoleRequestInput = z.infer<
-  typeof createParoleRequestSchema
->;
-export type ParoleStatusFilterInput = z.infer<
-  typeof paroleStatusFilterSchema
->;
-export type ReviewParoleRequestInput = z.infer<
-  typeof reviewParoleRequestSchema
->;
 
 const validate =
   (

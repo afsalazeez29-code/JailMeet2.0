@@ -3,15 +3,12 @@ import { Router } from 'express';
 
 import { authenticate } from '../../middlewares/auth.middleware';
 import { authorizeRoles } from '../../middlewares/role.middleware';
+import { registerVisitorAppointmentRoutes } from '../appointments';
 import {
-  createAppointment,
   getProfile,
-  listAppointments,
-  listPrisoners,
   updateProfile,
 } from './visitor.controller';
-import { validateCreateAppointment } from '../appointment';
-import { validateUpdateVisitorProfile } from './visitor.validation';
+import { validateUpdateVisitorProfile } from './visitor.schema';
 
 const visitorRoutes = Router();
 
@@ -19,8 +16,6 @@ visitorRoutes.use(authenticate, authorizeRoles([Role.VISITOR]));
 
 visitorRoutes.get('/profile', getProfile);
 visitorRoutes.patch('/profile', validateUpdateVisitorProfile, updateProfile);
-visitorRoutes.get('/prisoners', listPrisoners);
-visitorRoutes.post('/appointments', validateCreateAppointment, createAppointment);
-visitorRoutes.get('/appointments', listAppointments);
+registerVisitorAppointmentRoutes(visitorRoutes);
 
 export default visitorRoutes;

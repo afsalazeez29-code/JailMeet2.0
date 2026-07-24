@@ -16,7 +16,7 @@ import {
   UserIdParam,
   UserListQuery,
   VisitorIdParam,
-} from './admin.validation';
+} from './admin.types';
 
 const handleAdminError = (
   error: unknown,
