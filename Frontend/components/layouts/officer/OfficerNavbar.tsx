@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -7,6 +7,7 @@ import { IdCard, LogOut, Mail, Menu, Search, Settings, UserRound } from 'lucide-
 
 import LogoutConfirmModal from '../../common/LogoutConfirmModal';
 import iconStyles from '../../common/LucideIcon.module.css';
+import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 import { clearAccessToken } from '@features/auth/services/token.service';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
 
@@ -27,7 +28,10 @@ export default function OfficerNavbar({ onToggleSidebar }: OfficerNavbarProps) {
 
   return (
     <div className="header">
-      <div className="header-left">
+      <div className="header-left d-flex align-items-center">
+        <Link href="/" className="d-flex align-items-center me-2 ms-2 ms-md-0">
+          <img src="/images/logos/auth-logobl.png" alt="JailMeet home" className="navbar-brand-logo" />
+        </Link>
         <button
           className="menu-icon border-0 bg-transparent"
           type="button"
@@ -62,9 +66,8 @@ export default function OfficerNavbar({ onToggleSidebar }: OfficerNavbarProps) {
                   onClick={() => setSearchOpen((current) => !current)}
                 ></button>
                 <div
-                  className={`dropdown-menu dropdown-menu-right${
-                    searchOpen ? ' show' : ''
-                  }`}
+                  className={`dropdown-menu dropdown-menu-right${searchOpen ? ' show' : ''
+                    }`}
                 >
                   <div className="form-group row">
                     <label className="col-sm-12 col-md-2 col-form-label">
@@ -101,7 +104,7 @@ export default function OfficerNavbar({ onToggleSidebar }: OfficerNavbarProps) {
                   </div>
                   <div className="text-right">
                     <button className="btn btn-primary" type="submit">
-                      Search
+                      <AnimatedButtonText>Search</AnimatedButtonText>
                     </button>
                   </div>
                 </div>
@@ -134,9 +137,8 @@ export default function OfficerNavbar({ onToggleSidebar }: OfficerNavbarProps) {
               <span className="user-name">Officer</span>
             </button>
             <div
-              className={`dropdown-menu dropdown-menu-right dropdown-menu-icon-list${
-                profileOpen ? ' show' : ''
-              }`}
+              className={`dropdown-menu dropdown-menu-right dropdown-menu-icon-list${profileOpen ? ' show' : ''
+                }`}
             >
               <span className="dropdown-item">
                 <IdCard

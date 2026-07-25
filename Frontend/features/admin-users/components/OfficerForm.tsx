@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useState } from 'react';
 
 import { CreateOfficerInput, UpdateOfficerInput } from '@features/admin-users/types';
 import { validateAdminCreateCredentials, validateRequiredName } from '@features/admin-users/admin-users.validation';
+import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 
 type OfficerFormProps = {
   mode: 'create' | 'edit';
@@ -87,13 +88,13 @@ export default function OfficerForm({
           <input className="form-control" id="phone" onChange={(event) => setPhone(event.target.value)} type="text" value={phone ?? ''} />
         </div>
         <button className="btn btn-primary" disabled={isSubmitting} type="submit">
-          {isSubmitting
+          <AnimatedButtonText>{isSubmitting
             ? mode === 'create'
               ? 'Creating...'
               : 'Saving...'
             : mode === 'create'
               ? 'Create Officer'
-              : 'Save Changes'}
+              : 'Save Changes'}</AnimatedButtonText>
         </button>
       </div>
     </form>

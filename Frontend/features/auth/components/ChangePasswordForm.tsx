@@ -1,14 +1,16 @@
-﻿'use client';
+'use client';
 
 import { ErrorAlert, SuccessAlert } from '../../../components/common/StatusAlert';
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Eye, EyeOff } from 'lucide-react';
 
 import { clearAccessToken } from '@features/auth/services/token.service';
 import { changePassword } from '@features/auth/services/auth.service';
 import { navigateToLoginAfterPasswordChange } from '@features/auth/services/navigation.service';
 import { isApiServiceError } from '@/types/api';
 import styles from './ChangePasswordForm.module.css';
+import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 
 type VisibilityField = 'current' | 'new' | 'confirm';
 
@@ -89,11 +91,16 @@ export default function ChangePasswordForm() {
         />
         <button
           aria-label={`${visible[field] ? 'Hide' : 'Show'} ${label.toLowerCase()}`}
-          className="btn btn-outline-secondary"
+          className={`btn ${styles.eyeButton}`}
           onClick={() => toggleVisibility(field)}
           type="button"
+          aria-pressed={visible[field]}
         >
-          {visible[field] ? 'Hide' : 'Show'}
+          {visible[field] ? (
+            <EyeOff className={styles.eyeIcon} aria-hidden="true" />
+          ) : (
+            <Eye className={styles.eyeIcon} aria-hidden="true" />
+          )}
         </button>
       </div>
     </div>
@@ -112,9 +119,11 @@ export default function ChangePasswordForm() {
             {passwordInput('current', 'Current password', currentPassword, setCurrentPassword)}
             {passwordInput('new', 'New password', newPassword, setNewPassword)}
             {passwordInput('confirm', 'Confirm password', confirmPassword, setConfirmPassword)}
-            <button className="btn btn-primary" disabled={submitting} type="submit">
-              {submitting ? 'Changing...' : 'Change Password'}
-            </button>
+            <div className={styles.submitWrapper}>
+              <button className="btn btn-primary" disabled={submitting} type="submit">
+                <AnimatedButtonText>{submitting ? 'Changing...' : 'Change Password'}</AnimatedButtonText>
+              </button>
+            </div>
           </form>
         </div>
       </div>

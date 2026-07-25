@@ -1,6 +1,7 @@
-﻿'use client';
+'use client';
 
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useState } from 'react';
 import { LogOut, Menu } from 'lucide-react';
 
@@ -32,6 +33,9 @@ export default function VisitorNavbar({ user, onToggleMenu }: VisitorNavbarProps
         className={`layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme ${styles.visitorNavbar}`}
         id="layout-navbar"
       >
+        <Link href="/" className="d-flex align-items-center me-3 ms-3 ms-xl-0">
+          <img src="/images/logos/auth-logobl.png" alt="JailMeet home" className="navbar-brand-logo" />
+        </Link>
         <div className="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
           <button
             className="nav-item nav-link px-0 me-xl-4 border-0 bg-transparent"

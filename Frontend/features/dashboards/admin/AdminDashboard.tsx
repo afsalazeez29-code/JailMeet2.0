@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { type ComponentType, type SVGProps } from 'react';
@@ -18,6 +18,7 @@ import { useDashboard } from '@features/dashboards/services/useDashboard';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { getAdminDashboard } from '@features/dashboards/services/dashboard.service';
 import { AdminDashboardData } from '@features/dashboards/types';
+import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 
 type CardIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -196,7 +197,7 @@ export default function AdminDashboardPage() {
               className="btn btn-primary btn-round"
               data-legacy-href="userdetails.php"
             >
-              Add Visitor
+              <AnimatedButtonText>Add Visitor</AnimatedButtonText>
             </Link>
           </div>
         </div>

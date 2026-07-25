@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { EmptyStateAlert, ErrorAlert } from '../../../components/common/StatusAlert';
 import { useState } from 'react';
@@ -14,6 +14,7 @@ import {
   ReviewAppointmentInput,
 } from '@features/appointments/types';
 import styles from './OfficerAppointmentList.module.css';
+import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 
 type OfficerAppointmentListProps = {
   appointments: OfficerAppointment[];
@@ -118,7 +119,7 @@ export default function OfficerAppointmentList({
                 onClick={() => onFilterChange(item.value)}
                 type="button"
               >
-                {item.label}
+                <AnimatedButtonText>{item.label}</AnimatedButtonText>
               </button>
             ))}
           </div>

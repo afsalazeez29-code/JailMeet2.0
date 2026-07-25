@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { ErrorAlert, SuccessAlert, WarningAlert } from '../../../components/common/StatusAlert';
 import { FormEvent, useEffect, useState } from 'react';
@@ -16,6 +16,7 @@ import {
   VisitorProfileData,
 } from '@features/visitor-profile/types';
 import styles from './VisitorSettingsForm.module.css';
+import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 
 type VisitorSettingsFormProps = {
   profileData: VisitorProfileData;
@@ -129,13 +130,13 @@ export default function VisitorSettingsForm({
         <div className="col-md-12">
           <ul className="nav nav-pills flex-column flex-md-row mb-3">
             <li className="nav-item">
-              <span className="nav-link active">
+              <Link href="/visitor/profile" className="btn btn-primary d-inline-flex align-items-center">
                 <UserRound
-                  className={`${iconStyles.icon} ${iconStyles.action} me-1`}
+                  className={`${iconStyles.icon} ${iconStyles.action} me-2`}
                   aria-hidden="true"
                 />
-                My Profile
-              </span>
+                <AnimatedButtonText>My Profile</AnimatedButtonText>
+              </Link>
             </li>
           </ul>
 
@@ -271,7 +272,7 @@ export default function VisitorSettingsForm({
                     disabled={saving}
                     type="submit"
                   >
-                    {saving ? 'Saving...' : 'Save Changes'}
+                    <AnimatedButtonText>{saving ? 'Saving...' : 'Save Changes'}</AnimatedButtonText>
                   </button>
                 </div>
               </div>
@@ -284,7 +285,7 @@ export default function VisitorSettingsForm({
             <div className="card-body">
               <WarningAlert className={styles.notice}>Password changes are handled separately from profile updates.</WarningAlert>
               <Link href="/visitor/change-password" className="btn btn-primary mt-3">
-                Change Password
+                <AnimatedButtonText>Change Password</AnimatedButtonText>
               </Link>
             </div>
           </div>

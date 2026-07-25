@@ -4,6 +4,7 @@ import { ErrorAlert } from '../../../components/common/StatusAlert';
 import { FormEvent, useEffect, useState } from 'react';
 
 import { CreatePrisonerInput, UpdatePrisonerInput } from '@features/admin-users/types';
+import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 import { validateAdminCreateCredentials, validateRequiredName } from '@features/admin-users/admin-users.validation';
 
 type PrisonerFormProps = {
@@ -98,7 +99,7 @@ export default function PrisonerForm({
           <div className="form-group col-md-4"><label>Sentence Period</label><input className="form-control" onChange={(event) => setSentencePeriod(event.target.value)} value={sentencePeriod ?? ''} /></div>
         </div>
         <div className="form-group"><label>Case Details</label><textarea className="form-control" onChange={(event) => setCaseDetails(event.target.value)} rows={4} value={caseDetails ?? ''}></textarea></div>
-        <button className="btn btn-primary" disabled={isSubmitting} type="submit">{isSubmitting ? (mode === 'create' ? 'Creating...' : 'Saving...') : (mode === 'create' ? 'Create Prisoner' : 'Save Changes')}</button>
+        <button className="btn btn-primary" disabled={isSubmitting} type="submit"><AnimatedButtonText>{isSubmitting ? (mode === 'create' ? 'Creating...' : 'Saving...') : (mode === 'create' ? 'Create Prisoner' : 'Save Changes')}</AnimatedButtonText></button>
       </div>
     </form>
   );

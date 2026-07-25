@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -29,12 +29,11 @@ export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
     <div className="main-header">
       <div className="main-header-logo">
         <div className="logo-header" data-background-color="dark">
-          <Link href="/admin/dashboard" className="logo">
+          <Link href="/" className="logo d-flex align-items-center">
             <img
-              src="/images/admin/kaiadmin-logo-light.svg"
-              alt="navbar brand"
-              className="navbar-brand"
-              height="20"
+              src="/images/logos/auth-logobl.png"
+              alt="JailMeet home"
+              className="navbar-brand-logo"
             />
           </Link>
           <div className="nav-toggle">
@@ -110,9 +109,8 @@ export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
                 />
               </button>
               <ul
-                className={`dropdown-menu dropdown-search animated fadeIn${
-                  searchOpen ? ' show' : ''
-                }`}
+                className={`dropdown-menu dropdown-search animated fadeIn${searchOpen ? ' show' : ''
+                  }`}
               >
                 <li>
                   <form className="navbar-left navbar-form nav-search">
@@ -146,9 +144,8 @@ export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
                 </span>
               </button>
               <ul
-                className={`dropdown-menu dropdown-user animated fadeIn${
-                  profileOpen ? ' show' : ''
-                }`}
+                className={`dropdown-menu dropdown-user animated fadeIn${profileOpen ? ' show' : ''
+                  }`}
               >
                 <li>
                   <div className="dropdown-user-scroll scrollbar-outer">

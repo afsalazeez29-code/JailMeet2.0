@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -9,6 +9,7 @@ import {
   ClipboardList,
   House,
   LockKeyhole,
+  UserRound,
   UserRoundPen,
 } from 'lucide-react';
 
@@ -42,6 +43,12 @@ const menuItems = [
     label: 'View Booking Status',
   },
   {
+    href: '/visitor/profile',
+    legacyHref: 'profile.php',
+    icon: UserRound,
+    label: 'My Profile',
+  },
+  {
     href: '/visitor/settings',
     legacyHref: 'accountsettings.php',
     icon: UserRoundPen,
@@ -66,7 +73,7 @@ export default function VisitorSidebar() {
   return (
     <aside id="layout-menu" className="layout-menu menu-vertical menu bg-menu-theme">
       <div className="app-brand demo">
-        <Link href="/visitor/dashboard" className="app-brand-link">
+        <Link href="/" className="app-brand-link">
           <img
             src="/images/visitor/jmblack.png"
             alt="Logo"
@@ -91,32 +98,26 @@ export default function VisitorSidebar() {
       </div>
 
       <ul className="menu-inner py-1">
-        {menuItems.map((item, index) => {
+        {menuItems.map((item) => {
           const Icon = item.icon;
 
           return (
-            <Fragment key={item.href}>
-              {index === 1 ? (
-                <li className="menu-header small text-uppercase">
-                  <span className="menu-header-text">Pages</span>
-                </li>
-              ) : null}
-              <li
-                className={`menu-item${pathname === item.href ? ' active' : ''}`}
+            <li
+              key={item.href}
+              className={`menu-item${pathname === item.href ? ' active' : ''}`}
+            >
+              <Link
+                href={item.href}
+                className="menu-link"
+                data-legacy-href={item.legacyHref}
               >
-                <Link
-                  href={item.href}
-                  className="menu-link"
-                  data-legacy-href={item.legacyHref}
-                >
-                  <Icon
-                    aria-hidden="true"
-                    className={`menu-icon tf-icons ${iconStyles.icon} ${iconStyles.sidebar}`}
-                  />
-                  <div>{item.label}</div>
-                </Link>
-              </li>
-            </Fragment>
+                <Icon
+                  aria-hidden="true"
+                  className={`menu-icon tf-icons ${iconStyles.icon} ${iconStyles.sidebar}`}
+                />
+                <div>{item.label}</div>
+              </Link>
+            </li>
           );
         })}
       </ul>

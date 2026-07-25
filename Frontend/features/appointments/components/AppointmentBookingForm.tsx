@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { ErrorAlert, SuccessAlert, WarningAlert } from '../../../components/common/StatusAlert';
 import Link from 'next/link';
@@ -11,6 +11,7 @@ import { createVisitorAppointment } from '@features/appointments/services/appoin
 import { isApiServiceError } from '@/types/api';
 import { PrisonerOption } from '@features/appointments/types';
 import styles from './AppointmentBookingForm.module.css';
+import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 
 type AppointmentBookingFormProps = {
   prisoners: PrisonerOption[];
@@ -209,7 +210,7 @@ export default function AppointmentBookingForm({
                 disabled={submitting || prisoners.length === 0}
                 type="submit"
               >
-                {submitting ? 'Booking...' : 'Book Appointment'}
+                <AnimatedButtonText>{submitting ? 'Booking...' : 'Book Appointment'}</AnimatedButtonText>
               </button>
               <Link href="/visitor/appointments" className="btn btn-outline-secondary">
                 View Booking Status

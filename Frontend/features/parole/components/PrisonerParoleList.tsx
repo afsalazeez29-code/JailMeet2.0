@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { EmptyStateAlert, WarningAlert } from '../../../components/common/StatusAlert';
 import Link from 'next/link';
@@ -9,6 +9,7 @@ import {
   PrisonerParoleRequest,
 } from '@features/parole/types';
 import ParoleStatusCard from './ParoleStatusCard';
+import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 
 type PrisonerParoleListProps = {
   requests: PrisonerParoleRequest[];
@@ -54,7 +55,7 @@ export default function PrisonerParoleList({
               }`}
               href={hasPendingRequest ? '#' : '/prisoner/parole/request'}
             >
-              Submit New Request
+              <AnimatedButtonText>Submit New Request</AnimatedButtonText>
             </Link>
           </div>
           {hasPendingRequest ? (
@@ -75,7 +76,7 @@ export default function PrisonerParoleList({
                 onClick={() => setFilter(item.value)}
                 type="button"
               >
-                {item.label}
+                <AnimatedButtonText>{item.label}</AnimatedButtonText>
               </button>
             ))}
           </div>

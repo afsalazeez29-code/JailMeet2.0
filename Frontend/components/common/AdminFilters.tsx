@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
+import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 
 type FilterOption = {
   label: string;
@@ -64,7 +65,7 @@ export default function AdminFilters({
           ))}
           <div className="col-md-2 mb-2">
             <button className="btn btn-primary w-100" type="submit">
-              Search
+              <AnimatedButtonText>Search</AnimatedButtonText>
             </button>
           </div>
         </div>

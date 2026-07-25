@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { EmptyStateAlert } from '../../../components/common/StatusAlert';
 import { useMemo, useState } from 'react';
@@ -9,6 +9,7 @@ import {
   VisitorAppointment,
 } from '@features/appointments/types';
 import styles from './VisitorAppointmentList.module.css';
+import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 
 type VisitorAppointmentListProps = {
   appointments: VisitorAppointment[];
@@ -74,7 +75,7 @@ export default function VisitorAppointmentList({
                 onClick={() => setFilter(item.value)}
                 type="button"
               >
-                {item.label}
+                <AnimatedButtonText>{item.label}</AnimatedButtonText>
               </button>
             ))}
             <Link href="/visitor/appointments/book" className="btn btn-success">

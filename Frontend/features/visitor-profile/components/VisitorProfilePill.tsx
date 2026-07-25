@@ -16,9 +16,9 @@ export default function VisitorProfilePill({
 
   return (
     <Link
-      href="/visitor/settings"
+      href="/visitor/profile"
       className={styles.profilePill}
-      aria-label={`Open ${displayName} profile settings`}
+      aria-label={`Open ${displayName} profile`}
     >
       <span className={styles.avatarWrap}>
         <img

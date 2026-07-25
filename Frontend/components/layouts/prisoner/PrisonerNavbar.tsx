@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -31,6 +31,11 @@ export default function PrisonerNavbar({ onToggleSidebar }: PrisonerNavbarProps)
     <header className="topbar-nav">
       <nav className="navbar navbar-expand fixed-top">
         <ul className="navbar-nav mr-auto align-items-center">
+          <li className="nav-item">
+            <Link href="/" className="nav-link d-flex align-items-center pe-2 ps-2 ps-md-0">
+              <img src="/images/logos/auth-logobl.png" alt="JailMeet home" className="navbar-brand-logo" />
+            </Link>
+          </li>
           <li className="nav-item">
             <button
               className="nav-link toggle-menu border-0 bg-transparent"
@@ -87,9 +92,8 @@ export default function PrisonerNavbar({ onToggleSidebar }: PrisonerNavbarProps)
               </span>
             </button>
             <ul
-              className={`dropdown-menu dropdown-menu-right${
-                profileOpen ? ' show' : ''
-              }`}
+              className={`dropdown-menu dropdown-menu-right${profileOpen ? ' show' : ''
+                }`}
             >
               <li className="dropdown-item user-details">
                 <div className="media">

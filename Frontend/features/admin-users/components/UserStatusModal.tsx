@@ -1,6 +1,7 @@
 'use client';
 
 import { AdminUser } from '@features/admin-users/types';
+import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 
 type UserStatusModalProps = {
   user: AdminUser | null;
@@ -39,7 +40,7 @@ export default function UserStatusModal({
               Cancel
             </button>
             <button className="btn btn-primary" disabled={processing} onClick={() => onConfirm(user)} type="button">
-              {processing ? 'Processing...' : action}
+              <AnimatedButtonText>{processing ? 'Processing...' : action}</AnimatedButtonText>
             </button>
           </div>
         </div>

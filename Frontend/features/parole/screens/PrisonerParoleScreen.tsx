@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
 import Link from 'next/link';
@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { clearAccessToken } from '@features/auth/services/token.service';
 import { getPrisonerParoleRequests } from '@features/parole/services/parole.service';
+import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 import { isApiServiceError } from '@/types/api';
 import { PrisonerParoleRequest } from '@features/parole/types';
 
@@ -117,7 +118,7 @@ export default function PrisonerParolePage() {
             Submit your first parole request to begin the review process.
           </p>
           <Link href="/prisoner/parole/request" className="btn btn-primary">
-            Submit Parole Request
+            <AnimatedButtonText>Submit Parole Request</AnimatedButtonText>
           </Link>
         </div>
       </div>

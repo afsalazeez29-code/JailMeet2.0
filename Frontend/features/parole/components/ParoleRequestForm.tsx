@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { ErrorAlert, SuccessAlert } from '../../../components/common/StatusAlert';
 import { FormEvent, useMemo, useState } from 'react';
@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { clearAccessToken } from '@features/auth/services/token.service';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
 import { createParoleRequest } from '@features/parole/services/parole.service';
+import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 import { isApiServiceError } from '@/types/api';
 
 const getDateInputValue = (date: Date): string =>
@@ -221,7 +222,7 @@ export default function ParoleRequestForm() {
             disabled={submitting}
             type="submit"
           >
-            {submitting ? 'Submitting...' : 'Submit Request'}
+            <AnimatedButtonText>{submitting ? 'Submitting...' : 'Submit Request'}</AnimatedButtonText>
           </button>
         </form>
       </div>
