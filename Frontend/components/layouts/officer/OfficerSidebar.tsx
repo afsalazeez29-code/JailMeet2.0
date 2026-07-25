@@ -1,28 +1,23 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, type ComponentType, type SVGProps } from 'react';
+import { useState } from 'react';
 import {
   CalendarDays,
-  Check,
   ChevronDown,
   ChevronRight,
-  ChevronsRight,
-  Circle,
-  FastForward,
   FileText,
   House,
   LockKeyhole,
-  Minus,
-  Plus,
   UsersRound,
   X,
 } from 'lucide-react';
 
 import iconStyles from '../../common/LucideIcon.module.css';
+import s from './OfficerTheme.module.css';
 
-type SidebarIcon = ComponentType<SVGProps<SVGSVGElement>>;
+type SidebarIcon = React.ComponentType<React.SVGProps<SVGSVGElement>>;
 
 type OfficerSidebarProps = {
   sidebarOpen: boolean;
@@ -80,7 +75,9 @@ export default function OfficerSidebar({
   onCloseSidebar,
 }: OfficerSidebarProps) {
   const pathname = usePathname();
-  const [settingsOpen, setSettingsOpen] = useState(false);
+
+
+
   const [bookingsOpen, setBookingsOpen] = useState(
     pathname.startsWith('/officer/appointments'),
   );
@@ -93,150 +90,32 @@ export default function OfficerSidebar({
 
   return (
     <>
-      <div className={`right-sidebar${settingsOpen ? ' right-sidebar-visible' : ''}`}>
-        <div className="sidebar-title">
-          <h3 className="weight-600 font-16 text-blue">
-            Layout Settings
-            <span className="btn-block font-weight-400 font-12">
-              User Interface Settings
-            </span>
-          </h3>
-          <button
-            className="close-sidebar border-0 bg-transparent"
-            type="button"
-            aria-label="Close layout settings"
-            onClick={() => setSettingsOpen(false)}
-          >
-            <X
-              aria-hidden="true"
-              className={`${iconStyles.icon} ${iconStyles.navbar}`}
-            />
-          </button>
-        </div>
-        <div className="right-sidebar-body customscroll">
-          <div className="right-sidebar-body-content">
-            <h4 className="weight-600 font-18 pb-10">Header Background</h4>
-            <div className="sidebar-btn-group pb-30 mb-10">
-              <button className="btn btn-outline-primary header-white active" type="button">
-                White
-              </button>
-              <button className="btn btn-outline-primary header-dark" type="button">
-                Dark
-              </button>
-            </div>
 
-            <h4 className="weight-600 font-18 pb-10">Sidebar Background</h4>
-            <div className="sidebar-btn-group pb-30 mb-10">
-              <button className="btn btn-outline-primary sidebar-light" type="button">
-                White
-              </button>
-              <button className="btn btn-outline-primary sidebar-dark active" type="button">
-                Dark
-              </button>
-            </div>
 
-            <h4 className="weight-600 font-18 pb-10">Menu Dropdown Icon</h4>
-            <div className="sidebar-radio-group pb-10 mb-10">
-              <div className="custom-control custom-radio custom-control-inline">
-                <input
-                  className="custom-control-input"
-                  defaultChecked
-                  id="sidebaricon-1"
-                  name="menu-dropdown-icon"
-                  type="radio"
-                  value="icon-style-1"
-                />
-                <label className="custom-control-label" htmlFor="sidebaricon-1">
-                  <ChevronDown
-                    aria-hidden="true"
-                    className={`${iconStyles.icon} ${iconStyles.action}`}
-                  />
-                </label>
-              </div>
-              <div className="custom-control custom-radio custom-control-inline">
-                <input
-                  className="custom-control-input"
-                  id="sidebaricon-2"
-                  name="menu-dropdown-icon"
-                  type="radio"
-                  value="icon-style-2"
-                />
-                <label className="custom-control-label" htmlFor="sidebaricon-2">
-                  <Plus
-                    aria-hidden="true"
-                    className={`${iconStyles.icon} ${iconStyles.action}`}
-                  />
-                </label>
-              </div>
-              <div className="custom-control custom-radio custom-control-inline">
-                <input
-                  className="custom-control-input"
-                  id="sidebaricon-3"
-                  name="menu-dropdown-icon"
-                  type="radio"
-                  value="icon-style-3"
-                />
-                <label className="custom-control-label" htmlFor="sidebaricon-3">
-                  <ChevronsRight
-                    aria-hidden="true"
-                    className={`${iconStyles.icon} ${iconStyles.action}`}
-                  />
-                </label>
-              </div>
-            </div>
+      {/* Mobile overlay */}
+      <button
+        className={`${s.overlay}${sidebarOpen ? ` ${s.overlayVisible}` : ''}`}
+        type="button"
+        aria-label="Close officer menu overlay"
+        onClick={onCloseSidebar}
+      />
 
-            <h4 className="weight-600 font-18 pb-10">Menu List Icon</h4>
-            <div className="sidebar-radio-group pb-30 mb-10">
-              {[1, 2, 3, 4, 5, 6].map((number) => {
-                const Icon = getMenuListIcon(number);
-
-                return (
-                  <div
-                    className="custom-control custom-radio custom-control-inline"
-                    key={number}
-                  >
-                    <input
-                      className="custom-control-input"
-                      defaultChecked={number === 1 || number === 4}
-                      id={`sidebariconlist-${number}`}
-                      name="menu-list-icon"
-                      type="radio"
-                      value={`icon-list-style-${number}`}
-                    />
-                    <label
-                      className="custom-control-label"
-                      htmlFor={`sidebariconlist-${number}`}
-                    >
-                      <Icon
-                        aria-hidden="true"
-                        className={`${iconStyles.icon} ${iconStyles.action}`}
-                      />
-                    </label>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="reset-options pt-30 text-center">
-              <button className="btn btn-danger" id="reset-settings" type="button">
-                Reset Settings
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className={`left-side-bar${sidebarOpen ? ' open' : ''}`}>
-        <div className="brand-logo">
-          <Link href="/officer/dashboard" data-legacy-href="index.php">
+      {/* Sidebar panel */}
+      <aside
+        className={`${s.sidebar}${sidebarOpen ? ` ${s.sidebarOpen}` : ''}`}
+        aria-label="Officer navigation"
+      >
+        {/* Brand / Logo */}
+        <div className={s.sidebarBrand}>
+          <Link href="/" aria-label="JailMeet home">
             <img
               src="/images/logos/jmlogo.png"
-              alt="JailMeet logo"
-              style={{ right: '100px' }}
+              alt="JailMeet"
+              className={s.sidebarLogo}
             />
           </Link>
           <button
-            className="close-sidebar border-0 bg-transparent"
+            className={s.sidebarCloseBtn}
             type="button"
             aria-label="Close sidebar"
             onClick={onCloseSidebar}
@@ -247,208 +126,175 @@ export default function OfficerSidebar({
             />
           </button>
         </div>
-        <div className="menu-block customscroll">
-          <div className="sidebar-menu">
-            <ul id="accordion-menu">
-              <li className="dropdown">
-                <Link
-                  href="/officer/dashboard"
-                  className={`dropdown-toggle no-arrow${
-                    isActive('/officer/dashboard') ? ' active' : ''
-                  }`}
-                  data-legacy-href="index.php"
-                >
-                  <span className="micon">
-                    <House
-                      aria-hidden="true"
-                      className={`${iconStyles.icon} ${iconStyles.sidebar}`}
-                    />
-                  </span>
-                  <span className="mtext">Home</span>
-                </Link>
-              </li>
 
-              <li
-                className={`dropdown${
+        {/* Navigation */}
+        <ul className={s.sidebarNav} role="list">
+          {/* Home */}
+          <li>
+            <Link
+              href="/officer/dashboard"
+              data-legacy-href="index.php"
+              className={`${s.navPill}${isActive('/officer/dashboard') ? ` ${s.navPillActive}` : ''}`}
+            >
+              <House
+                aria-hidden="true"
+                className={`${iconStyles.icon} ${iconStyles.sidebar} ${s.navIcon}`}
+              />
+              <span className={s.navLabel}>Home</span>
+            </Link>
+          </li>
+
+          {/* Bookings group */}
+          <li>
+            <button
+              className={`${s.groupToggle}${
+                bookingsOpen || isSectionActive('/officer/appointments')
+                  ? ` ${s.groupToggleActive}`
+                  : ''
+              }`}
+              type="button"
+              aria-expanded={bookingsOpen || isSectionActive('/officer/appointments')}
+              onClick={() => setBookingsOpen((prev) => !prev)}
+            >
+              <CalendarDays
+                aria-hidden="true"
+                className={`${iconStyles.icon} ${iconStyles.sidebar} ${s.navIcon}`}
+              />
+              <span className={s.navLabel}>Bookings</span>
+              <ChevronDown
+                aria-hidden="true"
+                className={`${s.groupChevron}${
                   bookingsOpen || isSectionActive('/officer/appointments')
-                    ? ' show'
+                    ? ` ${s.groupChevronOpen}`
                     : ''
                 }`}
-              >
-                <button
-                  className="dropdown-toggle border-0 bg-transparent"
-                  type="button"
-                  aria-expanded={bookingsOpen}
-                  onClick={() => setBookingsOpen((current) => !current)}
-                >
-                  <span className="micon">
-                    <CalendarDays
-                      aria-hidden="true"
-                      className={`${iconStyles.icon} ${iconStyles.sidebar}`}
-                    />
-                  </span>
-                  <span className="mtext"> Bookings </span>
-                </button>
-                <ul
-                  className="submenu"
-                  style={{
-                    display:
-                      bookingsOpen || isSectionActive('/officer/appointments')
-                        ? 'block'
-                        : undefined,
-                  }}
-                >
-                  {bookingItems.map((item) => (
-                    <li key={item.legacyHref}>
-                      <Link
-                        href={item.href}
-                        data-legacy-href={item.legacyHref}
-                        className={isActive(item.href) ? 'active' : undefined}
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </li>
+              />
+            </button>
 
-              <li>
-                <span
-                  className="dropdown-toggle no-arrow"
-                  data-legacy-href="prisoners.php"
-                  aria-disabled="true"
-                  title="Prisoner management is not implemented for officers yet"
-                >
-                  <span className="micon">
-                    <UsersRound
-                      aria-hidden="true"
-                      className={`${iconStyles.icon} ${iconStyles.sidebar}`}
-                    />
-                  </span>
-                  <span className="mtext">Prisoners</span>
-                </span>
-              </li>
-
-              <li>
-                <span
-                  className="dropdown-toggle no-arrow"
-                  data-legacy-href="fir.php"
-                  aria-disabled="true"
-                  title="FIR management is not implemented yet"
-                >
-                  <span className="micon">
-                    <FileText
-                      aria-hidden="true"
-                      className={`${iconStyles.icon} ${iconStyles.sidebar}`}
-                    />
-                  </span>
-                  <span className="mtext">FIR</span>
-                </span>
-              </li>
-
-              <li
-                className={`dropdown${
-                  paroleOpen || isSectionActive('/officer/parole') ? ' show' : ''
-                }`}
-              >
-                <button
-                  className="dropdown-toggle border-0 bg-transparent"
-                  type="button"
-                  aria-expanded={paroleOpen}
-                  onClick={() => setParoleOpen((current) => !current)}
-                >
-                  <span className="micon">
-                    <ClipboardListIcon />
-                  </span>
-                  <span className="mtext"> Parole </span>
-                </button>
-                <ul
-                  className="submenu"
-                  style={{
-                    display:
-                      paroleOpen || isSectionActive('/officer/parole')
-                        ? 'block'
-                        : undefined,
-                  }}
-                >
-                  {paroleItems.map((item) => (
-                    <li key={item.legacyHref}>
-                      <Link
-                        href={item.href}
-                        data-legacy-href={item.legacyHref}
-                        className={isActive(item.href) ? 'active' : undefined}
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </li>
-              <li>
-                <div className="dropdown-divider"></div>
-              </li>
-              <li>
-                <Link
-                  href="/officer/change-password"
-                  className={`dropdown-toggle no-arrow${
-                    isActive('/officer/change-password') ? ' active' : ''
-                  }`}
-                  data-legacy-href="changepassword.php"
-                >
-                  <span className="micon">
-                    <LockKeyhole
-                      aria-hidden="true"
-                      className={`${iconStyles.icon} ${iconStyles.sidebar}`}
-                    />
-                  </span>
-                  <span className="mtext">Change Password</span>
-                </Link>
-              </li>
+            <ul
+              className={`${s.submenu}${
+                bookingsOpen || isSectionActive('/officer/appointments')
+                  ? ''
+                  : ` ${s.submenuHidden}`
+              }`}
+              role="list"
+            >
+              {bookingItems.map((item) => (
+                <li key={item.legacyHref}>
+                  <Link
+                    href={item.href}
+                    data-legacy-href={item.legacyHref}
+                    className={`${s.subPill}${isActive(item.href) ? ` ${s.subPillActive}` : ''}`}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
-          </div>
-        </div>
-      </div>
-      <button
-        className={`mobile-menu-overlay border-0${
-          sidebarOpen ? ' show' : ''
-        }`}
-        type="button"
-        aria-label="Close officer menu overlay"
-        onClick={onCloseSidebar}
-      ></button>
-      <button
-        className="btn btn-primary d-none"
-        type="button"
-        onClick={() => setSettingsOpen(true)}
-      >
-        Layout Settings
-      </button>
+          </li>
+
+          {/* Prisoners — not yet implemented, non-clickable */}
+          <li>
+            <span
+              className={`${s.navPill} ${s.navPillDisabled}`}
+              aria-disabled="true"
+              data-legacy-href="prisoners.php"
+              title="Prisoner management is not implemented for officers yet"
+            >
+              <UsersRound
+                aria-hidden="true"
+                className={`${iconStyles.icon} ${iconStyles.sidebar} ${s.navIcon}`}
+              />
+              <span className={s.navLabel}>Prisoners</span>
+            </span>
+          </li>
+
+          {/* FIR — not yet implemented, non-clickable */}
+          <li>
+            <span
+              className={`${s.navPill} ${s.navPillDisabled}`}
+              aria-disabled="true"
+              data-legacy-href="fir.php"
+              title="FIR management is not implemented yet"
+            >
+              <FileText
+                aria-hidden="true"
+                className={`${iconStyles.icon} ${iconStyles.sidebar} ${s.navIcon}`}
+              />
+              <span className={s.navLabel}>FIR</span>
+            </span>
+          </li>
+
+          {/* Parole group */}
+          <li>
+            <button
+              className={`${s.groupToggle}${
+                paroleOpen || isSectionActive('/officer/parole')
+                  ? ` ${s.groupToggleActive}`
+                  : ''
+              }`}
+              type="button"
+              aria-expanded={paroleOpen || isSectionActive('/officer/parole')}
+              onClick={() => setParoleOpen((prev) => !prev)}
+            >
+              <FileText
+                aria-hidden="true"
+                className={`${iconStyles.icon} ${iconStyles.sidebar} ${s.navIcon}`}
+              />
+              <span className={s.navLabel}>Parole</span>
+              <ChevronDown
+                aria-hidden="true"
+                className={`${s.groupChevron}${
+                  paroleOpen || isSectionActive('/officer/parole')
+                    ? ` ${s.groupChevronOpen}`
+                    : ''
+                }`}
+              />
+            </button>
+
+            <ul
+              className={`${s.submenu}${
+                paroleOpen || isSectionActive('/officer/parole')
+                  ? ''
+                  : ` ${s.submenuHidden}`
+              }`}
+              role="list"
+            >
+              {paroleItems.map((item) => (
+                <li key={item.legacyHref}>
+                  <Link
+                    href={item.href}
+                    data-legacy-href={item.legacyHref}
+                    className={`${s.subPill}${isActive(item.href) ? ` ${s.subPillActive}` : ''}`}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </li>
+
+          <li>
+            <hr className={s.navDivider} />
+          </li>
+
+          {/* Change Password */}
+          <li>
+            <Link
+              href="/officer/change-password"
+              data-legacy-href="changepassword.php"
+              className={`${s.navPill}${isActive('/officer/change-password') ? ` ${s.navPillActive}` : ''}`}
+            >
+              <LockKeyhole
+                aria-hidden="true"
+                className={`${iconStyles.icon} ${iconStyles.sidebar} ${s.navIcon}`}
+              />
+              <span className={s.navLabel}>Change Password</span>
+            </Link>
+          </li>
+        </ul>
+      </aside>
+
     </>
   );
-}
-
-function ClipboardListIcon() {
-  return (
-    <FileText
-      aria-hidden="true"
-      className={`${iconStyles.icon} ${iconStyles.sidebar}`}
-    />
-  );
-}
-
-function getMenuListIcon(number: number): SidebarIcon {
-  switch (number) {
-    case 1:
-      return Minus;
-    case 2:
-      return Circle;
-    case 3:
-      return Check;
-    case 4:
-      return ChevronsRight;
-    case 5:
-      return FastForward;
-    default:
-      return ChevronRight;
-  }
 }

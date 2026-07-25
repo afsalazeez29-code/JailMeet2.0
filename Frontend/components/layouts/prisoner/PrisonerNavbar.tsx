@@ -9,6 +9,8 @@ import LogoutConfirmModal from '../../common/LogoutConfirmModal';
 import iconStyles from '../../common/LucideIcon.module.css';
 import { clearAccessToken } from '@features/auth/services/token.service';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
+import PrisonerProfilePill from './PrisonerProfilePill';
+import s from './PrisonerTheme.module.css';
 
 type PrisonerNavbarProps = {
   onToggleSidebar: () => void;
@@ -28,99 +30,98 @@ export default function PrisonerNavbar({ onToggleSidebar }: PrisonerNavbarProps)
   };
 
   return (
-    <header className="topbar-nav">
-      <nav className="navbar navbar-expand fixed-top">
-        <ul className="navbar-nav mr-auto align-items-center">
-          <li className="nav-item">
-            <Link href="/" className="nav-link d-flex align-items-center pe-2 ps-2 ps-md-0">
-              <img src="/images/logos/auth-logobl.png" alt="JailMeet home" className="navbar-brand-logo" />
-            </Link>
-          </li>
-          <li className="nav-item">
-            <button
-              className="nav-link toggle-menu border-0 bg-transparent"
-              type="button"
-              aria-label="Toggle prisoner sidebar"
-              onClick={onToggleSidebar}
-            >
-              <Menu
-                aria-hidden="true"
-                className={`menu-icon ${iconStyles.icon} ${iconStyles.navbar}`}
-              />
-            </button>
-          </li>
-          <li className="nav-item">
-            <form
-              className={`search-bar${searchOpen ? ' show' : ''}`}
-              onSubmit={(event) => event.preventDefault()}
-            >
-              <input
-                className="form-control"
-                placeholder="Enter keywords"
-                type="text"
-              />
-              <button
-                className="border-0 bg-transparent"
-                type="button"
-                aria-label="Toggle search"
-                onClick={() => setSearchOpen((current) => !current)}
-              >
-                <Search
-                  aria-hidden="true"
-                  className={`${iconStyles.icon} ${iconStyles.navbar}`}
-                />
-              </button>
-            </form>
-          </li>
-        </ul>
+    <>
+      <nav className={s.navbar} aria-label="Prisoner top navigation">
+        {/* Left: toggle + logo + search */}
+        <div className={s.navbarLeft}>
+          <button
+            className={s.toggleBtn}
+            type="button"
+            aria-label="Toggle prisoner sidebar"
+            onClick={onToggleSidebar}
+          >
+            <Menu
+              aria-hidden="true"
+              className={`${iconStyles.icon} ${iconStyles.navbar}`}
+            />
+          </button>
 
-        <ul className="navbar-nav align-items-center right-nav-link">
-          <li className="nav-item">
+          <Link href="/" aria-label="JailMeet home" className="d-flex align-items-center">
+            <img
+              src="/images/logos/auth-logobl.png"
+              alt="JailMeet home"
+              className="navbar-brand-logo"
+              style={{ height: '30px' }}
+            />
+          </Link>
+
+          {/* Search form — exact structure and behaviour preserved */}
+          <form
+            className={`search-bar d-flex align-items-center${searchOpen ? ' show' : ''}`}
+            onSubmit={(event) => event.preventDefault()}
+            style={{ marginLeft: '10px' }}
+          >
+            <input
+              className={`form-control ${!searchOpen ? 'd-none' : ''}`}
+              placeholder="Enter keywords"
+              type="text"
+            />
             <button
-              className="nav-link dropdown-toggle dropdown-toggle-nocaret border-0 bg-transparent"
+              className={s.toggleBtn}
               type="button"
-              aria-expanded={profileOpen}
-              onClick={() => setProfileOpen((current) => !current)}
+              aria-label="Toggle search"
+              onClick={() => setSearchOpen((current) => !current)}
             >
-              <span className="user-profile">
-                <img
-                  src={fallbackPrisonerImage}
-                  className="img-circle"
-                  alt="Prisoner avatar"
-                  style={{ width: '40px', height: '40px', objectFit: 'cover' }}
-                />
-              </span>
+              <Search
+                aria-hidden="true"
+                className={`${iconStyles.icon} ${iconStyles.navbar}`}
+              />
             </button>
+          </form>
+        </div>
+
+        {/* Right: profile dropdown */}
+        <div className={s.navbarRight}>
+          <div className="dropdown">
+            <PrisonerProfilePill
+              displayName="Prisoner"
+              avatarSrc={fallbackPrisonerImage}
+              onClick={() => setProfileOpen((current) => !current)}
+              ariaExpanded={profileOpen}
+            />
             <ul
-              className={`dropdown-menu dropdown-menu-right${profileOpen ? ' show' : ''
-                }`}
+              className={`dropdown-menu dropdown-menu-right${
+                profileOpen ? ' show' : ''
+              }`}
+              style={{ position: 'absolute', top: '100%', right: 0 }}
             >
               <li className="dropdown-item user-details">
-                <div className="media">
-                  <div className="avatar">
+                <div className="media align-items-center">
+                  <div className="avatar me-3">
                     <img
-                      className="align-self-start mr-3"
+                      className="align-self-start"
                       src={fallbackPrisonerImage}
                       alt="Prisoner avatar"
                       style={{
                         width: '60px',
                         height: '60px',
                         objectFit: 'cover',
+                        borderRadius: '50%'
                       }}
                     />
                   </div>
                   <div className="media-body">
-                    <h6 className="mt-2 user-title">Prisoner ID: Prisoner</h6>
-                    <p className="user-subtitle">Prisoner Name: Prisoner</p>
+                    <h6 className="mt-2 user-title mb-0">Prisoner ID: Prisoner</h6>
+                    <p className="user-subtitle text-muted mb-0">Prisoner Name: Prisoner</p>
                   </div>
                 </div>
               </li>
               <li className="dropdown-divider"></li>
               <li className="dropdown-item">
-                <Link href="/prisoner/dashboard" className="text-white">
+                <Link href="/prisoner/dashboard" className="text-dark d-flex align-items-center">
                   <WalletCards
                     aria-hidden="true"
-                    className={`mr-2 ${iconStyles.icon} ${iconStyles.action}`}
+                    className={`me-2 ${iconStyles.icon} ${iconStyles.action}`}
                   />{' '}
                   Account
                 </Link>
@@ -128,20 +129,23 @@ export default function PrisonerNavbar({ onToggleSidebar }: PrisonerNavbarProps)
               <li className="dropdown-divider"></li>
               <li className="dropdown-item">
                 <button
-                  className="text-white border-0 bg-transparent p-0"
+                  className="text-dark border-0 bg-transparent p-0 d-flex align-items-center w-100"
                   type="button"
-                  onClick={() => setLogoutOpen(true)}
+                  onClick={() => {
+                    setProfileOpen(false);
+                    setLogoutOpen(true);
+                  }}
                 >
                   <LogOut
                     aria-hidden="true"
-                    className={`mr-2 ${iconStyles.icon} ${iconStyles.action}`}
+                    className={`me-2 ${iconStyles.icon} ${iconStyles.action}`}
                   />{' '}
                   Logout
                 </button>
               </li>
             </ul>
-          </li>
-        </ul>
+          </div>
+        </div>
       </nav>
 
       <LogoutConfirmModal
@@ -152,6 +156,6 @@ export default function PrisonerNavbar({ onToggleSidebar }: PrisonerNavbarProps)
           handleLogout();
         }}
       />
-    </header>
+    </>
   );
 }

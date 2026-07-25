@@ -402,23 +402,14 @@ body.visitor-page .layout-navbar .navbar-nav .nav-item.dropdown .dropdown-menu {
 /* Sidebar Menu Items - Pill Shape and Soft Glow Hover Effects */
 
 /* 1. Reset menu item margins and widths on container elements */
-body.visitor-page .bg-menu-theme .menu-inner .menu-item,
-body.admin-page .sidebar .nav-secondary .nav-item,
-body.officer-page .sidebar-menu>ul>li,
-body.prisoner-page #sidebar-wrapper .sidebar-menu li {
+body.visitor-page .bg-menu-theme .menu-inner .menu-item {
   width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
 }
 
 /* 2. Style the menu option links/buttons/spans as pills */
-body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link,
-body.admin-page .sidebar .nav-secondary .nav-item a,
-body.officer-page .sidebar-menu li a,
-body.officer-page .sidebar-menu li button,
-body.officer-page .sidebar-menu li span,
-body.prisoner-page #sidebar-wrapper .sidebar-menu li a,
-body.prisoner-page #sidebar-wrapper .sidebar-menu li span[aria-disabled="true"] {
+body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link {
   display: inline-flex !important;
   align-items: center !important;
   gap: 10px !important;
@@ -441,63 +432,33 @@ body.prisoner-page #sidebar-wrapper .sidebar-menu li span[aria-disabled="true"] 
 /* 3. Responsive padding */
 @media (max-width: 575.98px) {
 
-  body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link,
-  body.admin-page .sidebar .nav-secondary .nav-item a,
-  body.officer-page .sidebar-menu li a,
-  body.officer-page .sidebar-menu li button,
-  body.officer-page .sidebar-menu li span,
-  body.prisoner-page #sidebar-wrapper .sidebar-menu li a,
-  body.prisoner-page #sidebar-wrapper .sidebar-menu li span[aria-disabled="true"] {
+  body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link {
     padding: 7px 12px !important;
   }
 }
 
 @media (min-width: 576px) and (max-width: 991.98px) {
 
-  body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link,
-  body.admin-page .sidebar .nav-secondary .nav-item a,
-  body.officer-page .sidebar-menu li a,
-  body.officer-page .sidebar-menu li button,
-  body.officer-page .sidebar-menu li span,
-  body.prisoner-page #sidebar-wrapper .sidebar-menu li a,
-  body.prisoner-page #sidebar-wrapper .sidebar-menu li span[aria-disabled="true"] {
+  body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link {
     padding: 8px 14px !important;
   }
 }
 
 @media (min-width: 992px) {
 
-  body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link,
-  body.admin-page .sidebar .nav-secondary .nav-item a,
-  body.officer-page .sidebar-menu li a,
-  body.officer-page .sidebar-menu li button,
-  body.officer-page .sidebar-menu li span,
-  body.prisoner-page #sidebar-wrapper .sidebar-menu li a,
-  body.prisoner-page #sidebar-wrapper .sidebar-menu li span[aria-disabled="true"] {
+  body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link {
     padding: 8px 16px !important;
   }
 }
 
 /* 4. Align icons and prevent shrinking */
-body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link .menu-icon,
-body.admin-page .sidebar .nav-secondary .nav-item a svg,
-body.officer-page .sidebar-menu li a svg,
-body.officer-page .sidebar-menu li button svg,
-body.officer-page .sidebar-menu li span svg,
-body.prisoner-page #sidebar-wrapper .sidebar-menu li a svg,
-body.prisoner-page #sidebar-wrapper .sidebar-menu li span[aria-disabled="true"] svg {
+body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link .menu-icon {
   flex-shrink: 0 !important;
   margin: 0 !important;
 }
 
 /* 5. Prevent text wrapping & overflow on options labels */
-body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link>div,
-body.admin-page .sidebar .nav-secondary .nav-item a p,
-body.officer-page .sidebar-menu li a .mtext,
-body.officer-page .sidebar-menu li button .mtext,
-body.officer-page .sidebar-menu li span .mtext,
-body.prisoner-page #sidebar-wrapper .sidebar-menu li a span,
-body.prisoner-page #sidebar-wrapper .sidebar-menu li span[aria-disabled="true"] span {
+body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link>div {
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
@@ -525,44 +486,6 @@ body.visitor-page .bg-menu-theme .menu-inner>.menu-item.active:before {
   content: none !important;
 }
 
-/* Admin Active */
-body.admin-page .sidebar .nav-secondary .nav-item.active a {
-  background: #1572e8 !important;
-  color: #ffffff !important;
-  border-color: #1572e8 !important;
-  box-shadow: 0 0 0 4px rgba(21, 114, 232, 0.15), 0 6px 14px rgba(21, 114, 232, 0.2) !important;
-}
-
-body.admin-page .sidebar .nav-secondary .nav-item.active a svg {
-  color: #ffffff !important;
-}
-
-/* Officer Active */
-body.officer-page .sidebar-menu li a.active,
-body.officer-page .sidebar-menu li button.active {
-  background-color: #1b00ff !important;
-  color: #ffffff !important;
-  border-color: #1b00ff !important;
-  box-shadow: 0 0 0 4px rgba(27, 0, 255, 0.15), 0 6px 14px rgba(27, 0, 255, 0.2) !important;
-}
-
-body.officer-page .sidebar-menu li a.active svg,
-body.officer-page .sidebar-menu li button.active svg {
-  color: #ffffff !important;
-}
-
-/* Prisoner Active */
-body.prisoner-page #sidebar-wrapper .sidebar-menu li.active a {
-  color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.4) !important;
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1), 0 6px 14px rgba(255, 255, 255, 0.15) !important;
-}
-
-body.prisoner-page #sidebar-wrapper .sidebar-menu li.active a svg {
-  color: #ffffff !important;
-}
 
 /* 7. Hover States */
 
@@ -573,38 +496,7 @@ body.visitor-page .bg-menu-theme .menu-inner .menu-item:not(.active) .menu-link:
   box-shadow: 0 4px 12px rgba(255, 74, 23, 0.12) !important;
 }
 
-/* Admin Hover */
-body.admin-page .sidebar .nav-secondary .nav-item:not(.active) a:hover {
-  transform: translateY(-2px) !important;
-  border-color: #1572e8 !important;
-  box-shadow: 0 4px 12px rgba(21, 114, 232, 0.15) !important;
-}
 
-/* Officer Hover */
-body.officer-page .sidebar-menu li:not(.active) a:not([aria-disabled="true"]):hover,
-body.officer-page .sidebar-menu li:not(.active) button:not([aria-disabled="true"]):hover {
-  transform: translateY(-2px) !important;
-  border-color: #1b00ff !important;
-  box-shadow: 0 4px 12px rgba(27, 0, 255, 0.15) !important;
-}
-
-/* Prisoner Hover */
-body.prisoner-page #sidebar-wrapper .sidebar-menu li:not(.active) a:not([aria-disabled="true"]):hover {
-  transform: translateY(-2px) !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15) !important;
-}
-
-/* 8. Disabled Items (Non-clickable and reduced emphasis) */
-body.officer-page .sidebar-menu li span[aria-disabled="true"],
-body.prisoner-page #sidebar-wrapper .sidebar-menu li span[aria-disabled="true"] {
-  cursor: default !important;
-  transform: none !important;
-  pointer-events: none !important;
-  opacity: 0.6 !important;
-  box-shadow: none !important;
-  border-color: #e5e7eb !important;
-}
 
 
 /* Button Text Animation */

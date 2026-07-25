@@ -9,6 +9,7 @@ import LogoutConfirmModal from '../../common/LogoutConfirmModal';
 import iconStyles from '../../common/LucideIcon.module.css';
 import { clearAccessToken } from '@features/auth/services/token.service';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
+import AdminProfilePill from './AdminProfilePill';
 
 type AdminNavbarProps = {
   onToggleSidebar: () => void;
@@ -109,8 +110,9 @@ export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
                 />
               </button>
               <ul
-                className={`dropdown-menu dropdown-search animated fadeIn${searchOpen ? ' show' : ''
-                  }`}
+                className={`dropdown-menu dropdown-search animated fadeIn${
+                  searchOpen ? ' show' : ''
+                }`}
               >
                 <li>
                   <form className="navbar-left navbar-form nav-search">
@@ -127,25 +129,16 @@ export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
             </li>
 
             <li className="nav-item topbar-user dropdown hidden-caret">
-              <button
-                className="dropdown-toggle profile-pic"
-                type="button"
-                aria-expanded={profileOpen}
+              <AdminProfilePill
+                displayName="Admin"
                 onClick={() => setProfileOpen((current) => !current)}
-              >
-                <div className="avatar-sm">
-                  <span className="avatar-img rounded-circle d-flex align-items-center justify-content-center bg-secondary text-white">
-                    A
-                  </span>
-                </div>
-                <span className="profile-username">
-                  <span className="op-7">Hi,</span>
-                  <span className="fw-bold">Admin</span>
-                </span>
-              </button>
+                ariaExpanded={profileOpen}
+              />
+              
               <ul
-                className={`dropdown-menu dropdown-user animated fadeIn${profileOpen ? ' show' : ''
-                  }`}
+                className={`dropdown-menu dropdown-user animated fadeIn${
+                  profileOpen ? ' show' : ''
+                }`}
               >
                 <li>
                   <div className="dropdown-user-scroll scrollbar-outer">

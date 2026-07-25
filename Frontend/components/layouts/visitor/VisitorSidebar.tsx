@@ -75,7 +75,7 @@ export default function VisitorSidebar() {
       <div className="app-brand demo">
         <Link href="/" className="app-brand-link">
           <img
-            src="/images/visitor/jmblack.png"
+            src="/images/logos/jmlogobl.png"
             alt="Logo"
             className="app-brand-logo"
             style={{ maxWidth: '180px', height: 'auto' }}

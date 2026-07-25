@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -88,12 +88,12 @@ export default function AdminSidebar({ onToggleSidebar }: AdminSidebarProps) {
     <div className="sidebar" data-background-color="dark">
       <div className="sidebar-logo">
         <div className="logo-header" data-background-color="dark">
-          <Link href="/admin/dashboard" className="logo">
+          <Link href="/" className="logo d-flex align-items-center">
             <img
               src="/images/logos/jmlogo.png"
-              alt="navbar brand"
+              alt="JailMeet home"
               className="navbar-brand"
-              height="20"
+              style={{ height: '32px' }}
             />
           </Link>
           <div className="nav-toggle">

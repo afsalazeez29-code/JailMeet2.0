@@ -5,6 +5,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import AdminFooter from './AdminFooter';
 import AdminNavbar from './AdminNavbar';
 import AdminSidebar from './AdminSidebar';
+import s from './AdminTheme.module.css';
 
 type AdminLayoutProps = {
   children: ReactNode;
@@ -78,15 +79,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       ))}
       <style>{adminFontOverrides}</style>
 
-      <div className={sidebarOpen ? 'wrapper nav_open' : 'wrapper'}>
+      {/* 
+        s.shell enforces the new visual root.
+        The "wrapper" and "nav_open" classes must remain exactly as-is for Kaiadmin 
+        mobile-toggle compatibility.
+      */}
+      <div className={`${s.shell} wrapper${sidebarOpen ? ' nav_open' : ''}`}>
         <AdminSidebar onToggleSidebar={toggleSidebar} />
+        
         <div className="main-panel" style={{ width: '100%', maxWidth: '100%' }}>
           <AdminNavbar onToggleSidebar={toggleSidebar} />
-          {children}
+          
+          <main className="content">
+            {children}
+          </main>
+          
           <AdminFooter />
         </div>
       </div>
     </>
   );
 }
-

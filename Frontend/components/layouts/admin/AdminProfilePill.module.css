@@ -1,0 +1,97 @@
+/* AdminProfilePill.module.css
+   Acts as an accessible dropdown trigger button matching the Visitor/Prisoner profile pill */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 230px;
+  padding: 4px 16px 4px 4px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: #111111;
+  flex-shrink: 0;
+  user-select: none;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+  outline: none;
+}
+
+.pill:hover,
+.pill[aria-expanded="true"] {
+  background: #ffffff;
+  border-color: #ff4a17;
+  color: #111111;
+  box-shadow: 0 4px 14px rgba(255, 74, 23, 0.14);
+  transform: translateY(-1px);
+}
+
+.pill:focus-visible {
+  outline: 2px solid #ff4a17;
+  outline-offset: 3px;
+}
+
+.avatarWrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  display: block;
+  object-fit: cover;
+  border: 2px solid #f3f4f6;
+  border-radius: 50%;
+}
+
+.onlineDot {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  background: #34c759;
+}
+
+.name {
+  max-width: 150px;
+  overflow: hidden;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #111111;
+}
+
+/* Responsive */
+@media (max-width: 575px) {
+  .pill {
+    padding: 3px;
+    gap: 0;
+    max-width: none;
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .name {
+    display: none;
+  }
+
+  .onlineDot {
+    width: 9px;
+    height: 9px;
+  }
+}

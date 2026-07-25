@@ -3,13 +3,16 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { IdCard, LogOut, Mail, Menu, Search, Settings, UserRound } from 'lucide-react';
+import { LogOut, Menu, Search } from 'lucide-react';
 
 import LogoutConfirmModal from '../../common/LogoutConfirmModal';
 import iconStyles from '../../common/LucideIcon.module.css';
 import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 import { clearAccessToken } from '@features/auth/services/token.service';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
+import OfficerProfilePill from './OfficerProfilePill';
+import pillStyles from './OfficerProfilePill.module.css';
+import s from './OfficerTheme.module.css';
 
 type OfficerNavbarProps = {
   onToggleSidebar: () => void;
@@ -17,7 +20,6 @@ type OfficerNavbarProps = {
 
 export default function OfficerNavbar({ onToggleSidebar }: OfficerNavbarProps) {
   const router = useRouter();
-  const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
 
@@ -27,163 +29,129 @@ export default function OfficerNavbar({ onToggleSidebar }: OfficerNavbarProps) {
   };
 
   return (
-    <div className="header">
-      <div className="header-left d-flex align-items-center">
-        <Link href="/" className="d-flex align-items-center me-2 ms-2 ms-md-0">
-          <img src="/images/logos/auth-logobl.png" alt="JailMeet home" className="navbar-brand-logo" />
-        </Link>
-        <button
-          className="menu-icon border-0 bg-transparent"
-          type="button"
-          aria-label="Toggle officer sidebar"
-          onClick={onToggleSidebar}
-        >
-          <Menu
-            aria-hidden="true"
-            className={`${iconStyles.icon} ${iconStyles.navbar}`}
-          />
-        </button>
-        <button
-          className="search-toggle-icon border-0 bg-transparent"
-          type="button"
-          aria-expanded={searchOpen}
-          aria-label="Toggle search"
-          onClick={() => setSearchOpen((current) => !current)}
-        >
-          <Search
-            aria-hidden="true"
-            className={`${iconStyles.icon} ${iconStyles.navbar}`}
-          />
-        </button>
-        <div className={`header-search${searchOpen ? ' show' : ''}`}>
-          <form>
-            <div className="form-group mb-0">
-              <div className="dropdown">
-                <button
-                  className="dropdown-toggle no-arrow border-0 bg-transparent"
-                  type="button"
-                  aria-expanded={searchOpen}
-                  onClick={() => setSearchOpen((current) => !current)}
-                ></button>
-                <div
-                  className={`dropdown-menu dropdown-menu-right${searchOpen ? ' show' : ''
+    <>
+      <nav className={s.navbar} id="officer-navbar" aria-label="Officer top navigation">
+        {/* Left: toggle + logo + search */}
+        <div className={s.navbarLeft}>
+          <button
+            className={s.toggleBtn}
+            type="button"
+            aria-label="Toggle officer sidebar"
+            onClick={onToggleSidebar}
+          >
+            <Menu
+              aria-hidden="true"
+              className={`${iconStyles.icon} ${iconStyles.navbar}`}
+            />
+          </button>
+
+          <Link href="/" aria-label="JailMeet home" className="d-flex align-items-center">
+            <img
+              src="/images/logos/auth-logobl.png"
+              alt="JailMeet home"
+              className="navbar-brand-logo"
+            />
+          </Link>
+
+          {/* Search toggle — preserved from original; form has no submit handler by design */}
+          <button
+            className={`search-toggle-icon ${s.toggleBtn}`}
+            type="button"
+            aria-expanded={searchOpen}
+            aria-label="Toggle search"
+            onClick={() => setSearchOpen((current) => !current)}
+          >
+            <Search
+              aria-hidden="true"
+              className={`${iconStyles.icon} ${iconStyles.navbar}`}
+            />
+          </button>
+
+          {/* Search dropdown — preserved from original officer template */}
+          <div className={`header-search${searchOpen ? ' show' : ''}`}>
+            <form>
+              <div className="form-group mb-0">
+                <div className="dropdown">
+                  <button
+                    className="dropdown-toggle no-arrow border-0 bg-transparent"
+                    type="button"
+                    aria-expanded={searchOpen}
+                    onClick={() => setSearchOpen((current) => !current)}
+                  />
+                  <div
+                    className={`dropdown-menu dropdown-menu-right${
+                      searchOpen ? ' show' : ''
                     }`}
-                >
-                  <div className="form-group row">
-                    <label className="col-sm-12 col-md-2 col-form-label">
-                      From
-                    </label>
-                    <div className="col-sm-12 col-md-10">
-                      <input
-                        className="form-control form-control-sm form-control-line"
-                        type="text"
-                      />
+                  >
+                    <div className="form-group row">
+                      <label className="col-sm-12 col-md-2 col-form-label">
+                        From
+                      </label>
+                      <div className="col-sm-12 col-md-10">
+                        <input
+                          className="form-control form-control-sm form-control-line"
+                          type="text"
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="form-group row">
-                    <label className="col-sm-12 col-md-2 col-form-label">
-                      To
-                    </label>
-                    <div className="col-sm-12 col-md-10">
-                      <input
-                        className="form-control form-control-sm form-control-line"
-                        type="text"
-                      />
+                    <div className="form-group row">
+                      <label className="col-sm-12 col-md-2 col-form-label">
+                        To
+                      </label>
+                      <div className="col-sm-12 col-md-10">
+                        <input
+                          className="form-control form-control-sm form-control-line"
+                          type="text"
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="form-group row">
-                    <label className="col-sm-12 col-md-2 col-form-label">
-                      Subject
-                    </label>
-                    <div className="col-sm-12 col-md-10">
-                      <input
-                        className="form-control form-control-sm form-control-line"
-                        type="text"
-                      />
+                    <div className="form-group row">
+                      <label className="col-sm-12 col-md-2 col-form-label">
+                        Subject
+                      </label>
+                      <div className="col-sm-12 col-md-10">
+                        <input
+                          className="form-control form-control-sm form-control-line"
+                          type="text"
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <button className="btn btn-primary" type="submit">
-                      <AnimatedButtonText>Search</AnimatedButtonText>
-                    </button>
+                    <div className="text-right">
+                      <button className="btn btn-primary" type="submit">
+                        <AnimatedButtonText>Search</AnimatedButtonText>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <div className="header-right">
-        <div className="user-notification">
-          <div className="dropdown">
-            <div className="dropdown-menu dropdown-menu-right">
-              <div className="notification-list mx-h-350 customscroll"></div>
-            </div>
+            </form>
           </div>
         </div>
 
-        <div className="user-info-dropdown">
-          <div className="dropdown">
-            <button
-              className="dropdown-toggle border-0 bg-transparent"
-              type="button"
-              aria-expanded={profileOpen}
-              onClick={() => setProfileOpen((current) => !current)}
-            >
-              <span className="user-icon">
-                <img src="/images/officer/officer-profile.png" alt="Officer profile" />
-              </span>
-              <span className="user-name">Officer</span>
-            </button>
-            <div
-              className={`dropdown-menu dropdown-menu-right dropdown-menu-icon-list${profileOpen ? ' show' : ''
-                }`}
-            >
-              <span className="dropdown-item">
-                <IdCard
-                  aria-hidden="true"
-                  className={`${iconStyles.icon} ${iconStyles.action}`}
-                />{' '}
-                ID: Officer
-              </span>
-              <span className="dropdown-item">
-                <Mail
-                  aria-hidden="true"
-                  className={`${iconStyles.icon} ${iconStyles.action}`}
-                />{' '}
-                Email: officer@jailmeet.com
-              </span>
-              <div className="dropdown-divider"></div>
-              <Link className="dropdown-item" href="/officer/profile">
-                <UserRound
-                  aria-hidden="true"
-                  className={`${iconStyles.icon} ${iconStyles.action}`}
-                />{' '}
-                Profile
-              </Link>
-              <Link className="dropdown-item" href="/officer/profile/settings">
-                <Settings
-                  aria-hidden="true"
-                  className={`${iconStyles.icon} ${iconStyles.action}`}
-                />{' '}
-                Setting
-              </Link>
-              <button
-                className="dropdown-item"
-                type="button"
-                onClick={() => setLogoutOpen(true)}
-              >
-                <LogOut
-                  aria-hidden="true"
-                  className={`${iconStyles.icon} ${iconStyles.action}`}
-                />{' '}
-                Log Out
-              </button>
-            </div>
-          </div>
+        {/* Right: profile pill + logout */}
+        <div className={s.navbarRight}>
+          {/*
+            Profile pill — non-clickable.
+            Evidence for non-clickable: /officer/profile and /officer/profile/settings
+            both confirmed absent (Test-Path returns False for both).
+            The original dropdown contained hard-coded fake data ("Officer", "officer@jailmeet.com")
+            with no real auth data source. Logout action is preserved via the dedicated button below.
+          */}
+          <OfficerProfilePill displayName="Officer" />
+
+          <button
+            className={pillStyles.logoutButton}
+            type="button"
+            aria-label="Log out"
+            onClick={() => setLogoutOpen(true)}
+          >
+            <LogOut
+              aria-hidden="true"
+              className={`${iconStyles.icon} ${iconStyles.navbar}`}
+            />
+          </button>
         </div>
-      </div>
+      </nav>
 
       <LogoutConfirmModal
         open={logoutOpen}
@@ -193,6 +161,6 @@ export default function OfficerNavbar({ onToggleSidebar }: OfficerNavbarProps) {
           handleLogout();
         }}
       />
-    </div>
+    </>
   );
 }

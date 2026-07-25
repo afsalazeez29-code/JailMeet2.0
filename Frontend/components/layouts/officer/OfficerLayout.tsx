@@ -5,6 +5,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import OfficerFooter from './OfficerFooter';
 import OfficerNavbar from './OfficerNavbar';
 import OfficerSidebar from './OfficerSidebar';
+import s from './OfficerTheme.module.css';
 
 type OfficerLayoutProps = {
   children: ReactNode;
@@ -27,16 +28,19 @@ export default function OfficerLayout({ children }: OfficerLayoutProps) {
   }, [sidebarOpen]);
 
   return (
-    <>
-      <OfficerNavbar
-        onToggleSidebar={() => setSidebarOpen((current) => !current)}
-      />
+    <div className={s.shell}>
       <OfficerSidebar
         sidebarOpen={sidebarOpen}
         onCloseSidebar={() => setSidebarOpen(false)}
       />
-      <main className="main-container">{children}</main>
-      <OfficerFooter />
-    </>
+
+      <div className={s.main}>
+        <OfficerNavbar
+          onToggleSidebar={() => setSidebarOpen((current) => !current)}
+        />
+        <main className={s.content}>{children}</main>
+        <OfficerFooter />
+      </div>
+    </div>
   );
 }

@@ -5,6 +5,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import PrisonerFooter from './PrisonerFooter';
 import PrisonerNavbar from './PrisonerNavbar';
 import PrisonerSidebar from './PrisonerSidebar';
+import s from './PrisonerTheme.module.css';
 
 type PrisonerLayoutProps = {
   children: ReactNode;
@@ -37,16 +38,28 @@ export default function PrisonerLayout({ children }: PrisonerLayoutProps) {
   }, [sidebarOpen]);
 
   return (
-    <div id="wrapper" className={sidebarOpen ? 'toggled' : undefined}>
-      <div className="clearfix"></div>
+    <div id="wrapper" className={`${s.shell}${sidebarOpen ? ' toggled' : ''}`}>
       <PrisonerSidebar sidebarOpen={sidebarOpen} />
-      <div className="content-wrapper">
-        <div className="container-fluid">
-          <PrisonerNavbar
-            onToggleSidebar={() => setSidebarOpen((current) => !current)}
-          />
-          {children}
-          <PrisonerFooter />
+      
+      {/* Mobile overlay */}
+      <button
+        className={`${s.overlay}${sidebarOpen ? ` ${s.overlayVisible}` : ''}`}
+        type="button"
+        aria-label="Close prisoner menu overlay"
+        onClick={() => setSidebarOpen(false)}
+      />
+
+      <div className={s.main}>
+        <div className="content-wrapper">
+          <div className="container-fluid">
+            <PrisonerNavbar
+              onToggleSidebar={() => setSidebarOpen((current) => !current)}
+            />
+            <main className={s.content}>
+              {children}
+            </main>
+            <PrisonerFooter />
+          </div>
         </div>
       </div>
     </div>
