@@ -11,6 +11,7 @@ import {
   LockKeyhole,
   UserRound,
   UserRoundPen,
+  X,
 } from 'lucide-react';
 
 import iconStyles from '../../common/LucideIcon.module.css';
@@ -67,7 +68,11 @@ const menuItems = [
   label: string;
 }>;
 
-export default function VisitorSidebar() {
+type VisitorSidebarProps = {
+  onCloseMenu?: () => void;
+};
+
+export default function VisitorSidebar({ onCloseMenu }: VisitorSidebarProps = {}) {
   const pathname = usePathname();
 
   return (
@@ -81,6 +86,14 @@ export default function VisitorSidebar() {
             style={{ maxWidth: '180px', height: 'auto' }}
           />
         </Link>
+        <button
+          className="layout-menu-toggle menu-link text-large ms-auto d-xl-none border-0 bg-transparent p-0"
+          type="button"
+          onClick={onCloseMenu}
+          aria-label="Close navigation menu"
+        >
+          <X aria-hidden="true" className={iconStyles.icon} />
+        </button>
       </div>
 
       <div className="menu-inner-shadow"></div>

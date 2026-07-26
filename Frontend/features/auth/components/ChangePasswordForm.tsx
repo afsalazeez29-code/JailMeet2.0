@@ -14,7 +14,13 @@ import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 
 type VisibilityField = 'current' | 'new' | 'confirm';
 
-export default function ChangePasswordForm() {
+type ChangePasswordFormProps = {
+  buttonClassName?: string;
+};
+
+export default function ChangePasswordForm({
+  buttonClassName = "btn btn-primary"
+}: ChangePasswordFormProps = {}) {
   const router = useRouter();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -120,7 +126,7 @@ export default function ChangePasswordForm() {
             {passwordInput('new', 'New password', newPassword, setNewPassword)}
             {passwordInput('confirm', 'Confirm password', confirmPassword, setConfirmPassword)}
             <div className={styles.submitWrapper}>
-              <button className="btn btn-primary" disabled={submitting} type="submit">
+              <button className={buttonClassName} disabled={submitting} type="submit">
                 <AnimatedButtonText>{submitting ? 'Changing...' : 'Change Password'}</AnimatedButtonText>
               </button>
             </div>

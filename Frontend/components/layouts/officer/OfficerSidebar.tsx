@@ -102,6 +102,7 @@ export default function OfficerSidebar({
 
       {/* Sidebar panel */}
       <aside
+        id="officer-sidebar"
         className={`${s.sidebar}${sidebarOpen ? ` ${s.sidebarOpen}` : ''}`}
         aria-label="Officer navigation"
       >

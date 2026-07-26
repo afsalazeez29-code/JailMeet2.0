@@ -31,11 +31,12 @@ export default function VisitorLayout({ children }: VisitorLayoutProps) {
       }`}
     >
       <div className="layout-container">
-        <VisitorSidebar />
+        <VisitorSidebar onCloseMenu={() => setMenuOpen(false)} />
         <div className="layout-page">
           <VisitorNavbar
             user={user}
             onToggleMenu={() => setMenuOpen((current) => !current)}
+            menuOpen={menuOpen}
           />
           <div className="content-wrapper">
             {children}
@@ -43,6 +44,15 @@ export default function VisitorLayout({ children }: VisitorLayoutProps) {
           </div>
         </div>
       </div>
+      
+      {/* Overlay to close menu on mobile */}
+      {menuOpen && (
+        <div 
+          className="layout-overlay layout-menu-toggle" 
+          onClick={() => setMenuOpen(false)}
+          style={{ display: 'block' }}
+        />
+      )}
     </div>
   );
 }

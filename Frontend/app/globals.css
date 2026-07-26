@@ -507,7 +507,7 @@ body.visitor-page .bg-menu-theme .menu-inner .menu-item:not(.active) .menu-link:
   transform: translateY(-100%);
 }
 
-/* Shared Navbar Logo */
+/* Shared Navbar Logo — base size (Admin, Prisoner, fallback) */
 .navbar-brand-logo {
   height: 30px;
   width: auto;
@@ -523,5 +523,25 @@ body.visitor-page .bg-menu-theme .menu-inner .menu-item:not(.active) .menu-link:
 @media (min-width: 1200px) {
   .navbar-brand-logo {
     height: 36px;
+  }
+}
+
+/* Visitor and Officer logos: requested +10-15% larger */
+body.visitor-page .navbar-brand-logo,
+body.officer-page .navbar-brand-logo {
+  height: 33px;
+}
+
+@media (min-width: 768px) {
+  body.visitor-page .navbar-brand-logo,
+  body.officer-page .navbar-brand-logo {
+    height: 36px;
+  }
+}
+
+@media (min-width: 1200px) {
+  body.visitor-page .navbar-brand-logo,
+  body.officer-page .navbar-brand-logo {
+    height: 41px;
   }
 }

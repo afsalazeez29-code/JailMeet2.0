@@ -1,4 +1,4 @@
-﻿/* OfficerProfilePill.module.css
+/* OfficerProfilePill.module.css
    Matches the VisitorProfilePill visual dimensions — no link, non-clickable container */
 
 .pill {
@@ -11,9 +11,26 @@
   border-radius: 999px;
   background: #ffffff;
   color: #111111;
+  text-decoration: none;
+  cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
   flex-shrink: 0;
-  user-select: none;
+}
+
+.pill:hover {
+  border-color: #ff4a17;
+  color: #111111;
+  box-shadow: 0 4px 14px rgba(255, 74, 23, 0.14);
+  transform: translateY(-1px);
+}
+
+.pill:focus-visible {
+  outline: 2px solid #ff4a17;
+  outline-offset: 3px;
 }
 
 .avatarWrap {

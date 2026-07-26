@@ -37,6 +37,7 @@ export default function OfficerLayout({ children }: OfficerLayoutProps) {
       <div className={s.main}>
         <OfficerNavbar
           onToggleSidebar={() => setSidebarOpen((current) => !current)}
+          sidebarOpen={sidebarOpen}
         />
         <main className={s.content}>{children}</main>
         <OfficerFooter />

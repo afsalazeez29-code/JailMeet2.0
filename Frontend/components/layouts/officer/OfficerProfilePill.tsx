@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import styles from './OfficerProfilePill.module.css';
 
 type OfficerProfilePillProps = {
@@ -8,9 +9,8 @@ type OfficerProfilePillProps = {
 };
 
 /**
- * OfficerProfilePill — non-clickable pill container.
- * /officer/profile does not currently exist, so this is a semantic
- * display-only element. Do not add a Link until the route is created.
+ * OfficerProfilePill — clickable pill container.
+ * Navigates to /officer/profile
  */
 export default function OfficerProfilePill({
   displayName,
@@ -23,7 +23,7 @@ export default function OfficerProfilePill({
     .toUpperCase();
 
   return (
-    <span className={styles.pill} aria-label={`Logged in as ${displayName}`}>
+    <Link href="/officer/profile" className={styles.pill} aria-label={`Logged in as ${displayName}`}>
       <span className={styles.avatarWrap} aria-hidden="true">
         {/* Initials-based avatar — replaced with a real avatar once the profile route exists */}
         <span
@@ -44,6 +44,6 @@ export default function OfficerProfilePill({
         <span className={styles.onlineDot} aria-hidden="true" />
       </span>
       <span className={styles.name}>{displayName}</span>
-    </span>
+    </Link>
   );
 }
