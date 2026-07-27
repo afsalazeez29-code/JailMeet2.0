@@ -422,10 +422,12 @@ body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link {
   text-decoration: none !important;
   cursor: pointer !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease !important;
+  transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease !important;
   flex-shrink: 0 !important;
   position: relative !important;
   border-left: 1px solid #e5e7eb !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
   /* Override template borders */
 }
 
@@ -487,16 +489,59 @@ body.visitor-page .bg-menu-theme .menu-inner>.menu-item.active:before {
 }
 
 
-/* 7. Hover States */
-
-/* Visitor Hover */
-body.visitor-page .bg-menu-theme .menu-inner .menu-item:not(.active) .menu-link:hover {
-  transform: translateY(-2px) !important;
-  border-color: #ff4a17 !important;
-  box-shadow: 0 4px 12px rgba(255, 74, 23, 0.12) !important;
+body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link:focus-visible,
+body.visitor-page .layout-menu-toggle:focus-visible,
+body.visitor-page .layout-overlay:focus-visible,
+body.visitor-page .btn:focus-visible,
+body.visitor-page .pagination .page-link:focus-visible {
+  outline: 2px solid #ff4a17 !important;
+  outline-offset: 2px !important;
 }
 
+body.visitor-page .layout-menu,
+body.visitor-page .menu-inner {
+  -webkit-overflow-scrolling: touch;
+}
 
+body.visitor-page .layout-overlay {
+  cursor: pointer;
+  padding: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body.visitor-page .layout-menu-toggle,
+body.visitor-page .btn,
+body.visitor-page .pagination .page-link,
+body.visitor-page .alert-link {
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+
+  body.visitor-page .bg-menu-theme .menu-inner .menu-item:not(.active) .menu-link:hover {
+    transform: translateY(-2px) !important;
+    border-color: #ff4a17 !important;
+    box-shadow: 0 4px 12px rgba(255, 74, 23, 0.12) !important;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+
+  body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link:active {
+    transform: translateX(2px) scale(0.99) !important;
+  }
+
+  body.visitor-page .layout-menu-toggle:active,
+  body.visitor-page .btn:active,
+  body.visitor-page .pagination .page-link:active,
+  body.visitor-page .alert-link:active {
+    transform: scale(0.97);
+  }
+}
 
 
 /* Button Text Animation */
@@ -526,22 +571,18 @@ body.visitor-page .bg-menu-theme .menu-inner .menu-item:not(.active) .menu-link:
   }
 }
 
-/* Visitor and Officer logos: requested +10-15% larger */
-body.visitor-page .navbar-brand-logo,
-body.officer-page .navbar-brand-logo {
+body.visitor-page .navbar-brand-logo {
   height: 33px;
 }
 
 @media (min-width: 768px) {
-  body.visitor-page .navbar-brand-logo,
-  body.officer-page .navbar-brand-logo {
+  body.visitor-page .navbar-brand-logo {
     height: 36px;
   }
 }
 
 @media (min-width: 1200px) {
-  body.visitor-page .navbar-brand-logo,
-  body.officer-page .navbar-brand-logo {
+  body.visitor-page .navbar-brand-logo {
     height: 41px;
   }
 }

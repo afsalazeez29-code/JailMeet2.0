@@ -1,6 +1,6 @@
 'use client';
 
-import styles from './PrisonerProfilePill.module.css';
+import s from './PrisonerTheme.module.css';
 
 type PrisonerProfilePillProps = {
   /** Display name for the authenticated prisoner */
@@ -13,53 +13,31 @@ type PrisonerProfilePillProps = {
   ariaExpanded: boolean;
 };
 
-/**
- * PrisonerProfilePill — acts as an accessible dropdown trigger button.
- */
 export default function PrisonerProfilePill({
   displayName,
   avatarSrc,
   onClick,
   ariaExpanded,
 }: PrisonerProfilePillProps) {
-  const initials = displayName
-    .split(' ')
-    .slice(0, 2)
-    .map((w) => w[0] ?? '')
-    .join('')
-    .toUpperCase();
+  const safeName = displayName.trim() || 'Prisoner';
 
   return (
     <button
       type="button"
-      className={styles.pill}
-      aria-label={`Profile menu for ${displayName}`}
+      className={s.profilePill}
+      aria-label={`Profile menu for ${safeName}`}
       aria-expanded={ariaExpanded}
       onClick={onClick}
     >
-      <span className={styles.avatarWrap} aria-hidden="true">
+      <span className={s.avatarWrap} aria-hidden="true">
         {avatarSrc ? (
-          <img src={avatarSrc} alt="" className={styles.avatar} />
+          <img src={avatarSrc} alt="" className={s.avatar} />
         ) : (
-          <span
-            className={styles.avatar}
-            style={{
-              background: '#1a1a1a',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff',
-              fontSize: '14px',
-              fontWeight: 700,
-              fontFamily: 'inherit',
-            }}
-          >
-            {initials || 'P'}
-          </span>
+          <span className={s.avatar}>P</span>
         )}
-        <span className={styles.onlineDot} aria-hidden="true" />
+        <span className={s.onlineDot} aria-hidden="true" />
       </span>
-      <span className={styles.name}>{displayName}</span>
+      <span className={s.profileName}>{safeName}</span>
     </button>
   );
 }

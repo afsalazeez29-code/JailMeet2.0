@@ -5,7 +5,6 @@ import { ReactNode, useEffect, useState } from 'react';
 import PrisonerFooter from './PrisonerFooter';
 import PrisonerNavbar from './PrisonerNavbar';
 import PrisonerSidebar from './PrisonerSidebar';
-import s from './PrisonerTheme.module.css';
 
 type PrisonerLayoutProps = {
   children: ReactNode;
@@ -20,48 +19,48 @@ export default function PrisonerLayout({ children }: PrisonerLayoutProps) {
       'admin-page',
       'visitor-page',
       'officer-page',
+      'prisoner-page',
     );
-    document.body.classList.add('bg-theme', 'bg-theme1', 'prisoner-page');
+    document.body.classList.add('prisoner-page');
 
     return () => {
-      document.body.classList.remove(
-        'bg-theme',
-        'bg-theme1',
-        'prisoner-page',
-        'toggled',
-      );
+      document.body.classList.remove('prisoner-page');
     };
   }, []);
 
-  useEffect(() => {
-    document.body.classList.toggle('toggled', sidebarOpen);
-  }, [sidebarOpen]);
-
   return (
-    <div id="wrapper" className={`${s.shell}${sidebarOpen ? ' toggled' : ''}`}>
-      <PrisonerSidebar sidebarOpen={sidebarOpen} />
-      
-      {/* Mobile overlay */}
-      <button
-        className={`${s.overlay}${sidebarOpen ? ` ${s.overlayVisible}` : ''}`}
-        type="button"
-        aria-label="Close prisoner menu overlay"
-        onClick={() => setSidebarOpen(false)}
-      />
+    <div
+      className={`layout-wrapper layout-content-navbar${
+        sidebarOpen ? ' layout-menu-expanded' : ''
+      }`}
+    >
+      <div className="layout-container">
+        <PrisonerSidebar
+          onCloseSidebar={() => setSidebarOpen(false)}
+        />
 
-      <div className={s.main}>
-        <div className="content-wrapper">
-          <div className="container-fluid">
-            <PrisonerNavbar
-              onToggleSidebar={() => setSidebarOpen((current) => !current)}
-            />
-            <main className={s.content}>
-              {children}
-            </main>
+        <div className="layout-page">
+          <PrisonerNavbar
+            onToggleSidebar={() => setSidebarOpen((current) => !current)}
+            sidebarOpen={sidebarOpen}
+          />
+          <div className="content-wrapper">
+            <main>{children}</main>
             <PrisonerFooter />
           </div>
         </div>
       </div>
+
+      {sidebarOpen ? (
+        <button
+          aria-controls="layout-menu"
+          aria-label="Close navigation menu overlay"
+          className="layout-overlay layout-menu-toggle border-0"
+          onClick={() => setSidebarOpen(false)}
+          style={{ display: 'block' }}
+          type="button"
+        />
+      ) : null}
     </div>
   );
 }

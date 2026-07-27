@@ -158,6 +158,106 @@ const visitorFontOverrides = `
   body.visitor-page .page-link:focus {
     color: var(--jm-accent) !important;
   }
+
+  @media (max-width: 767px) {
+    body.visitor-page #layout-navbar.layout-navbar.navbar-detached {
+      width: calc(100% - 24px) !important;
+      max-width: calc(100% - 24px) !important;
+      min-height: 56px !important;
+      margin: 10px auto 0 !important;
+      padding: 0.3rem 0.75rem !important;
+      border-radius: 999px !important;
+      box-sizing: border-box !important;
+      overflow: visible !important;
+    }
+
+    body.visitor-page #layout-navbar .navbar-nav-right {
+      min-width: 0 !important;
+    }
+
+    body.visitor-page #layout-navbar button,
+    body.visitor-page #layout-navbar a,
+    body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link,
+    body.visitor-page .content-wrapper .btn,
+    body.visitor-page .content-wrapper .page-link {
+      touch-action: manipulation;
+      transition:
+        transform 0.18s ease,
+        background-color 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease !important;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body.visitor-page #layout-navbar button:focus-visible,
+    body.visitor-page #layout-navbar a:focus-visible,
+    body.visitor-page .layout-menu-toggle:focus-visible,
+    body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link:focus-visible,
+    body.visitor-page .content-wrapper .btn:focus-visible,
+    body.visitor-page .content-wrapper .page-link:focus-visible {
+      outline: 2px solid var(--jm-accent) !important;
+      outline-offset: 2px !important;
+    }
+
+    body.visitor-page #layout-navbar button:active,
+    body.visitor-page #layout-navbar a:active,
+    body.visitor-page .layout-menu-toggle:active,
+    body.visitor-page .content-wrapper .btn:active,
+    body.visitor-page .content-wrapper .page-link:active {
+      transform: scale(0.97) !important;
+    }
+
+    body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link:active {
+      border-color: var(--jm-accent) !important;
+      color: var(--jm-accent) !important;
+      background-color: rgba(var(--jm-accent-rgb), 0.12) !important;
+      box-shadow: 0 4px 12px rgba(var(--jm-accent-rgb), 0.14) !important;
+      transform: translateX(2px) scale(0.99) !important;
+    }
+  }
+
+  @media (max-width: 767px) and (hover: hover) and (pointer: fine) {
+    body.visitor-page #layout-navbar button:hover,
+    body.visitor-page #layout-navbar a:hover,
+    body.visitor-page .layout-menu-toggle:hover,
+    body.visitor-page .content-wrapper .btn:hover,
+    body.visitor-page .content-wrapper .page-link:hover {
+      transform: translateY(-1px) !important;
+    }
+
+    body.visitor-page .bg-menu-theme .menu-inner .menu-item:not(.active) .menu-link:hover {
+      transform: translateX(2px) translateY(-1px) !important;
+    }
+  }
+
+  @media (max-width: 430px) {
+    body.visitor-page #layout-navbar.layout-navbar.navbar-detached {
+      width: calc(100% - 18px) !important;
+      max-width: calc(100% - 18px) !important;
+      margin-top: 8px !important;
+      padding-left: 0.6rem !important;
+      padding-right: 0.6rem !important;
+    }
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    body.visitor-page #layout-navbar button:active,
+    body.visitor-page #layout-navbar a:active,
+    body.visitor-page .layout-menu-toggle:active,
+    body.visitor-page .content-wrapper .btn:active,
+    body.visitor-page .content-wrapper .page-link:active {
+      transform: scale(0.95) !important;
+    }
+
+    body.visitor-page .bg-menu-theme .menu-inner .menu-item .menu-link:active {
+      border-color: var(--jm-accent) !important;
+      color: var(--jm-accent) !important;
+      background-color: rgba(var(--jm-accent-rgb), 0.12) !important;
+      box-shadow: 0 4px 12px rgba(var(--jm-accent-rgb), 0.14) !important;
+      transform: translateX(2px) scale(0.98) !important;
+    }
+  }
 `;
 
 export default function VisitorRouteLayout({

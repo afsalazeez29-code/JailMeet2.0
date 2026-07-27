@@ -5,6 +5,7 @@ import { CircleX, Clock3, ThumbsUp, UsersRound } from 'lucide-react';
 
 import { ErrorAlert, ForbiddenAlert, LoadingAlert, SuccessAlert } from '../../../components/common/StatusAlert';
 import iconStyles from '../../../components/common/LucideIcon.module.css';
+import s from '../../../components/layouts/officer/OfficerTheme.module.css';
 import { useDashboard } from '@features/dashboards/services/useDashboard';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { getOfficerDashboard } from '@features/dashboards/services/dashboard.service';
@@ -17,66 +18,64 @@ const statCards = [
     label: 'Total Prisoners',
     field: 'totalPrisoners',
     icon: UsersRound,
-    cardClass: 'bg-primary text-white',
+    colorClass: s.iconPrimary,
   },
   {
     label: 'Pending Appointments',
     field: 'pendingAppointments',
     icon: Clock3,
-    cardClass: 'bg-info text-white',
+    colorClass: s.iconWarning,
   },
   {
     label: 'Approved Appointments',
     field: 'approvedAppointments',
     icon: ThumbsUp,
-    cardClass: 'bg-secondary text-white',
+    colorClass: s.iconSuccess,
   },
   {
     label: 'Rejected Appointments',
     field: 'rejectedAppointments',
     icon: CircleX,
-    cardClass: 'bg-danger text-white',
+    colorClass: s.iconDanger,
   },
   {
     label: 'Pending Parole Requests',
     field: 'pendingParoleRequests',
     icon: Clock3,
-    cardClass: 'bg-warning text-dark',
+    colorClass: s.iconWarning,
   },
 ] satisfies ReadonlyArray<{
   label: string;
   field: keyof OfficerDashboardData;
   icon: CardIcon;
-  cardClass: string;
+  colorClass: string;
 }>;
 
 function OfficerStatCard({
-  cardClass,
+  colorClass,
   data,
   field,
   icon: Icon,
   label,
 }: {
-  cardClass: string;
+  colorClass: string;
   data: OfficerDashboardData;
   field: keyof OfficerDashboardData;
   icon: CardIcon;
   label: string;
 }) {
   return (
-    <div className="col-xl-3 mb-30">
-      <div className={`card-box height-100-p widget-style1 ${cardClass}`}>
-        <div className="d-flex flex-wrap align-items-center">
-          <div className="widget-data">
-            <div className="h4 mb-0">{data[field] ?? 0}</div>
-            <div className="weight-600 font-14">{label}</div>
-          </div>
-          <div className="progress-data opacity-50">
+    <div className="col-lg-3 col-md-6 col-12 mb-4">
+      <div className={s.statCard}>
+        <div className={s.statCardBody}>
+          <div className={`${s.statIconBox} ${colorClass}`}>
             <Icon
               aria-hidden="true"
               className={`${iconStyles.icon} ${iconStyles.card}`}
             />
           </div>
+          <span className={s.statTitle}>{label}</span>
+          <h3 className={s.statValue}>{data[field] ?? 0}</h3>
         </div>
       </div>
     </div>
@@ -145,7 +144,7 @@ export default function OfficerDashboardPage() {
       <div className="row">
         {statCards.map((card) => (
           <OfficerStatCard
-            cardClass={card.cardClass}
+            colorClass={card.colorClass}
             data={data}
             field={card.field}
             icon={card.icon}

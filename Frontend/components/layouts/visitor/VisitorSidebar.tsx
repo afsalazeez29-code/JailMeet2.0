@@ -123,6 +123,7 @@ export default function VisitorSidebar({ onCloseMenu }: VisitorSidebarProps = {}
                 href={item.href}
                 className="menu-link"
                 data-legacy-href={item.legacyHref}
+                onClick={onCloseMenu}
               >
                 <Icon
                   aria-hidden="true"

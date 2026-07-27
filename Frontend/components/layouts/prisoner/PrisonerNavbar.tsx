@@ -3,26 +3,33 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { LogOut, Menu, Search, WalletCards } from 'lucide-react';
+import { LogOut, WalletCards } from 'lucide-react';
 
 import LogoutConfirmModal from '../../common/LogoutConfirmModal';
 import iconStyles from '../../common/LucideIcon.module.css';
-import { clearAccessToken } from '@features/auth/services/token.service';
+import { useAuth } from '@features/auth/hooks/useAuth';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
+import { clearAccessToken } from '@features/auth/services/token.service';
 import PrisonerProfilePill from './PrisonerProfilePill';
 import s from './PrisonerTheme.module.css';
 
 type PrisonerNavbarProps = {
   onToggleSidebar: () => void;
+  sidebarOpen?: boolean;
 };
 
 const fallbackPrisonerImage = '/images/avatars/prisoner-fallback.png';
 
-export default function PrisonerNavbar({ onToggleSidebar }: PrisonerNavbarProps) {
+export default function PrisonerNavbar({
+  onToggleSidebar,
+  sidebarOpen = false,
+}: PrisonerNavbarProps) {
   const router = useRouter();
+  const { user } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
+
+  const displayName = user?.name ?? 'Prisoner';
 
   const handleLogout = () => {
     clearAccessToken();
@@ -31,120 +38,81 @@ export default function PrisonerNavbar({ onToggleSidebar }: PrisonerNavbarProps)
 
   return (
     <>
-      <nav className={s.navbar} aria-label="Prisoner top navigation">
-        {/* Left: toggle + logo + search */}
-        <div className={s.navbarLeft}>
-          <button
-            className={s.toggleBtn}
-            type="button"
-            aria-label="Toggle prisoner sidebar"
-            onClick={onToggleSidebar}
-          >
-            <Menu
-              aria-hidden="true"
-              className={`${iconStyles.icon} ${iconStyles.navbar}`}
-            />
-          </button>
+      <nav
+        className={`layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme ${s.prisonerNavbar}`}
+        id="layout-navbar"
+        aria-label="Prisoner top navigation"
+      >
+        <Link href="/" className="d-none d-xl-flex align-items-center me-3 ms-xl-0">
+          <img src="/images/logos/auth-logo.png" alt="JailMeet home" className="navbar-brand-logo" />
+        </Link>
 
-          <Link href="/" aria-label="JailMeet home" className="d-flex align-items-center">
-            <img
-              src="/images/logos/auth-logobl.png"
-              alt="JailMeet home"
-              className="navbar-brand-logo"
-              style={{ height: '30px' }}
-            />
-          </Link>
+        <button
+          className={`d-flex d-xl-none align-items-center border-0 bg-transparent p-0 ms-1 me-3 ${s.mobileLogoButton}`}
+          type="button"
+          onClick={onToggleSidebar}
+          aria-label="Open navigation menu"
+          aria-expanded={sidebarOpen}
+          aria-controls="layout-menu"
+        >
+          <img src="/images/logos/auth-logo.png" alt="" className="navbar-brand-logo" aria-hidden="true" />
+        </button>
 
-          {/* Search form — exact structure and behaviour preserved */}
-          <form
-            className={`search-bar d-flex align-items-center${searchOpen ? ' show' : ''}`}
-            onSubmit={(event) => event.preventDefault()}
-            style={{ marginLeft: '10px' }}
-          >
-            <input
-              className={`form-control ${!searchOpen ? 'd-none' : ''}`}
-              placeholder="Enter keywords"
-              type="text"
-            />
-            <button
-              className={s.toggleBtn}
-              type="button"
-              aria-label="Toggle search"
-              onClick={() => setSearchOpen((current) => !current)}
-            >
-              <Search
-                aria-hidden="true"
-                className={`${iconStyles.icon} ${iconStyles.navbar}`}
-              />
-            </button>
-          </form>
-        </div>
-
-        {/* Right: profile dropdown */}
-        <div className={s.navbarRight}>
-          <div className="dropdown">
-            <PrisonerProfilePill
-              displayName="Prisoner"
-              avatarSrc={fallbackPrisonerImage}
-              onClick={() => setProfileOpen((current) => !current)}
-              ariaExpanded={profileOpen}
-            />
-            <ul
-              className={`dropdown-menu dropdown-menu-right${
-                profileOpen ? ' show' : ''
-              }`}
-              style={{ position: 'absolute', top: '100%', right: 0 }}
-            >
-              <li className="dropdown-item user-details">
-                <div className="media align-items-center">
-                  <div className="avatar me-3">
-                    <img
-                      className="align-self-start"
-                      src={fallbackPrisonerImage}
-                      alt="Prisoner avatar"
-                      style={{
-                        width: '60px',
-                        height: '60px',
-                        objectFit: 'cover',
-                        borderRadius: '50%'
-                      }}
-                    />
-                  </div>
-                  <div className="media-body">
-                    <h6 className="mt-2 user-title mb-0">Prisoner ID: Prisoner</h6>
-                    <p className="user-subtitle text-muted mb-0">Prisoner Name: Prisoner</p>
-                  </div>
-                </div>
-              </li>
-              <li className="dropdown-divider"></li>
-              <li className="dropdown-item">
-                <Link href="/prisoner/dashboard" className="text-dark d-flex align-items-center">
-                  <WalletCards
-                    aria-hidden="true"
-                    className={`me-2 ${iconStyles.icon} ${iconStyles.action}`}
-                  />{' '}
-                  Account
-                </Link>
-              </li>
-              <li className="dropdown-divider"></li>
-              <li className="dropdown-item">
-                <button
-                  className="text-dark border-0 bg-transparent p-0 d-flex align-items-center w-100"
-                  type="button"
-                  onClick={() => {
-                    setProfileOpen(false);
-                    setLogoutOpen(true);
-                  }}
+        <div className="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+          <ul className="navbar-nav flex-row align-items-center ms-auto">
+            <li className={`nav-item ${s.profileActions}`}>
+              <div className={s.profileDropdown}>
+                <PrisonerProfilePill
+                  displayName={displayName}
+                  avatarSrc={fallbackPrisonerImage}
+                  onClick={() => setProfileOpen((current) => !current)}
+                  ariaExpanded={profileOpen}
+                />
+                <ul
+                  className={`dropdown-menu dropdown-menu-right ${s.profileMenu}${
+                    profileOpen ? ' show' : ''
+                  }`}
                 >
-                  <LogOut
-                    aria-hidden="true"
-                    className={`me-2 ${iconStyles.icon} ${iconStyles.action}`}
-                  />{' '}
-                  Logout
-                </button>
-              </li>
-            </ul>
-          </div>
+                  <li className="dropdown-item user-details">
+                    <div className="media align-items-center">
+                      <div className="avatar me-3">
+                        <img
+                          className="align-self-start"
+                          src={fallbackPrisonerImage}
+                          alt="Prisoner avatar"
+                        />
+                      </div>
+                      <div className="media-body">
+                        <h6 className="mt-2 user-title mb-0">Prisoner ID: Prisoner</h6>
+                        <p className="user-subtitle text-muted mb-0">
+                          Prisoner Name: {displayName}
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                  <li className="dropdown-divider" />
+                  <li className="dropdown-item">
+                    <Link href="/prisoner/dashboard" className="text-dark d-flex align-items-center">
+                      <WalletCards
+                        aria-hidden="true"
+                        className={`me-2 ${iconStyles.icon} ${iconStyles.action}`}
+                      />{' '}
+                      Account
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              <button
+                className={s.logoutButton}
+                type="button"
+                aria-label="Log out"
+                onClick={() => setLogoutOpen(true)}
+              >
+                <LogOut aria-hidden="true" className={`${iconStyles.icon} ${iconStyles.navbar}`} />
+              </button>
+            </li>
+          </ul>
         </div>
       </nav>
 

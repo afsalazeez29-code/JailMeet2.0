@@ -16,7 +16,12 @@ export default function VisitorLayout({ children }: VisitorLayoutProps) {
   const { user } = useAuth();
 
   useEffect(() => {
-    document.body.classList.remove('index-page', 'admin-page');
+    document.body.classList.remove(
+      'index-page',
+      'admin-page',
+      'officer-page',
+      'prisoner-page',
+    );
     document.body.classList.add('visitor-page');
 
     return () => {
@@ -45,12 +50,13 @@ export default function VisitorLayout({ children }: VisitorLayoutProps) {
         </div>
       </div>
       
-      {/* Overlay to close menu on mobile */}
       {menuOpen && (
-        <div 
-          className="layout-overlay layout-menu-toggle" 
+        <button
+          aria-label="Close navigation menu overlay"
+          className="layout-overlay layout-menu-toggle border-0"
           onClick={() => setMenuOpen(false)}
           style={{ display: 'block' }}
+          type="button"
         />
       )}
     </div>

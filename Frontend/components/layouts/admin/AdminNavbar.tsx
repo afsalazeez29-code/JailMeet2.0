@@ -3,23 +3,31 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Menu, MoreVertical, PanelLeftClose, Search } from 'lucide-react';
+import { LogOut, Search } from 'lucide-react';
 
 import LogoutConfirmModal from '../../common/LogoutConfirmModal';
 import iconStyles from '../../common/LucideIcon.module.css';
-import { clearAccessToken } from '@features/auth/services/token.service';
+import { useAuth } from '@features/auth/hooks/useAuth';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
+import { clearAccessToken } from '@features/auth/services/token.service';
 import AdminProfilePill from './AdminProfilePill';
+import s from './AdminTheme.module.css';
 
 type AdminNavbarProps = {
   onToggleSidebar: () => void;
+  sidebarOpen?: boolean;
 };
 
-export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
+export default function AdminNavbar({
+  onToggleSidebar,
+  sidebarOpen = false,
+}: AdminNavbarProps) {
   const router = useRouter();
+  const { user } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
+
+  const displayName = user?.name ?? 'Admin';
 
   const handleLogout = () => {
     clearAccessToken();
@@ -27,157 +35,85 @@ export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
   };
 
   return (
-    <div className="main-header">
-      <div className="main-header-logo">
-        <div className="logo-header" data-background-color="dark">
-          <Link href="/" className="logo d-flex align-items-center">
-            <img
-              src="/images/logos/auth-logobl.png"
-              alt="JailMeet home"
-              className="navbar-brand-logo"
-            />
-          </Link>
-          <div className="nav-toggle">
-            <button
-              className="btn btn-toggle toggle-sidebar"
-              type="button"
-              onClick={onToggleSidebar}
-            >
-              <Menu
-                aria-hidden="true"
-                className={`${iconStyles.icon} ${iconStyles.navbar}`}
-              />
-            </button>
-            <button
-              className="btn btn-toggle sidenav-toggler"
-              type="button"
-              onClick={onToggleSidebar}
-            >
-              <PanelLeftClose
-                aria-hidden="true"
-                className={`${iconStyles.icon} ${iconStyles.navbar}`}
-              />
-            </button>
-          </div>
-          <button
-            className="topbar-toggler more"
-            type="button"
-            onClick={() => setSearchOpen((current) => !current)}
-          >
-            <MoreVertical
-              aria-hidden="true"
-              className={`${iconStyles.icon} ${iconStyles.navbar}`}
-            />
-          </button>
-        </div>
-      </div>
-
+    <>
       <nav
-        className="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"
-        style={{ right: '1px', width: '100%', maxWidth: '100%' }}
+        className={`layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme ${s.adminNavbar}`}
+        id="layout-navbar"
+        aria-label="Admin top navigation"
       >
-        <div className="container-fluid" style={{ width: '100%', maxWidth: '100%' }}>
-          <nav className="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
-            <div className="input-group">
-              <div className="input-group-prepend">
-                <button type="submit" className="btn btn-search pe-1">
-                  <Search
-                    aria-hidden="true"
-                    className={`search-icon ${iconStyles.icon} ${iconStyles.action}`}
-                  />
-                </button>
-              </div>
-              <input
-                type="text"
-                placeholder="Search ..."
-                className="form-control"
-              />
-            </div>
-          </nav>
+        <Link href="/" className="d-none d-xl-flex align-items-center me-3 ms-xl-0">
+          <img src="/images/logos/auth-logo.png" alt="JailMeet home" className="navbar-brand-logo" />
+        </Link>
 
-          <ul className="navbar-nav topbar-nav ms-md-auto align-items-center">
-            <li className="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
-              <button
-                className="nav-link dropdown-toggle"
-                type="button"
-                aria-expanded={searchOpen}
-                aria-haspopup="true"
-                onClick={() => setSearchOpen((current) => !current)}
-              >
-                <Search
-                  aria-hidden="true"
-                  className={`${iconStyles.icon} ${iconStyles.navbar}`}
+        <button
+          className={`d-flex d-xl-none align-items-center border-0 bg-transparent p-0 ms-1 me-3 ${s.mobileLogoButton}`}
+          type="button"
+          onClick={onToggleSidebar}
+          aria-label="Open navigation menu"
+          aria-expanded={sidebarOpen}
+          aria-controls="layout-menu"
+        >
+          <img src="/images/logos/auth-logo.png" alt="" className="navbar-brand-logo" aria-hidden="true" />
+        </button>
+
+        <form className={s.searchForm} onSubmit={(event) => event.preventDefault()}>
+          <Search aria-hidden="true" className={`${s.searchIcon} ${iconStyles.icon} ${iconStyles.action}`} />
+          <input
+            aria-label="Search"
+            className={s.searchInput}
+            placeholder="Search"
+            type="search"
+          />
+        </form>
+
+        <div className="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+          <ul className="navbar-nav flex-row align-items-center ms-auto">
+            <li className={`nav-item ${s.profileActions}`}>
+              <div className={s.profileDropdown}>
+                <AdminProfilePill
+                  displayName={displayName}
+                  onClick={() => setProfileOpen((current) => !current)}
+                  ariaExpanded={profileOpen}
                 />
-              </button>
-              <ul
-                className={`dropdown-menu dropdown-search animated fadeIn${
-                  searchOpen ? ' show' : ''
-                }`}
-              >
-                <li>
-                  <form className="navbar-left navbar-form nav-search">
-                    <div className="input-group">
-                      <input
-                        type="text"
-                        placeholder="Search ..."
-                        className="form-control"
-                      />
-                    </div>
-                  </form>
-                </li>
-              </ul>
-            </li>
-
-            <li className="nav-item topbar-user dropdown hidden-caret">
-              <AdminProfilePill
-                displayName="Admin"
-                onClick={() => setProfileOpen((current) => !current)}
-                ariaExpanded={profileOpen}
-              />
-              
-              <ul
-                className={`dropdown-menu dropdown-user animated fadeIn${
-                  profileOpen ? ' show' : ''
-                }`}
-              >
-                <li>
-                  <div className="dropdown-user-scroll scrollbar-outer">
-                    <div className="user-box">
-                      <div className="avatar-lg">
-                        <span className="avatar-img rounded d-flex align-items-center justify-content-center bg-secondary text-white">
-                          A
-                        </span>
-                      </div>
-                      <div className="u-text">
-                        <h4>Admin</h4>
-                        <p className="text-muted">admin@jailmeet.com</p>
-                        <Link
-                          href="/admin/profile"
-                          className="btn btn-xs btn-secondary btn-sm"
-                        >
-                          View Profile
-                        </Link>
+                <ul
+                  className={`dropdown-menu dropdown-user ${s.profileMenu}${
+                    profileOpen ? ' show' : ''
+                  }`}
+                >
+                  <li>
+                    <div className={s.profileMenuHeader}>
+                      <span className={s.profileMenuAvatar} aria-hidden="true">
+                        A
+                      </span>
+                      <div>
+                        <h4>{displayName}</h4>
+                        <p>{user?.email ?? 'admin@jailmeet.com'}</p>
                       </div>
                     </div>
-                    <div className="dropdown-divider"></div>
+                  </li>
+                  <li className="dropdown-divider" />
+                  <li>
                     <Link className="dropdown-item" href="/admin/profile">
                       My Profile
                     </Link>
-                    <div className="dropdown-divider"></div>
+                  </li>
+                  <li className="dropdown-divider" />
+                  <li>
                     <Link className="dropdown-item" href="/admin/settings">
                       Account Setting
                     </Link>
-                    <div className="dropdown-divider"></div>
-                    <button
-                      className="dropdown-item"
-                      type="button"
-                      onClick={() => setLogoutOpen(true)}
-                    >
-                      Logout
-                    </button>
-                  </div>
-                </li>
-              </ul>
+                  </li>
+                </ul>
+              </div>
+
+              <button
+                className={s.logoutButton}
+                type="button"
+                aria-label="Log out"
+                onClick={() => setLogoutOpen(true)}
+              >
+                <LogOut aria-hidden="true" className={`${iconStyles.icon} ${iconStyles.navbar}`} />
+              </button>
             </li>
           </ul>
         </div>
@@ -191,6 +127,6 @@ export default function AdminNavbar({ onToggleSidebar }: AdminNavbarProps) {
           handleLogout();
         }}
       />
-    </div>
+    </>
   );
 }

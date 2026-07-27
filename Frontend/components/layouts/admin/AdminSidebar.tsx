@@ -9,15 +9,14 @@ import {
   FileText,
   House,
   LockKeyhole,
-  Menu,
-  MoreVertical,
-  PanelLeftClose,
   UserCheck,
   UserRound,
   UsersRound,
+  X,
 } from 'lucide-react';
 
 import iconStyles from '../../common/LucideIcon.module.css';
+import s from './AdminTheme.module.css';
 
 type SidebarIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -78,97 +77,79 @@ const navItems = [
 }>;
 
 type AdminSidebarProps = {
-  onToggleSidebar: () => void;
+  onCloseSidebar: () => void;
 };
 
-export default function AdminSidebar({ onToggleSidebar }: AdminSidebarProps) {
+export default function AdminSidebar({ onCloseSidebar }: AdminSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <div className="sidebar" data-background-color="dark">
-      <div className="sidebar-logo">
-        <div className="logo-header" data-background-color="dark">
-          <Link href="/" className="logo d-flex align-items-center">
-            <img
-              src="/images/logos/jmlogo.png"
-              alt="JailMeet home"
-              className="navbar-brand"
-              style={{ height: '32px' }}
-            />
-          </Link>
-          <div className="nav-toggle">
-            <button
-              className="btn btn-toggle toggle-sidebar"
-              type="button"
-              onClick={onToggleSidebar}
-            >
-              <Menu
-                aria-hidden="true"
-                className={`${iconStyles.icon} ${iconStyles.navbar}`}
-              />
-            </button>
-            <button
-              className="btn btn-toggle sidenav-toggler"
-              type="button"
-              onClick={onToggleSidebar}
-            >
-              <PanelLeftClose
-                aria-hidden="true"
-                className={`${iconStyles.icon} ${iconStyles.navbar}`}
-              />
-            </button>
-          </div>
-          <button
-            className="topbar-toggler more"
-            type="button"
-            onClick={onToggleSidebar}
-          >
-            <MoreVertical
-              aria-hidden="true"
-              className={`${iconStyles.icon} ${iconStyles.navbar}`}
-            />
-          </button>
-        </div>
+    <aside
+      id="layout-menu"
+      className="layout-menu menu-vertical menu bg-menu-theme"
+      aria-label="Admin navigation"
+    >
+      <div className="app-brand demo">
+        <Link href="/" className="app-brand-link" aria-label="JailMeet home">
+          <img
+            src="/images/logos/jmlogo.png"
+            alt="JailMeet home"
+            className="app-brand-logo"
+            style={{ maxWidth: '180px', height: 'auto' }}
+          />
+        </Link>
+        <button
+          className="layout-menu-toggle menu-link text-large ms-auto d-xl-none border-0 bg-transparent p-0"
+          type="button"
+          aria-label="Close sidebar"
+          onClick={onCloseSidebar}
+        >
+          <X
+            aria-hidden="true"
+            className={`${iconStyles.icon} ${iconStyles.navbar}`}
+          />
+        </button>
       </div>
 
-      <div className="sidebar-wrapper scrollbar scrollbar-inner">
-        <div className="sidebar-content">
-          <ul className="nav nav-secondary">
+      <div className="menu-inner-shadow"></div>
+
+      <nav>
+          <ul className="menu-inner py-1">
             {navItems.map((item, index) => {
               const Icon = item.icon;
 
               return (
                 <Fragment key={item.href}>
                   {index === 1 ? (
-                    <li className="nav-section">
-                      <span className="sidebar-mini-icon">
+                    <li className={`menu-item ${s.navSection}`}>
+                      <span>
                         <Ellipsis
                           aria-hidden="true"
-                          className={`${iconStyles.icon} ${iconStyles.sidebar}`}
+                          className={`menu-icon tf-icons ${iconStyles.icon} ${iconStyles.sidebar}`}
                         />
                       </span>
-                      <h4 className="text-section">Components</h4>
+                      <h4 className={s.navSectionText}>Components</h4>
                     </li>
                   ) : null}
-                  <li
-                    className={`nav-item${
-                      pathname === item.href ? ' active' : ''
-                    }`}
-                  >
-                    <Link href={item.href} data-legacy-href={item.legacyHref}>
+                  <li className={`menu-item${pathname === item.href ? ' active' : ''}`}>
+                    <Link
+                      href={item.href}
+                      data-legacy-href={item.legacyHref}
+                      className="menu-link"
+                      onClick={onCloseSidebar}
+                    >
                       <Icon
                         aria-hidden="true"
-                        className={`${iconStyles.icon} ${iconStyles.sidebar}`}
+                        className={`menu-icon tf-icons ${iconStyles.icon} ${iconStyles.sidebar}`}
                       />
-                      <p>{item.label}</p>
+                      <div>{item.label}</div>
                     </Link>
                   </li>
                 </Fragment>
               );
             })}
           </ul>
-        </div>
-      </div>
-    </div>
+      </nav>
+    </aside>
   );
 }

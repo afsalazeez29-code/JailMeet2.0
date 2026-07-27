@@ -5,7 +5,6 @@ import { type ComponentType, type SVGProps } from 'react';
 import {
   CalendarDays,
   CircleCheck,
-  Clock3,
   FileText,
   UserCheck,
   UserRound,
@@ -14,6 +13,7 @@ import {
 
 import { ErrorAlert, ForbiddenAlert, LoadingAlert, StatusAlert } from '../../../components/common/StatusAlert';
 import iconStyles from '../../../components/common/LucideIcon.module.css';
+import s from '../../../components/layouts/admin/AdminTheme.module.css';
 import { useDashboard } from '@features/dashboards/services/useDashboard';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { getAdminDashboard } from '@features/dashboards/services/dashboard.service';
@@ -27,49 +27,49 @@ const statCards = [
     label: 'Total Users',
     field: 'totalUsers',
     icon: UsersRound,
-    iconClass: 'icon-primary',
+    iconClass: s.iconPrimary,
     href: '/admin/users',
   },
   {
     label: 'Visitors',
     field: 'totalVisitors',
     icon: UserCheck,
-    iconClass: 'icon-info',
+    iconClass: s.iconInfo,
     href: '/admin/visitors',
   },
   {
     label: 'Officers',
     field: 'totalOfficers',
     icon: UserRound,
-    iconClass: 'icon-success',
+    iconClass: s.iconSuccess,
     href: '/admin/officers',
   },
   {
     label: 'Prisoners',
     field: 'totalPrisoners',
     icon: UserRound,
-    iconClass: 'icon-secondary',
+    iconClass: s.iconPrimary,
     href: '/admin/prisoners',
   },
   {
     label: 'Appointments',
     field: 'totalAppointments',
     icon: CalendarDays,
-    iconClass: 'icon-primary',
+    iconClass: s.iconPrimary,
     href: '/admin/appointments',
   },
   {
     label: 'Pending Appointments',
     field: 'pendingAppointments',
     icon: CircleCheck,
-    iconClass: 'icon-info',
+    iconClass: s.iconWarning,
     href: '/admin/appointments?status=PENDING',
   },
   {
     label: 'Pending Parole Requests',
     field: 'pendingParoleRequests',
     icon: FileText,
-    iconClass: 'icon-warning',
+    iconClass: s.iconWarning,
     href: '/admin/parole?status=PENDING',
   },
 ] satisfies ReadonlyArray<{
@@ -97,25 +97,17 @@ function AdminStatCard({
 }) {
   return (
     <div className="col-sm-6 col-md-3">
-      <Link href={href} className="card card-stats card-round text-decoration-none">
-        <div className="card-body">
-          <div className="row align-items-center">
-            <div className="col-icon">
-              <div
-                className={`icon-big text-center ${iconClass} bubble-shadow-small`}
-              >
-                <Icon
-                  aria-hidden="true"
-                  className={`${iconStyles.icon} ${iconStyles.card}`}
-                />
-              </div>
+      <Link href={href} className="text-decoration-none">
+        <div className={`${s.statCard} ${s.statCardInteractive}`}>
+          <div className={s.statCardBody}>
+            <div className={`${s.statIconBox} ${iconClass}`}>
+              <Icon
+                aria-hidden="true"
+                className={`${iconStyles.icon} ${iconStyles.card}`}
+              />
             </div>
-            <div className="col col-stats ms-3 ms-sm-0">
-              <div className="numbers">
-                <p className="card-category">{label}</p>
-                <h4 className="card-title">{data[field] ?? 0}</h4>
-              </div>
-            </div>
+            <span className={s.statTitle}>{label}</span>
+            <h3 className={s.statValue}>{data[field] ?? 0}</h3>
           </div>
         </div>
       </Link>
@@ -138,7 +130,7 @@ export default function AdminDashboardPage() {
       !protectedPage.error)
   ) {
     return (
-      <div className="container" style={{ position: 'absolute', top: '70px' }}>
+      <div className="admin-dashboard-page">
         <div className="page-inner">
           <LoadingAlert>Loading admin dashboard...</LoadingAlert>
         </div>
@@ -148,7 +140,7 @@ export default function AdminDashboardPage() {
 
   if (protectedPage.isForbidden || dashboard.isForbidden) {
     return (
-      <div className="container" style={{ position: 'absolute', top: '70px' }}>
+      <div className="admin-dashboard-page">
         <div className="page-inner">
           <ForbiddenAlert />
         </div>
@@ -161,7 +153,7 @@ export default function AdminDashboardPage() {
 
   if (protectedPage.error || dashboard.error) {
     return (
-      <div className="container" style={{ position: 'absolute', top: '70px' }}>
+      <div className="admin-dashboard-page">
         <div className="page-inner">
           <ErrorAlert>{errorMessage}</ErrorAlert>
         </div>
@@ -177,7 +169,7 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="container" style={{ position: 'absolute', top: '70px' }}>
+    <div className="admin-dashboard-page">
       <div className="page-inner">
         <div className="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
           <div>

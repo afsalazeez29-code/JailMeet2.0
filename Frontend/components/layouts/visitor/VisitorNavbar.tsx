@@ -41,7 +41,7 @@ export default function VisitorNavbar({ user, onToggleMenu, menuOpen = false }: 
 
         {/* Mobile Logo Toggle (acts as menu trigger on small screens) */}
         <button
-          className="d-flex d-xl-none align-items-center border-0 bg-transparent p-0 ms-1 me-3"
+          className={`d-flex d-xl-none align-items-center border-0 bg-transparent p-0 ms-1 me-3 ${styles.mobileLogoButton}`}
           type="button"
           onClick={onToggleMenu}
           aria-label="Open navigation menu"

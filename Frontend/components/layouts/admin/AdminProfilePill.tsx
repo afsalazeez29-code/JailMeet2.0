@@ -1,6 +1,6 @@
 'use client';
 
-import styles from './AdminProfilePill.module.css';
+import s from './AdminTheme.module.css';
 
 type AdminProfilePillProps = {
   /** Display name for the authenticated admin */
@@ -13,53 +13,31 @@ type AdminProfilePillProps = {
   ariaExpanded: boolean;
 };
 
-/**
- * AdminProfilePill — acts as an accessible dropdown trigger button.
- */
 export default function AdminProfilePill({
   displayName,
   avatarSrc,
   onClick,
   ariaExpanded,
 }: AdminProfilePillProps) {
-  const initials = displayName
-    .split(' ')
-    .slice(0, 2)
-    .map((w) => w[0] ?? '')
-    .join('')
-    .toUpperCase();
+  const safeName = displayName.trim() || 'Admin';
 
   return (
     <button
       type="button"
-      className={styles.pill}
-      aria-label={`Profile menu for ${displayName}`}
+      className={s.profilePill}
+      aria-label={`Profile menu for ${safeName}`}
       aria-expanded={ariaExpanded}
       onClick={onClick}
     >
-      <span className={styles.avatarWrap} aria-hidden="true">
+      <span className={s.avatarWrap} aria-hidden="true">
         {avatarSrc ? (
-          <img src={avatarSrc} alt="" className={styles.avatar} />
+          <img src={avatarSrc} alt="" className={s.avatar} />
         ) : (
-          <span
-            className={styles.avatar}
-            style={{
-              background: '#111111',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff',
-              fontSize: '14px',
-              fontWeight: 700,
-              fontFamily: 'inherit',
-            }}
-          >
-            {initials || 'A'}
-          </span>
+          <span className={s.avatar}>A</span>
         )}
-        <span className={styles.onlineDot} aria-hidden="true" />
+        <span className={s.onlineDot} aria-hidden="true" />
       </span>
-      <span className={styles.name}>{displayName}</span>
+      <span className={s.profileName}>{safeName}</span>
     </button>
   );
 }

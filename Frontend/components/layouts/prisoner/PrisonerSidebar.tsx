@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type ComponentType, type SVGProps } from 'react';
-import { CalendarDays, FileText, History, LayoutDashboard, LockKeyhole } from 'lucide-react';
+import { CalendarDays, FileText, History, LayoutDashboard, LockKeyhole, X } from 'lucide-react';
 
 import iconStyles from '../../common/LucideIcon.module.css';
 import s from './PrisonerTheme.module.css';
@@ -11,7 +11,7 @@ import s from './PrisonerTheme.module.css';
 type SidebarIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 type PrisonerSidebarProps = {
-  sidebarOpen: boolean;
+  onCloseSidebar: () => void;
 };
 
 const menuItems = [
@@ -56,59 +56,77 @@ const menuItems = [
   title?: string;
 }>;
 
-export default function PrisonerSidebar({ sidebarOpen }: PrisonerSidebarProps) {
+export default function PrisonerSidebar({
+  onCloseSidebar,
+}: PrisonerSidebarProps) {
   const pathname = usePathname();
 
   return (
     <aside
-      id="sidebar-wrapper"
-      data-simplebar=""
-      data-simplebar-auto-hide="true"
-      className={`${s.sidebar}${sidebarOpen ? ' toggled' : ''}`}
+      id="layout-menu"
+      className="layout-menu menu-vertical menu bg-menu-theme"
       aria-label="Prisoner navigation"
     >
-      <div className={s.sidebarBrand}>
-        <Link href="/prisoner/dashboard" data-legacy-href="index.php">
+      <div className="app-brand demo">
+        <Link href="/prisoner/dashboard" className="app-brand-link" data-legacy-href="index.php">
           <img
             src="/images/logos/jmlogo.png"
-            className={s.sidebarLogo}
+            className="app-brand-logo"
+            style={{ maxWidth: '180px', height: 'auto' }}
             alt="JailMeet"
           />
         </Link>
+        <button
+          className="layout-menu-toggle menu-link text-large ms-auto d-xl-none border-0 bg-transparent p-0"
+          type="button"
+          aria-label="Close sidebar"
+          onClick={onCloseSidebar}
+        >
+          <X
+            aria-hidden="true"
+            className={`${iconStyles.icon} ${iconStyles.navbar}`}
+          />
+        </button>
       </div>
 
-      <ul className={s.sidebarNav} role="list">
+      <div className="menu-inner-shadow"></div>
+
+      <ul className="menu-inner py-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const renderedIcon = (
-            <Icon
-              aria-hidden="true"
-              className={`${iconStyles.icon} ${iconStyles.sidebar} ${s.navIcon}`}
-            />
-          );
-          
           const isActive = pathname === item.href;
+          const content = (
+            <>
+              <Icon
+                aria-hidden="true"
+                className={`menu-icon tf-icons ${iconStyles.icon} ${iconStyles.sidebar}`}
+              />
+              <div>{item.label}</div>
+            </>
+          );
 
           return (
-            <li key={item.href}>
+            <li
+              key={item.href}
+              className={`menu-item${isActive ? ' active' : ''}`}
+            >
               {item.disabled ? (
                 <span
-                  data-legacy-href={item.legacyHref}
+                  className={`menu-link ${s.navPillDisabled}`}
                   aria-disabled="true"
+                  data-legacy-href={item.legacyHref}
                   title={item.title}
-                  className={`${s.navPill} ${s.navPillDisabled}`}
                 >
-                  {renderedIcon}
-                  <span className={s.navLabel}>{item.label}</span>
+                  {content}
                 </span>
               ) : (
                 <Link
                   href={item.href}
                   data-legacy-href={item.legacyHref}
-                  className={`${s.navPill}${isActive ? ` ${s.navPillActive}` : ''}`}
+                  className="menu-link"
+                  onClick={onCloseSidebar}
                 >
-                  {renderedIcon}
-                  <span className={s.navLabel}>{item.label}</span>
+                  {content}
                 </Link>
               )}
             </li>

@@ -2,11 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { type ComponentType, type SVGProps, useState } from 'react';
 import {
   CalendarDays,
   ChevronDown,
-  ChevronRight,
   FileText,
   House,
   LockKeyhole,
@@ -17,10 +16,9 @@ import {
 import iconStyles from '../../common/LucideIcon.module.css';
 import s from './OfficerTheme.module.css';
 
-type SidebarIcon = React.ComponentType<React.SVGProps<SVGSVGElement>>;
+type SidebarIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 type OfficerSidebarProps = {
-  sidebarOpen: boolean;
   onCloseSidebar: () => void;
 };
 
@@ -70,13 +68,8 @@ const paroleItems = [
   },
 ];
 
-export default function OfficerSidebar({
-  sidebarOpen,
-  onCloseSidebar,
-}: OfficerSidebarProps) {
+export default function OfficerSidebar({ onCloseSidebar }: OfficerSidebarProps) {
   const pathname = usePathname();
-
-
 
   const [bookingsOpen, setBookingsOpen] = useState(
     pathname.startsWith('/officer/appointments'),
@@ -88,214 +81,184 @@ export default function OfficerSidebar({
   const isActive = (href: string) => pathname === href;
   const isSectionActive = (prefix: string) => pathname.startsWith(prefix);
 
+  const renderIcon = (Icon: SidebarIcon) => (
+    <Icon
+      aria-hidden="true"
+      className={`menu-icon tf-icons ${iconStyles.icon} ${iconStyles.sidebar}`}
+    />
+  );
+
   return (
-    <>
+    <aside
+      id="layout-menu"
+      className="layout-menu menu-vertical menu bg-menu-theme"
+      aria-label="Officer navigation"
+    >
+      <div className="app-brand demo">
+        <Link href="/" className="app-brand-link" aria-label="JailMeet home">
+          <img
+            src="/images/logos/jmlogo.png"
+            alt="JailMeet"
+            className="app-brand-logo"
+            style={{ maxWidth: '180px', height: 'auto' }}
+          />
+        </Link>
+        <button
+          className="layout-menu-toggle menu-link text-large ms-auto d-xl-none border-0 bg-transparent p-0"
+          type="button"
+          aria-label="Close sidebar"
+          onClick={onCloseSidebar}
+        >
+          <X
+            aria-hidden="true"
+            className={`${iconStyles.icon} ${iconStyles.navbar}`}
+          />
+        </button>
+      </div>
 
+      <div className="menu-inner-shadow"></div>
 
-      {/* Mobile overlay */}
-      <button
-        className={`${s.overlay}${sidebarOpen ? ` ${s.overlayVisible}` : ''}`}
-        type="button"
-        aria-label="Close officer menu overlay"
-        onClick={onCloseSidebar}
-      />
-
-      {/* Sidebar panel */}
-      <aside
-        id="officer-sidebar"
-        className={`${s.sidebar}${sidebarOpen ? ` ${s.sidebarOpen}` : ''}`}
-        aria-label="Officer navigation"
-      >
-        {/* Brand / Logo */}
-        <div className={s.sidebarBrand}>
-          <Link href="/" aria-label="JailMeet home">
-            <img
-              src="/images/logos/jmlogo.png"
-              alt="JailMeet"
-              className={s.sidebarLogo}
-            />
-          </Link>
-          <button
-            className={s.sidebarCloseBtn}
-            type="button"
-            aria-label="Close sidebar"
+      <ul className="menu-inner py-1">
+        <li className={`menu-item${isActive('/officer/dashboard') ? ' active' : ''}`}>
+          <Link
+            href="/officer/dashboard"
+            data-legacy-href="index.php"
+            className="menu-link"
             onClick={onCloseSidebar}
           >
-            <X
+            {renderIcon(House)}
+            <div>Home</div>
+          </Link>
+        </li>
+
+        <li className={`menu-item${isSectionActive('/officer/appointments') ? ' active' : ''}`}>
+          <button
+            className="menu-link"
+            type="button"
+            aria-expanded={bookingsOpen || isSectionActive('/officer/appointments')}
+            onClick={() => setBookingsOpen((prev) => !prev)}
+          >
+            {renderIcon(CalendarDays)}
+            <div>Bookings</div>
+            <ChevronDown
               aria-hidden="true"
-              className={`${iconStyles.icon} ${iconStyles.navbar}`}
+              className={`${s.groupChevron}${
+                bookingsOpen || isSectionActive('/officer/appointments')
+                  ? ` ${s.groupChevronOpen}`
+                  : ''
+              }`}
             />
           </button>
-        </div>
 
-        {/* Navigation */}
-        <ul className={s.sidebarNav} role="list">
-          {/* Home */}
-          <li>
-            <Link
-              href="/officer/dashboard"
-              data-legacy-href="index.php"
-              className={`${s.navPill}${isActive('/officer/dashboard') ? ` ${s.navPillActive}` : ''}`}
-            >
-              <House
-                aria-hidden="true"
-                className={`${iconStyles.icon} ${iconStyles.sidebar} ${s.navIcon}`}
-              />
-              <span className={s.navLabel}>Home</span>
-            </Link>
-          </li>
+          <ul
+            className={`officer-submenu ${s.submenu}${
+              bookingsOpen || isSectionActive('/officer/appointments')
+                ? ''
+                : ` ${s.submenuHidden}`
+            }`}
+          >
+            {bookingItems.map((item) => (
+              <li
+                key={item.legacyHref}
+                className={`menu-item${isActive(item.href) ? ' active' : ''}`}
+              >
+                <Link
+                  href={item.href}
+                  data-legacy-href={item.legacyHref}
+                  className="menu-link"
+                  onClick={onCloseSidebar}
+                >
+                  <div>{item.label}</div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </li>
 
-          {/* Bookings group */}
-          <li>
-            <button
-              className={`${s.groupToggle}${
-                bookingsOpen || isSectionActive('/officer/appointments')
-                  ? ` ${s.groupToggleActive}`
+        <li className="menu-item">
+          <span
+            className={`menu-link ${s.navPillDisabled}`}
+            aria-disabled="true"
+            data-legacy-href="prisoners.php"
+            title="Prisoner management is not implemented for officers yet"
+          >
+            {renderIcon(UsersRound)}
+            <div>Prisoners</div>
+          </span>
+        </li>
+
+        <li className="menu-item">
+          <span
+            className={`menu-link ${s.navPillDisabled}`}
+            aria-disabled="true"
+            data-legacy-href="fir.php"
+            title="FIR management is not implemented yet"
+          >
+            {renderIcon(FileText)}
+            <div>FIR</div>
+          </span>
+        </li>
+
+        <li className={`menu-item${isSectionActive('/officer/parole') ? ' active' : ''}`}>
+          <button
+            className="menu-link"
+            type="button"
+            aria-expanded={paroleOpen || isSectionActive('/officer/parole')}
+            onClick={() => setParoleOpen((prev) => !prev)}
+          >
+            {renderIcon(FileText)}
+            <div>Parole</div>
+            <ChevronDown
+              aria-hidden="true"
+              className={`${s.groupChevron}${
+                paroleOpen || isSectionActive('/officer/parole')
+                  ? ` ${s.groupChevronOpen}`
                   : ''
               }`}
-              type="button"
-              aria-expanded={bookingsOpen || isSectionActive('/officer/appointments')}
-              onClick={() => setBookingsOpen((prev) => !prev)}
-            >
-              <CalendarDays
-                aria-hidden="true"
-                className={`${iconStyles.icon} ${iconStyles.sidebar} ${s.navIcon}`}
-              />
-              <span className={s.navLabel}>Bookings</span>
-              <ChevronDown
-                aria-hidden="true"
-                className={`${s.groupChevron}${
-                  bookingsOpen || isSectionActive('/officer/appointments')
-                    ? ` ${s.groupChevronOpen}`
-                    : ''
-                }`}
-              />
-            </button>
+            />
+          </button>
 
-            <ul
-              className={`${s.submenu}${
-                bookingsOpen || isSectionActive('/officer/appointments')
-                  ? ''
-                  : ` ${s.submenuHidden}`
-              }`}
-              role="list"
-            >
-              {bookingItems.map((item) => (
-                <li key={item.legacyHref}>
-                  <Link
-                    href={item.href}
-                    data-legacy-href={item.legacyHref}
-                    className={`${s.subPill}${isActive(item.href) ? ` ${s.subPillActive}` : ''}`}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </li>
+          <ul
+            className={`officer-submenu ${s.submenu}${
+              paroleOpen || isSectionActive('/officer/parole')
+                ? ''
+                : ` ${s.submenuHidden}`
+            }`}
+          >
+            {paroleItems.map((item) => (
+              <li
+                key={item.legacyHref}
+                className={`menu-item${isActive(item.href) ? ' active' : ''}`}
+              >
+                <Link
+                  href={item.href}
+                  data-legacy-href={item.legacyHref}
+                  className="menu-link"
+                  onClick={onCloseSidebar}
+                >
+                  <div>{item.label}</div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </li>
 
-          {/* Prisoners — not yet implemented, non-clickable */}
-          <li>
-            <span
-              className={`${s.navPill} ${s.navPillDisabled}`}
-              aria-disabled="true"
-              data-legacy-href="prisoners.php"
-              title="Prisoner management is not implemented for officers yet"
-            >
-              <UsersRound
-                aria-hidden="true"
-                className={`${iconStyles.icon} ${iconStyles.sidebar} ${s.navIcon}`}
-              />
-              <span className={s.navLabel}>Prisoners</span>
-            </span>
-          </li>
+        <li className="menu-item">
+          <hr className={s.navDivider} />
+        </li>
 
-          {/* FIR — not yet implemented, non-clickable */}
-          <li>
-            <span
-              className={`${s.navPill} ${s.navPillDisabled}`}
-              aria-disabled="true"
-              data-legacy-href="fir.php"
-              title="FIR management is not implemented yet"
-            >
-              <FileText
-                aria-hidden="true"
-                className={`${iconStyles.icon} ${iconStyles.sidebar} ${s.navIcon}`}
-              />
-              <span className={s.navLabel}>FIR</span>
-            </span>
-          </li>
-
-          {/* Parole group */}
-          <li>
-            <button
-              className={`${s.groupToggle}${
-                paroleOpen || isSectionActive('/officer/parole')
-                  ? ` ${s.groupToggleActive}`
-                  : ''
-              }`}
-              type="button"
-              aria-expanded={paroleOpen || isSectionActive('/officer/parole')}
-              onClick={() => setParoleOpen((prev) => !prev)}
-            >
-              <FileText
-                aria-hidden="true"
-                className={`${iconStyles.icon} ${iconStyles.sidebar} ${s.navIcon}`}
-              />
-              <span className={s.navLabel}>Parole</span>
-              <ChevronDown
-                aria-hidden="true"
-                className={`${s.groupChevron}${
-                  paroleOpen || isSectionActive('/officer/parole')
-                    ? ` ${s.groupChevronOpen}`
-                    : ''
-                }`}
-              />
-            </button>
-
-            <ul
-              className={`${s.submenu}${
-                paroleOpen || isSectionActive('/officer/parole')
-                  ? ''
-                  : ` ${s.submenuHidden}`
-              }`}
-              role="list"
-            >
-              {paroleItems.map((item) => (
-                <li key={item.legacyHref}>
-                  <Link
-                    href={item.href}
-                    data-legacy-href={item.legacyHref}
-                    className={`${s.subPill}${isActive(item.href) ? ` ${s.subPillActive}` : ''}`}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </li>
-
-          <li>
-            <hr className={s.navDivider} />
-          </li>
-
-          {/* Change Password */}
-          <li>
-            <Link
-              href="/officer/change-password"
-              data-legacy-href="changepassword.php"
-              className={`${s.navPill}${isActive('/officer/change-password') ? ` ${s.navPillActive}` : ''}`}
-            >
-              <LockKeyhole
-                aria-hidden="true"
-                className={`${iconStyles.icon} ${iconStyles.sidebar} ${s.navIcon}`}
-              />
-              <span className={s.navLabel}>Change Password</span>
-            </Link>
-          </li>
-        </ul>
-      </aside>
-
-    </>
+        <li className={`menu-item${isActive('/officer/change-password') ? ' active' : ''}`}>
+          <Link
+            href="/officer/change-password"
+            data-legacy-href="changepassword.php"
+            className="menu-link"
+            onClick={onCloseSidebar}
+          >
+            {renderIcon(LockKeyhole)}
+            <div>Change Password</div>
+          </Link>
+        </li>
+      </ul>
+    </aside>
   );
 }

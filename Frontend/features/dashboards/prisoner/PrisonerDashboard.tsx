@@ -5,6 +5,7 @@ import { CalendarCheck, CircleCheck, CircleX, Clock3, FileText } from 'lucide-re
 
 import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
 import iconStyles from '../../../components/common/LucideIcon.module.css';
+import s from '../../../components/layouts/prisoner/PrisonerTheme.module.css';
 import { useDashboard } from '@features/dashboards/services/useDashboard';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { getPrisonerDashboard } from '@features/dashboards/services/dashboard.service';
@@ -19,31 +20,31 @@ const statCards = [
     label: 'My Parole Requests',
     field: 'myParoleRequests',
     icon: FileText,
-    colorClass: 'bg-primary',
+    colorClass: s.iconPrimary,
   },
   {
     label: 'Pending Parole Requests',
     field: 'pendingParoleRequests',
     icon: Clock3,
-    colorClass: 'bg-warning',
+    colorClass: s.iconWarning,
   },
   {
     label: 'Approved Parole Requests',
     field: 'approvedParoleRequests',
     icon: CircleCheck,
-    colorClass: 'bg-success',
+    colorClass: s.iconSuccess,
   },
   {
     label: 'Rejected Parole Requests',
     field: 'rejectedParoleRequests',
     icon: CircleX,
-    colorClass: 'bg-danger',
+    colorClass: s.iconDanger,
   },
   {
     label: 'My Appointments',
     field: 'myAppointments',
     icon: CalendarCheck,
-    colorClass: 'bg-info',
+    colorClass: s.iconInfo,
   },
 ] satisfies ReadonlyArray<{
   label: string;
@@ -66,21 +67,17 @@ function PrisonerStatCard({
   label: string;
 }) {
   return (
-    <div className="col-12 col-lg-6 col-xl-3">
-      <div className={`card ${colorClass}`}>
-        <div className="card-body">
-          <div className="media align-items-center">
-            <div className="media-body">
-              <p className="text-white mb-0">{label}</p>
-              <h4 className="text-white mb-0">{data[field] ?? 0}</h4>
-            </div>
-            <div className="w-icon">
-              <Icon
-                aria-hidden="true"
-                className={`text-white ${iconStyles.icon} ${iconStyles.card}`}
-              />
-            </div>
+    <div className="col-lg-3 col-md-6 col-12 mb-4">
+      <div className={s.statCard}>
+        <div className={s.statCardBody}>
+          <div className={`${s.statIconBox} ${colorClass}`}>
+            <Icon
+              aria-hidden="true"
+              className={`${iconStyles.icon} ${iconStyles.card}`}
+            />
           </div>
+          <span className={s.statTitle}>{label}</span>
+          <h3 className={s.statValue}>{data[field] ?? 0}</h3>
         </div>
       </div>
     </div>
