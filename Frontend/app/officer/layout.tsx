@@ -45,10 +45,10 @@ const officerFontOverrides = `
 
   body.officer-page .layout-navbar.bg-navbar-theme,
   body.officer-page .officerNavbar {
-    background: #111111 !important;
-    background-color: #111111 !important;
+    background: #020202 !important;
+    background-color: #020202 !important;
     color: #ffffff !important;
-    border-color: #111111 !important;
+    border-color: #020202 !important;
   }
 
   body.officer-page .layout-menu {
@@ -56,18 +56,18 @@ const officerFontOverrides = `
     min-width: 16.25rem !important;
     max-width: 16.25rem !important;
     flex: 0 0 16.25rem !important;
-    background: #111111 !important;
+    background: #020202 !important;
     color: #ffffff !important;
   }
 
   body.officer-page .bg-menu-theme {
-    background: #111111 !important;
+    background: #020202 !important;
     color: #ffffff !important;
   }
 
   body.officer-page .layout-menu.bg-menu-theme {
-    background: #111111 !important;
-    background-color: #111111 !important;
+    background: #020202 !important;
+    background-color: #020202 !important;
     color: #ffffff !important;
   }
 
@@ -85,7 +85,7 @@ const officerFontOverrides = `
     flex: 1 1 auto !important;
     padding: 0 !important;
     margin-left: 0 !important;
-    background: transparent !important;
+    background: #B2D5E5 !important;
   }
 
   body.officer-page .content-wrapper {
@@ -138,7 +138,7 @@ const officerFontOverrides = `
     border: 1px solid #ffffff !important;
     border-radius: 999px !important;
     background: #ffffff !important;
-    color: #111111 !important;
+    color: #020202 !important;
     text-decoration: none !important;
     cursor: pointer !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.24) !important;
@@ -199,8 +199,8 @@ const officerFontOverrides = `
   @media (hover: hover) and (pointer: fine) {
     body.officer-page .bg-menu-theme .menu-inner .menu-item:not(.active) .menu-link:hover {
       transform: translateY(-2px) !important;
-      border-color: #111111 !important;
-      box-shadow: 0 4px 6px #111111 !important;
+      border-color: #ff4a1f !important;
+      box-shadow: 0 4px 6px #ff4a1f !important;
     }
   }
 
@@ -230,6 +230,14 @@ const officerFontOverrides = `
     body.officer-page .layout-page {
       width: 100% !important;
     }
+  }
+
+  body.officer-page,
+  body.officer-page .layout-wrapper,
+  body.officer-page .layout-container,
+  body.officer-page .content-wrapper {
+    background: #B2D5E5 !important;
+    background-color: #B2D5E5 !important;
   }
 
 `;

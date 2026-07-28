@@ -48,10 +48,10 @@ const prisonerFontOverrides = `
 
   body.prisoner-page .layout-navbar.bg-navbar-theme,
   body.prisoner-page .prisonerNavbar {
-    background: #ff4a17 !important;
-    background-color: #ff4a17 !important;
+    background: #FF5B32 !important;
+    background-color: #FF5B32 !important;
     color: #ffffff !important;
-    border-color: #ff4a17 !important;
+    border-color: #FF5B32 !important;
   }
 
   body.prisoner-page .layout-menu {
@@ -59,18 +59,18 @@ const prisonerFontOverrides = `
     min-width: 16.25rem !important;
     max-width: 16.25rem !important;
     flex: 0 0 16.25rem !important;
-    background: #ff4a17 !important;
+    background: #FF5B32 !important;
     color: #ffffff !important;
   }
 
   body.prisoner-page .bg-menu-theme {
-    background: #ff4a17 !important;
+    background: #FF5B32 !important;
     color: #ffffff !important;
   }
 
   body.prisoner-page .layout-menu.bg-menu-theme {
-    background: #ff4a17 !important;
-    background-color: #ff4a17 !important;
+    background: #FF5B32 !important;
+    background-color: #FF5B32 !important;
     color: #ffffff !important;
   }
 
@@ -83,12 +83,9 @@ const prisonerFontOverrides = `
   body.prisoner-page .layout-page {
     display: flex !important;
     flex-direction: column !important;
-    width: calc(100% - 16.25rem) !important;
     min-width: 0 !important;
-    flex: 1 1 auto !important;
-    padding: 0 !important;
-    margin-left: 0 !important;
-    background: transparent !important;
+    box-sizing: border-box !important;
+    background: #FFF2CF !important;
   }
 
   body.prisoner-page .content-wrapper {
@@ -99,6 +96,8 @@ const prisonerFontOverrides = `
     justify-content: space-between !important;
     width: 100% !important;
     min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   body.prisoner-page .bg-menu-theme .menu-inner .menu-item {
@@ -125,7 +124,7 @@ const prisonerFontOverrides = `
     margin: 0.35rem 1.15rem !important;
     border: 1px solid rgba(255, 255, 255, 0.35) !important;
     border-radius: 999px !important;
-    background: #ff4a17 !important;
+    background: #FF5B32 !important;
     color: #ffffff !important;
     text-decoration: none !important;
     cursor: pointer !important;
@@ -155,12 +154,12 @@ const prisonerFontOverrides = `
   body.prisoner-page .bg-menu-theme .menu-inner .menu-item.active > .menu-link {
     border-color: #ffffff !important;
     background-color: #ffffff !important;
-    color: #ff4a17 !important;
+    color: #FF5B32 !important;
     box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.14), 0 6px 14px rgba(0, 0, 0, 0.16) !important;
   }
 
   body.prisoner-page .bg-menu-theme .menu-inner .menu-item.active > .menu-link .menu-icon {
-    color: #ff4a17 !important;
+    color: #FF5B32 !important;
   }
 
   body.prisoner-page .bg-menu-theme .menu-inner > .menu-item.active:before {
@@ -171,15 +170,15 @@ const prisonerFontOverrides = `
   body.prisoner-page .bg-menu-theme .menu-inner .menu-item .menu-link:focus-visible,
   body.prisoner-page .layout-menu-toggle:focus-visible,
   body.prisoner-page .layout-overlay:focus-visible {
-    outline: 2px solid #ff4a17 !important;
+    outline: 2px solid #FF5B32 !important;
     outline-offset: 2px !important;
   }
 
   @media (hover: hover) and (pointer: fine) {
     body.prisoner-page .bg-menu-theme .menu-inner .menu-item:not(.active) .menu-link:hover {
       transform: translateY(-2px) !important;
-      border-color: #ff4a17 !important;
-      box-shadow: 0 4px 6px #ff4a17 !important;
+      border-color: #ffffff !important;
+      box-shadow: 0 4px 6px #ffffff !important;
     }
   }
 
@@ -207,8 +206,51 @@ const prisonerFontOverrides = `
     }
 
     body.prisoner-page .layout-page {
-      width: 100% !important;
+      /* core.css will handle the width */
     }
+  }
+  body.prisoner-page,
+  body.prisoner-page .layout-wrapper,
+  body.prisoner-page .layout-container,
+  body.prisoner-page .content-wrapper {
+    background: #FFF2CF !important;
+    background-color: #FFF2CF !important;
+  }
+
+  body.prisoner-page .content-wrapper,
+  body.prisoner-page main,
+  body.prisoner-page .card,
+  body.prisoner-page section {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.prisoner-page .alert,
+  body.prisoner-page .accessDenied,
+  body.prisoner-page [role="alert"] {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    overflow-wrap: anywhere !important;
+    transform: none !important;
+  }
+
+  body.prisoner-page .table-responsive {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  body.prisoner-page table {
+    width: 100% !important;
+    max-width: none !important;
   }
 
 `;

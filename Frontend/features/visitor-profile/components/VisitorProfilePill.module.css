@@ -62,7 +62,7 @@
   bottom: 1px;
   width: 10px;
   height: 10px;
-  border: 2px solid #ffffff;
+  border: 1px solid #ffffff;
   border-radius: 50%;
   background: #34c759;
 }
@@ -187,7 +187,8 @@
   }
 }
 
-@media (hover: none), (pointer: coarse) {
+@media (hover: none),
+(pointer: coarse) {
   .profilePill:hover {
     border-color: #e5e7eb;
     color: #111111;

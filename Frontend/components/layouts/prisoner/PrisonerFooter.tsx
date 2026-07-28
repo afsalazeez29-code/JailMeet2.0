@@ -1,5 +1,7 @@
 'use client';
 
+import DashboardFooter from '../../common/DashboardFooter';
+
 export default function PrisonerFooter() {
-  return null;
+  return <DashboardFooter />;
 }

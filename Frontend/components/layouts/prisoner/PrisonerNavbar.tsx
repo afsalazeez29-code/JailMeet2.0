@@ -18,7 +18,7 @@ type PrisonerNavbarProps = {
   sidebarOpen?: boolean;
 };
 
-const fallbackPrisonerImage = '/images/avatars/prisoner-fallback.png';
+const fallbackPrisonerImage = '/images/avatars/prisoner-default.png';
 
 export default function PrisonerNavbar({
   onToggleSidebar,
@@ -26,7 +26,6 @@ export default function PrisonerNavbar({
 }: PrisonerNavbarProps) {
   const router = useRouter();
   const { user } = useAuth();
-  const [profileOpen, setProfileOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
 
   const displayName = user?.name ?? 'Prisoner';
@@ -58,51 +57,13 @@ export default function PrisonerNavbar({
           <img src="/images/logos/auth-logo.png" alt="" className="navbar-brand-logo" aria-hidden="true" />
         </button>
 
-        <div className="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+        <div className={`navbar-nav-right d-flex align-items-center ${s.navbarNavRight}`} id="navbar-collapse">
           <ul className="navbar-nav flex-row align-items-center ms-auto">
             <li className={`nav-item ${s.profileActions}`}>
-              <div className={s.profileDropdown}>
-                <PrisonerProfilePill
-                  displayName={displayName}
-                  avatarSrc={fallbackPrisonerImage}
-                  onClick={() => setProfileOpen((current) => !current)}
-                  ariaExpanded={profileOpen}
-                />
-                <ul
-                  className={`dropdown-menu dropdown-menu-right ${s.profileMenu}${
-                    profileOpen ? ' show' : ''
-                  }`}
-                >
-                  <li className="dropdown-item user-details">
-                    <div className="media align-items-center">
-                      <div className="avatar me-3">
-                        <img
-                          className="align-self-start"
-                          src={fallbackPrisonerImage}
-                          alt="Prisoner avatar"
-                        />
-                      </div>
-                      <div className="media-body">
-                        <h6 className="mt-2 user-title mb-0">Prisoner ID: Prisoner</h6>
-                        <p className="user-subtitle text-muted mb-0">
-                          Prisoner Name: {displayName}
-                        </p>
-                      </div>
-                    </div>
-                  </li>
-                  <li className="dropdown-divider" />
-                  <li className="dropdown-item">
-                    <Link href="/prisoner/dashboard" className="text-dark d-flex align-items-center">
-                      <WalletCards
-                        aria-hidden="true"
-                        className={`me-2 ${iconStyles.icon} ${iconStyles.action}`}
-                      />{' '}
-                      Account
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
+              <PrisonerProfilePill
+                displayName={displayName}
+                avatarSrc={fallbackPrisonerImage}
+              />
               <button
                 className={s.logoutButton}
                 type="button"

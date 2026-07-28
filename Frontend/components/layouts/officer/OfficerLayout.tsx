@@ -5,6 +5,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import OfficerFooter from './OfficerFooter';
 import OfficerNavbar from './OfficerNavbar';
 import OfficerSidebar from './OfficerSidebar';
+import s from './OfficerTheme.module.css';
 
 type OfficerLayoutProps = {
   children: ReactNode;
@@ -30,11 +31,11 @@ export default function OfficerLayout({ children }: OfficerLayoutProps) {
 
   return (
     <div
-      className={`layout-wrapper layout-content-navbar${
+      className={`layout-wrapper layout-content-navbar ${s.dashboardRoot}${
         sidebarOpen ? ' layout-menu-expanded' : ''
       }`}
     >
-      <div className="layout-container">
+      <div className={`layout-container ${s.dashboardBody}`}>
         <OfficerSidebar
           onCloseSidebar={() => setSidebarOpen(false)}
         />
@@ -45,11 +46,12 @@ export default function OfficerLayout({ children }: OfficerLayoutProps) {
             sidebarOpen={sidebarOpen}
           />
           <div className="content-wrapper">
-            <main>{children}</main>
-            <OfficerFooter />
+            <main className={s.mainContent}>{children}</main>
           </div>
         </div>
       </div>
+
+      <OfficerFooter />
 
       {sidebarOpen ? (
         <button

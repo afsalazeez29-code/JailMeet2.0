@@ -81,9 +81,11 @@ export default function PrisonerParolePage() {
       !protectedPage.error)
   ) {
     return (
-      <div className="card">
-        <div className="card-body">
-          <LoadingAlert className="mb-0">Loading parole requests...</LoadingAlert>
+      <div className="container-xxl flex-grow-1 container-p-y">
+        <div className="card">
+          <div className="card-body">
+            <LoadingAlert className="mb-0">Loading parole requests...</LoadingAlert>
+          </div>
         </div>
       </div>
     );
@@ -91,9 +93,11 @@ export default function PrisonerParolePage() {
 
   if (protectedPage.isForbidden || error === 'Access denied') {
     return (
-      <div className="card">
-        <div className="card-body">
-          <ForbiddenAlert className="mb-0" />
+      <div className="container-xxl flex-grow-1 container-p-y">
+        <div className="card">
+          <div className="card-body">
+            <ForbiddenAlert className="mb-0" />
+          </div>
         </div>
       </div>
     );
@@ -101,9 +105,11 @@ export default function PrisonerParolePage() {
 
   if (protectedPage.error || error) {
     return (
-      <div className="card">
-        <div className="card-body">
-          <ErrorAlert className="mb-0">{protectedPage.error || error}</ErrorAlert>
+      <div className="container-xxl flex-grow-1 container-p-y">
+        <div className="card">
+          <div className="card-body">
+            <ErrorAlert className="mb-0">{protectedPage.error || error}</ErrorAlert>
+          </div>
         </div>
       </div>
     );
@@ -111,21 +117,27 @@ export default function PrisonerParolePage() {
 
   if (requests.length === 0) {
     return (
-      <div className="card">
-        <div className="card-body text-center">
-          <h5>No parole requests yet</h5>
-          <p className="text-muted">
-            Submit your first parole request to begin the review process.
-          </p>
-          <Link href="/prisoner/parole/request" className="btn btn-primary">
-            <AnimatedButtonText>Submit Parole Request</AnimatedButtonText>
-          </Link>
+      <div className="container-xxl flex-grow-1 container-p-y">
+        <div className="card">
+          <div className="card-body text-center">
+            <h5>No parole requests yet</h5>
+            <p className="text-muted">
+              Submit your first parole request to begin the review process.
+            </p>
+            <Link href="/prisoner/parole/request" className="btn btn-primary">
+              <AnimatedButtonText>Submit Parole Request</AnimatedButtonText>
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
-  return <PrisonerParoleList requests={requests} />;
+  return (
+    <div className="container-xxl flex-grow-1 container-p-y">
+      <PrisonerParoleList requests={requests} />
+    </div>
+  );
 }
 
 

@@ -5,6 +5,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import PrisonerFooter from './PrisonerFooter';
 import PrisonerNavbar from './PrisonerNavbar';
 import PrisonerSidebar from './PrisonerSidebar';
+import s from './PrisonerTheme.module.css';
 
 type PrisonerLayoutProps = {
   children: ReactNode;
@@ -30,11 +31,11 @@ export default function PrisonerLayout({ children }: PrisonerLayoutProps) {
 
   return (
     <div
-      className={`layout-wrapper layout-content-navbar${
+      className={`layout-wrapper layout-content-navbar ${s.dashboardRoot}${
         sidebarOpen ? ' layout-menu-expanded' : ''
       }`}
     >
-      <div className="layout-container">
+      <div className={`layout-container ${s.dashboardBody}`}>
         <PrisonerSidebar
           onCloseSidebar={() => setSidebarOpen(false)}
         />
@@ -45,11 +46,12 @@ export default function PrisonerLayout({ children }: PrisonerLayoutProps) {
             sidebarOpen={sidebarOpen}
           />
           <div className="content-wrapper">
-            <main>{children}</main>
-            <PrisonerFooter />
+            <main className={s.mainContent}>{children}</main>
           </div>
         </div>
       </div>
+
+      <PrisonerFooter />
 
       {sidebarOpen ? (
         <button

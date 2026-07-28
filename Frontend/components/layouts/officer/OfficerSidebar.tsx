@@ -123,7 +123,7 @@ export default function OfficerSidebar({ onCloseSidebar }: OfficerSidebarProps) 
           <Link
             href="/officer/dashboard"
             data-legacy-href="index.php"
-            className="menu-link"
+            className={`menu-link ${s.sidebarItem} ${isActive('/officer/dashboard') ? s.sidebarItemActive : ''}`}
             onClick={onCloseSidebar}
           >
             {renderIcon(House)}
@@ -133,7 +133,7 @@ export default function OfficerSidebar({ onCloseSidebar }: OfficerSidebarProps) 
 
         <li className={`menu-item${isSectionActive('/officer/appointments') ? ' active' : ''}`}>
           <button
-            className="menu-link"
+            className={`menu-link ${s.sidebarItem} ${isSectionActive('/officer/appointments') ? s.sidebarItemActive : ''}`}
             type="button"
             aria-expanded={bookingsOpen || isSectionActive('/officer/appointments')}
             onClick={() => setBookingsOpen((prev) => !prev)}
@@ -165,7 +165,7 @@ export default function OfficerSidebar({ onCloseSidebar }: OfficerSidebarProps) 
                 <Link
                   href={item.href}
                   data-legacy-href={item.legacyHref}
-                  className="menu-link"
+                  className={`menu-link ${s.sidebarItem} ${isActive(item.href) ? s.sidebarItemActive : ''}`}
                   onClick={onCloseSidebar}
                 >
                   <div>{item.label}</div>
@@ -177,7 +177,7 @@ export default function OfficerSidebar({ onCloseSidebar }: OfficerSidebarProps) 
 
         <li className="menu-item">
           <span
-            className={`menu-link ${s.navPillDisabled}`}
+            className={`menu-link ${s.sidebarItem} ${s.sidebarItemDisabled}`}
             aria-disabled="true"
             data-legacy-href="prisoners.php"
             title="Prisoner management is not implemented for officers yet"
@@ -189,7 +189,7 @@ export default function OfficerSidebar({ onCloseSidebar }: OfficerSidebarProps) 
 
         <li className="menu-item">
           <span
-            className={`menu-link ${s.navPillDisabled}`}
+            className={`menu-link ${s.sidebarItem} ${s.sidebarItemDisabled}`}
             aria-disabled="true"
             data-legacy-href="fir.php"
             title="FIR management is not implemented yet"
@@ -201,7 +201,7 @@ export default function OfficerSidebar({ onCloseSidebar }: OfficerSidebarProps) 
 
         <li className={`menu-item${isSectionActive('/officer/parole') ? ' active' : ''}`}>
           <button
-            className="menu-link"
+            className={`menu-link ${s.sidebarItem} ${isSectionActive('/officer/parole') ? s.sidebarItemActive : ''}`}
             type="button"
             aria-expanded={paroleOpen || isSectionActive('/officer/parole')}
             onClick={() => setParoleOpen((prev) => !prev)}
@@ -233,7 +233,7 @@ export default function OfficerSidebar({ onCloseSidebar }: OfficerSidebarProps) 
                 <Link
                   href={item.href}
                   data-legacy-href={item.legacyHref}
-                  className="menu-link"
+                  className={`menu-link ${s.sidebarItem} ${isActive(item.href) ? s.sidebarItemActive : ''}`}
                   onClick={onCloseSidebar}
                 >
                   <div>{item.label}</div>
@@ -251,7 +251,7 @@ export default function OfficerSidebar({ onCloseSidebar }: OfficerSidebarProps) 
           <Link
             href="/officer/change-password"
             data-legacy-href="changepassword.php"
-            className="menu-link"
+            className={`menu-link ${s.sidebarItem} ${isActive('/officer/change-password') ? s.sidebarItemActive : ''}`}
             onClick={onCloseSidebar}
           >
             {renderIcon(LockKeyhole)}

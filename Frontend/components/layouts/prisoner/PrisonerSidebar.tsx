@@ -112,7 +112,7 @@ export default function PrisonerSidebar({
             >
               {item.disabled ? (
                 <span
-                  className={`menu-link ${s.navPillDisabled}`}
+                  className={`menu-link ${s.sidebarItem} ${s.sidebarItemDisabled}`}
                   aria-disabled="true"
                   data-legacy-href={item.legacyHref}
                   title={item.title}
@@ -123,7 +123,7 @@ export default function PrisonerSidebar({
                 <Link
                   href={item.href}
                   data-legacy-href={item.legacyHref}
-                  className="menu-link"
+                  className={`menu-link ${s.sidebarItem} ${isActive ? s.sidebarItemActive : ''}`}
                   onClick={onCloseSidebar}
                 >
                   {content}

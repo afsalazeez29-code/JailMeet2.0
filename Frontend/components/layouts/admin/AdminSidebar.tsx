@@ -135,7 +135,7 @@ export default function AdminSidebar({ onCloseSidebar }: AdminSidebarProps) {
                     <Link
                       href={item.href}
                       data-legacy-href={item.legacyHref}
-                      className="menu-link"
+                      className={`menu-link ${s.sidebarItem} ${pathname === item.href ? s.sidebarItemActive : ''}`}
                       onClick={onCloseSidebar}
                     >
                       <Icon

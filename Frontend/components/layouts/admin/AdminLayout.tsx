@@ -5,6 +5,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import AdminFooter from './AdminFooter';
 import AdminNavbar from './AdminNavbar';
 import AdminSidebar from './AdminSidebar';
+import s from './AdminTheme.module.css';
 
 type AdminLayoutProps = {
   children: ReactNode;
@@ -108,7 +109,7 @@ const adminFontOverrides = `
     flex: 1 1 auto !important;
     padding: 0 !important;
     margin-left: 0 !important;
-    background: transparent !important;
+    background: #D2C3F6 !important;
   }
 
   body.admin-page .content-wrapper {
@@ -198,8 +199,8 @@ const adminFontOverrides = `
   @media (hover: hover) and (pointer: fine) {
     body.admin-page .bg-menu-theme .menu-inner .menu-item:not(.active) .menu-link:hover {
       transform: translateY(-2px) !important;
-      border-color: #36255c !important;
-      box-shadow: 0 4px 6px #36255c !important;
+      border-color: #ffffff !important;
+      box-shadow: 0 4px 6px #ffffff !important;
     }
   }
 
@@ -231,6 +232,14 @@ const adminFontOverrides = `
     }
   }
 
+  body.admin-page,
+  body.admin-page .layout-wrapper,
+  body.admin-page .layout-container,
+  body.admin-page .content-wrapper {
+    background: #D2C3F6 !important;
+    background-color: #D2C3F6 !important;
+  }
+
 `;
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
@@ -259,11 +268,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <style>{adminFontOverrides}</style>
 
       <div
-        className={`layout-wrapper layout-content-navbar${
+        className={`layout-wrapper layout-content-navbar ${s.dashboardRoot}${
           sidebarOpen ? ' layout-menu-expanded' : ''
         }`}
       >
-        <div className="layout-container">
+        <div className={`layout-container ${s.dashboardBody}`}>
           <AdminSidebar onCloseSidebar={() => setSidebarOpen(false)} />
 
           <div className="layout-page">
@@ -272,11 +281,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               sidebarOpen={sidebarOpen}
             />
             <div className="content-wrapper">
-              <main>{children}</main>
-              <AdminFooter />
+              <main className={s.mainContent}>{children}</main>
             </div>
           </div>
         </div>
+
+        <AdminFooter />
 
         {sidebarOpen ? (
           <button

@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import s from './AdminTheme.module.css';
 
 type AdminProfilePillProps = {
@@ -7,37 +9,29 @@ type AdminProfilePillProps = {
   displayName: string;
   /** Avatar source URL */
   avatarSrc?: string;
-  /** Toggle handler for the dropdown */
-  onClick: () => void;
-  /** Accessibility state for the dropdown */
-  ariaExpanded: boolean;
 };
 
 export default function AdminProfilePill({
   displayName,
   avatarSrc,
-  onClick,
-  ariaExpanded,
 }: AdminProfilePillProps) {
   const safeName = displayName.trim() || 'Admin';
 
   return (
-    <button
-      type="button"
+    <Link
+      href="/admin/profile"
       className={s.profilePill}
-      aria-label={`Profile menu for ${safeName}`}
-      aria-expanded={ariaExpanded}
-      onClick={onClick}
+      aria-label={`Open ${safeName} profile`}
     >
-      <span className={s.avatarWrap} aria-hidden="true">
+      <span className={s.avatarWrap}>
         {avatarSrc ? (
-          <img src={avatarSrc} alt="" className={s.avatar} />
+          <img src={avatarSrc} alt={`${safeName} profile`} className={s.avatar} />
         ) : (
           <span className={s.avatar}>A</span>
         )}
         <span className={s.onlineDot} aria-hidden="true" />
       </span>
       <span className={s.profileName}>{safeName}</span>
-    </button>
+    </Link>
   );
 }

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { type ComponentType, type SVGProps } from 'react';
 import { CalendarCheck, CircleCheck, CircleX, Clock3, FileText } from 'lucide-react';
@@ -11,7 +11,7 @@ import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { getPrisonerDashboard } from '@features/dashboards/services/dashboard.service';
 import { PrisonerDashboardData } from '@features/dashboards/types';
 
-const fallbackPrisonerImage = '/images/avatars/prisoner-fallback.png';
+const fallbackPrisonerImage = '/images/avatars/prisoner-default.png';
 
 type CardIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -99,9 +99,11 @@ export default function PrisonerDashboardPage() {
       !protectedPage.error)
   ) {
     return (
-      <div className="card">
-        <div className="card-body">
-          <LoadingAlert className="mb-0">Loading prisoner dashboard...</LoadingAlert>
+      <div className="container-xxl flex-grow-1 container-p-y">
+        <div className="card">
+          <div className="card-body">
+            <LoadingAlert className="mb-0">Loading prisoner dashboard...</LoadingAlert>
+          </div>
         </div>
       </div>
     );
@@ -109,9 +111,11 @@ export default function PrisonerDashboardPage() {
 
   if (protectedPage.isForbidden || dashboard.isForbidden) {
     return (
-      <div className="card">
-        <div className="card-body">
-          <ForbiddenAlert className="mb-0" />
+      <div className="container-xxl flex-grow-1 container-p-y">
+        <div className="card">
+          <div className="card-body">
+            <ForbiddenAlert className="mb-0" />
+          </div>
         </div>
       </div>
     );
@@ -124,9 +128,11 @@ export default function PrisonerDashboardPage() {
 
   if (protectedPage.error || dashboard.error) {
     return (
-      <div className="card">
-        <div className="card-body">
-          <ErrorAlert className="mb-0">{errorMessage}</ErrorAlert>
+      <div className="container-xxl flex-grow-1 container-p-y">
+        <div className="card">
+          <div className="card-body">
+            <ErrorAlert className="mb-0">{errorMessage}</ErrorAlert>
+          </div>
         </div>
       </div>
     );
@@ -140,7 +146,7 @@ export default function PrisonerDashboardPage() {
   }
 
   return (
-    <>
+    <div className="container-xxl flex-grow-1 container-p-y">
       <div className="card">
         <div className="card-header">
           <h5>Prisoner Profile</h5>
@@ -233,6 +239,6 @@ export default function PrisonerDashboardPage() {
           />
         ))}
       </div>
-    </>
+    </div>
   );
 }

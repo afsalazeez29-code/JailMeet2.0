@@ -6,6 +6,7 @@ import VisitorFooter from './VisitorFooter';
 import VisitorNavbar from './VisitorNavbar';
 import VisitorSidebar from './VisitorSidebar';
 import { useAuth } from '@features/auth/hooks/useAuth';
+import styles from './VisitorLayout.module.css';
 
 type VisitorLayoutProps = {
   children: ReactNode;
@@ -31,11 +32,11 @@ export default function VisitorLayout({ children }: VisitorLayoutProps) {
 
   return (
     <div
-      className={`layout-wrapper layout-content-navbar${
+      className={`layout-wrapper layout-content-navbar ${styles.dashboardRoot}${
         menuOpen ? ' layout-menu-expanded' : ''
       }`}
     >
-      <div className="layout-container">
+      <div className={`layout-container ${styles.dashboardBody}`}>
         <VisitorSidebar onCloseMenu={() => setMenuOpen(false)} />
         <div className="layout-page">
           <VisitorNavbar
@@ -44,12 +45,13 @@ export default function VisitorLayout({ children }: VisitorLayoutProps) {
             menuOpen={menuOpen}
           />
           <div className="content-wrapper">
-            {children}
-            <VisitorFooter />
+            <main className={styles.mainContent}>{children}</main>
           </div>
         </div>
       </div>
       
+      <VisitorFooter />
+
       {menuOpen && (
         <button
           aria-label="Close navigation menu overlay"

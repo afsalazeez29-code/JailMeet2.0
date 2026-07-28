@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { LogOut, Search } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 
 import LogoutConfirmModal from '../../common/LogoutConfirmModal';
+import NavbarSearch from '../../common/NavbarSearch';
 import iconStyles from '../../common/LucideIcon.module.css';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
@@ -18,13 +19,14 @@ type AdminNavbarProps = {
   sidebarOpen?: boolean;
 };
 
+const fallbackAdminImage = '/images/avatars/admin-default.png';
+
 export default function AdminNavbar({
   onToggleSidebar,
   sidebarOpen = false,
 }: AdminNavbarProps) {
   const router = useRouter();
   const { user } = useAuth();
-  const [profileOpen, setProfileOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
 
   const displayName = user?.name ?? 'Admin';
@@ -56,56 +58,12 @@ export default function AdminNavbar({
           <img src="/images/logos/auth-logo.png" alt="" className="navbar-brand-logo" aria-hidden="true" />
         </button>
 
-        <form className={s.searchForm} onSubmit={(event) => event.preventDefault()}>
-          <Search aria-hidden="true" className={`${s.searchIcon} ${iconStyles.icon} ${iconStyles.action}`} />
-          <input
-            aria-label="Search"
-            className={s.searchInput}
-            placeholder="Search"
-            type="search"
-          />
-        </form>
+        <NavbarSearch />
 
-        <div className="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+        <div className={`navbar-nav-right d-flex align-items-center ${s.navbarNavRight}`} id="navbar-collapse">
           <ul className="navbar-nav flex-row align-items-center ms-auto">
             <li className={`nav-item ${s.profileActions}`}>
-              <div className={s.profileDropdown}>
-                <AdminProfilePill
-                  displayName={displayName}
-                  onClick={() => setProfileOpen((current) => !current)}
-                  ariaExpanded={profileOpen}
-                />
-                <ul
-                  className={`dropdown-menu dropdown-user ${s.profileMenu}${
-                    profileOpen ? ' show' : ''
-                  }`}
-                >
-                  <li>
-                    <div className={s.profileMenuHeader}>
-                      <span className={s.profileMenuAvatar} aria-hidden="true">
-                        A
-                      </span>
-                      <div>
-                        <h4>{displayName}</h4>
-                        <p>{user?.email ?? 'admin@jailmeet.com'}</p>
-                      </div>
-                    </div>
-                  </li>
-                  <li className="dropdown-divider" />
-                  <li>
-                    <Link className="dropdown-item" href="/admin/profile">
-                      My Profile
-                    </Link>
-                  </li>
-                  <li className="dropdown-divider" />
-                  <li>
-                    <Link className="dropdown-item" href="/admin/settings">
-                      Account Setting
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
+              <AdminProfilePill displayName={displayName} avatarSrc={fallbackAdminImage} />
               <button
                 className={s.logoutButton}
                 type="button"

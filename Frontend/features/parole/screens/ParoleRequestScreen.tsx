@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
@@ -15,9 +15,11 @@ export default function PrisonerParoleRequestPage() {
       !protectedPage.error)
   ) {
     return (
-      <div className="card">
-        <div className="card-body">
-          <LoadingAlert className="mb-0">Loading parole request form...</LoadingAlert>
+      <div className="container-xxl flex-grow-1 container-p-y">
+        <div className="card">
+          <div className="card-body">
+            <LoadingAlert className="mb-0">Loading parole request form...</LoadingAlert>
+          </div>
         </div>
       </div>
     );
@@ -25,9 +27,11 @@ export default function PrisonerParoleRequestPage() {
 
   if (protectedPage.isForbidden) {
     return (
-      <div className="card">
-        <div className="card-body">
-          <ForbiddenAlert className="mb-0" />
+      <div className="container-xxl flex-grow-1 container-p-y">
+        <div className="card">
+          <div className="card-body">
+            <ForbiddenAlert className="mb-0" />
+          </div>
         </div>
       </div>
     );
@@ -35,15 +39,21 @@ export default function PrisonerParoleRequestPage() {
 
   if (protectedPage.error) {
     return (
-      <div className="card">
-        <div className="card-body">
-          <ErrorAlert className="mb-0">{protectedPage.error}</ErrorAlert>
+      <div className="container-xxl flex-grow-1 container-p-y">
+        <div className="card">
+          <div className="card-body">
+            <ErrorAlert className="mb-0">{protectedPage.error}</ErrorAlert>
+          </div>
         </div>
       </div>
     );
   }
 
-  return <ParoleRequestForm />;
+  return (
+    <div className="container-xxl flex-grow-1 container-p-y">
+      <ParoleRequestForm />
+    </div>
+  );
 }
 
 

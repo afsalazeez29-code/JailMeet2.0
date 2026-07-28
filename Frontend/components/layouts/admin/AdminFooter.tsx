@@ -1,3 +1,6 @@
+import DashboardFooter from '../../common/DashboardFooter';
+
 export default function AdminFooter() {
-  return null;
+  return <DashboardFooter />;
 }
+

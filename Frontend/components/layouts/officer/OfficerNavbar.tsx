@@ -3,11 +3,11 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { LogOut, Search } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 
 import LogoutConfirmModal from '../../common/LogoutConfirmModal';
+import NavbarSearch from '../../common/NavbarSearch';
 import iconStyles from '../../common/LucideIcon.module.css';
-import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
 import { clearAccessToken } from '@features/auth/services/token.service';
@@ -19,18 +19,25 @@ type OfficerNavbarProps = {
   sidebarOpen?: boolean;
 };
 
+const fallbackOfficerImage = '/images/avatars/officer-default.png';
+
 export default function OfficerNavbar({
   onToggleSidebar,
   sidebarOpen = false,
 }: OfficerNavbarProps) {
   const router = useRouter();
   const { user } = useAuth();
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [logoutOpen, setLogoutOpen] = useState(false);
 
   const handleLogout = () => {
     clearAccessToken();
     navigateToLogin(router, 'push');
+  };
+
+  const handleSearch = (value: string) => {
+    // UI-only: no backend search connected yet
+    void value;
   };
 
   return (
@@ -55,68 +62,17 @@ export default function OfficerNavbar({
           <img src="/images/logos/auth-logo.png" alt="" className="navbar-brand-logo" aria-hidden="true" />
         </button>
 
-        <div className={s.searchArea}>
-          <button
-            className={s.searchToggle}
-            type="button"
-            aria-expanded={searchOpen}
-            aria-label="Toggle search"
-            onClick={() => setSearchOpen((current) => !current)}
-          >
-            <Search aria-hidden="true" className={`${iconStyles.icon} ${iconStyles.navbar}`} />
-          </button>
+        <NavbarSearch
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSubmit={handleSearch}
+          placeholder="Search"
+        />
 
-          <div className={`${s.searchDropdown}${searchOpen ? ` ${s.searchDropdownOpen}` : ''}`}>
-            <form onSubmit={(event) => event.preventDefault()}>
-              <div className="form-group row">
-                <label className="col-sm-12 col-md-2 col-form-label" htmlFor="officer-search-from">
-                  From
-                </label>
-                <div className="col-sm-12 col-md-10">
-                  <input
-                    className="form-control form-control-sm form-control-line"
-                    id="officer-search-from"
-                    type="text"
-                  />
-                </div>
-              </div>
-              <div className="form-group row">
-                <label className="col-sm-12 col-md-2 col-form-label" htmlFor="officer-search-to">
-                  To
-                </label>
-                <div className="col-sm-12 col-md-10">
-                  <input
-                    className="form-control form-control-sm form-control-line"
-                    id="officer-search-to"
-                    type="text"
-                  />
-                </div>
-              </div>
-              <div className="form-group row">
-                <label className="col-sm-12 col-md-2 col-form-label" htmlFor="officer-search-subject">
-                  Subject
-                </label>
-                <div className="col-sm-12 col-md-10">
-                  <input
-                    className="form-control form-control-sm form-control-line"
-                    id="officer-search-subject"
-                    type="text"
-                  />
-                </div>
-              </div>
-              <div className="text-right">
-                <button className="btn btn-primary" type="submit">
-                  <AnimatedButtonText>Search</AnimatedButtonText>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        <div className="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+        <div className={`navbar-nav-right d-flex align-items-center ${s.navbarNavRight}`} id="navbar-collapse">
           <ul className="navbar-nav flex-row align-items-center ms-auto">
             <li className={`nav-item ${s.profileActions}`}>
-              <OfficerProfilePill displayName={user?.name ?? 'Officer'} />
+              <OfficerProfilePill displayName={user?.name ?? 'Officer'} avatarSrc={fallbackOfficerImage} />
               <button
                 className={s.logoutButton}
                 type="button"
