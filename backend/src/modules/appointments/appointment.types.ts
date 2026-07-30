@@ -32,6 +32,7 @@ export type VisitorAppointmentResult = {
 export type OfficerAppointmentResult = VisitorAppointmentResult & {
   visitor: {
     id: string;
+    publicId: string | null;
     name: string;
     phone: string;
   };

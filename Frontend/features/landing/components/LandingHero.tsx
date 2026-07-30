@@ -1,6 +1,10 @@
 import Link from 'next/link';
 
-export default function LandingHero() {
+type LandingHeroProps = {
+  onVisitorEntry: () => void;
+};
+
+export default function LandingHero({ onVisitorEntry }: LandingHeroProps) {
   return (
     <section id="hero" className="hero section dark-background">
       <img src="/images/landing/prison1.jpg" alt="Prison corridor" />
@@ -16,7 +20,14 @@ export default function LandingHero() {
           ones in prison"
         </p>
         <div className="d-flex mt-4" data-aos="fade-up" data-aos-delay="300">
-          <Link href="/register" className="btn-get-started">
+          <Link
+            href="/register?role=visitor"
+            className="btn-get-started"
+            onClick={(event) => {
+              event.preventDefault();
+              onVisitorEntry();
+            }}
+          >
             <span className="btn-hover-text">
               <span className="btn-hover-text-original">Get Started</span>
               <span className="btn-hover-text-copy" aria-hidden="true">

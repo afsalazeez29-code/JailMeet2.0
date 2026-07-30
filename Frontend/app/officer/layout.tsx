@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 
 import OfficerLayout from '../../components/layouts/officer/OfficerLayout';
+import RoleGuard from '@features/auth/components/RoleGuard';
 
 type OfficerRouteLayoutProps = {
   children: ReactNode;
@@ -246,17 +247,19 @@ export default function OfficerRouteLayout({
   children,
 }: OfficerRouteLayoutProps) {
   return (
-    <>
-      <link
-        href="/images/logos/favicon.jpg"
-        rel="icon"
-        type="image/jpeg"
-      />
-      {officerStylesheets.map((href) => (
-        <link href={href} key={href} rel="stylesheet" />
-      ))}
-      <style>{officerFontOverrides}</style>
-      <OfficerLayout>{children}</OfficerLayout>
-    </>
+    <RoleGuard expectedRole="OFFICER">
+      <>
+        <link
+          href="/images/logos/favicon.jpg"
+          rel="icon"
+          type="image/jpeg"
+        />
+        {officerStylesheets.map((href) => (
+          <link href={href} key={href} rel="stylesheet" />
+        ))}
+        <style>{officerFontOverrides}</style>
+        <OfficerLayout>{children}</OfficerLayout>
+      </>
+    </RoleGuard>
   );
 }

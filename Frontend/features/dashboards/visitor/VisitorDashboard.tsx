@@ -9,6 +9,7 @@ import { useDashboard } from '@features/dashboards/services/useDashboard';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { getVisitorDashboard } from '@features/dashboards/services/dashboard.service';
 import { VisitorDashboardData } from '@features/dashboards/types';
+import { formatVisitorPublicId } from '@/lib/visitor-public-id';
 
 type CardIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -134,7 +135,7 @@ export default function VisitorDashboardPage() {
             <div className="card-body">
               <h1>Welcome {user?.name ?? 'Visitor'}</h1>
               <p>
-                Your Visitor ID: <strong>{user?.id ?? ''}</strong>
+                Your Visitor ID: <strong>{formatVisitorPublicId(data.publicId)}</strong>
               </p>
               <p>Email: {user?.email ?? ''}</p>
             </div>

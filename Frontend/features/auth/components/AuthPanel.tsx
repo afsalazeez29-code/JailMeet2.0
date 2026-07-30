@@ -9,11 +9,10 @@ import { login, saveAccessToken } from '@features/auth/services/token.service';
 import { registerVisitor } from '@features/auth/services/auth.service';
 import {
   navigateToHome,
-  navigateToLogin,
   navigateToRoleDashboard,
 } from '@features/auth/services/navigation.service';
 import { isApiServiceError } from '@/types/api';
-import { VisitorRegistrationPayload } from '@features/auth/types';
+import { Role, VisitorRegistrationPayload } from '@features/auth/types';
 
 import styles from './AuthPanel.module.css';
 import AuthMobileSwitch from './AuthMobileSwitch';
@@ -23,6 +22,7 @@ import RegisterPanelForm from './RegisterPanelForm';
 
 type AuthPanelProps = {
   initialMode: 'login' | 'register';
+  selectedRole: Role;
 };
 
 const keralaDistricts = [
@@ -66,7 +66,7 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
 const getRegistrationError = (error: unknown): string => {
   if (isApiServiceError(error)) {
     if (error.status === 409) {
-      return 'Email already registered';
+      return 'Email or phone already registered';
     }
 
     return error.message || 'Registration failed';
@@ -75,10 +75,14 @@ const getRegistrationError = (error: unknown): string => {
   return 'Registration failed. Please check your connection and try again.';
 };
 
-export default function AuthPanel({ initialMode }: AuthPanelProps) {
+export default function AuthPanel({
+  initialMode,
+  selectedRole,
+}: AuthPanelProps) {
   const router = useRouter();
+  const canRegister = selectedRole === 'VISITOR';
   const [isRegisterMode, setIsRegisterMode] = useState(
-    initialMode === 'register',
+    initialMode === 'register' && canRegister,
   );
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -91,7 +95,11 @@ export default function AuthPanel({ initialMode }: AuthPanelProps) {
   const [isRegisterSubmitting, setIsRegisterSubmitting] = useState(false);
 
   const showLogin = () => setIsRegisterMode(false);
-  const showRegister = () => setIsRegisterMode(true);
+  const showRegister = () => {
+    if (canRegister) {
+      setIsRegisterMode(true);
+    }
+  };
 
   const updateRegisterField = (
     field: keyof VisitorRegistrationPayload,
@@ -137,7 +145,11 @@ export default function AuthPanel({ initialMode }: AuthPanelProps) {
     setIsLoginSubmitting(true);
 
     try {
-      const response = await login(loginEmail.trim(), loginPassword);
+      const response = await login(
+        loginEmail.trim(),
+        loginPassword,
+        selectedRole,
+      );
 
       if (!response.success || !response.data) {
         setLoginError(response.message || 'Login failed');
@@ -170,7 +182,7 @@ export default function AuthPanel({ initialMode }: AuthPanelProps) {
     setIsRegisterSubmitting(true);
 
     try {
-      await registerVisitor({
+      const registration = await registerVisitor({
         name: registerForm.name.trim(),
         email: registerForm.email.trim(),
         phone: registerForm.phone.trim(),
@@ -178,12 +190,9 @@ export default function AuthPanel({ initialMode }: AuthPanelProps) {
         state: registerForm.state,
       });
 
-      setRegisterSuccess(
-        'Registration Successful! Redirecting to Login Page ...',
-      );
-      window.setTimeout(() => {
-        navigateToLogin(router, 'push');
-      }, 1600);
+      saveAccessToken(registration.accessToken);
+      setRegisterSuccess('Registration successful! Redirecting ...');
+      navigateToRoleDashboard(router, registration.user.role);
     } catch (caughtError) {
       setRegisterError(getRegistrationError(caughtError));
     } finally {
@@ -247,12 +256,14 @@ export default function AuthPanel({ initialMode }: AuthPanelProps) {
         </div>
 
         <AuthOverlay
+          canRegister={canRegister}
           onGoHome={goHome}
           onShowLogin={showLogin}
           onShowRegister={showRegister}
         />
 
         <AuthMobileSwitch
+          canRegister={canRegister}
           isRegisterMode={isRegisterMode}
           onShowLogin={showLogin}
           onShowRegister={showRegister}

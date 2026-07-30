@@ -10,13 +10,16 @@ const visitorProfileSelect = {
   id: true,
   email: true,
   role: true,
+  isActive: true,
   visitorProfile: {
     select: {
+      publicId: true,
       name: true,
       phone: true,
       address: true,
       state: true,
       zip: true,
+      profilePic: true,
     },
   },
 };
@@ -25,12 +28,15 @@ const toVisitorProfileResult = (user: {
   id: string;
   email: string | null;
   role: Role;
+  isActive: boolean;
   visitorProfile: {
+    publicId: string | null;
     name: string;
     phone: string;
     address: string | null;
     state: string | null;
     zip: string | null;
+    profilePic: string | null;
   } | null;
 }): VisitorProfileResult | null => {
   if (!user.visitorProfile) {
@@ -40,11 +46,15 @@ const toVisitorProfileResult = (user: {
   return {
     user: {
       id: user.id,
+      publicId: user.visitorProfile.publicId,
       name: user.visitorProfile.name,
       email: user.email ?? '',
       role: user.role,
+      isActive: user.isActive,
+      profileImageUrl: user.visitorProfile.profilePic,
     },
     visitorProfile: {
+      publicId: user.visitorProfile.publicId,
       phone: user.visitorProfile.phone,
       address: user.visitorProfile.address,
       state: user.visitorProfile.state,

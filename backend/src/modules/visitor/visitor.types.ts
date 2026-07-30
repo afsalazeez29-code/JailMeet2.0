@@ -10,11 +10,15 @@ export type UpdateVisitorProfileInput = z.infer<
 export type VisitorProfileResult = {
   user: {
     id: string;
+    publicId: string | null;
     name: string;
     email: string;
     role: Role;
+    isActive: boolean;
+    profileImageUrl: string | null;
   };
   visitorProfile: {
+    publicId: string | null;
     phone: string;
     address: string | null;
     state: string | null;

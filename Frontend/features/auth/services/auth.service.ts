@@ -4,27 +4,54 @@ import {
   requestWithAuth as requestWithAuthUsingToken,
   requireData,
 } from '@/lib/api';
-import { getAccessToken, login as loginWithCredentials } from '@features/auth/services/token.service';
-import { ApiResponse, ApiServiceError } from '@/types/api';
+import {
+  clearAccessToken,
+  getAccessToken,
+  login as loginWithCredentials,
+  AUTH_FORBIDDEN_EVENT,
+} from '@features/auth/services/token.service';
+import { ApiResponse, ApiServiceError, isApiServiceError } from '@/types/api';
 import {
   AuthUser,
   ChangePasswordInput,
+  ChangePasswordData,
   CurrentUserData,
   LoginResponse,
   VisitorRegistrationData,
   VisitorRegistrationPayload,
+  Role,
 } from '@features/auth/types';
 
 export const requestWithAuth = async <TData>(
   path: string,
   token = getAccessToken(),
   options: RequestInit = {},
-): Promise<TData> => requestWithAuthUsingToken<TData>(path, token, options);
+): Promise<TData> => {
+  try {
+    return await requestWithAuthUsingToken<TData>(path, token, options);
+  } catch (error) {
+    if (isApiServiceError(error) && error.status === 401) {
+      clearAccessToken();
+    }
+
+    if (
+      isApiServiceError(error) &&
+      error.status === 403 &&
+      typeof window !== 'undefined'
+    ) {
+      window.dispatchEvent(new Event(AUTH_FORBIDDEN_EVENT));
+    }
+
+    throw error;
+  }
+};
 
 export const login = async (
   email: string,
   password: string,
-): Promise<LoginResponse> => loginWithCredentials(email, password);
+  expectedRole: Role,
+): Promise<LoginResponse> =>
+  loginWithCredentials(email, password, expectedRole);
 
 export const registerVisitor = async (
   payload: VisitorRegistrationPayload,
@@ -61,8 +88,8 @@ export const getCurrentUser = async (
 
 export const changePassword = async (
   payload: ChangePasswordInput,
-): Promise<null> =>
-  requestWithAuth<null>('/auth/change-password', undefined, {
+): Promise<ChangePasswordData> =>
+  requestWithAuth<ChangePasswordData>('/auth/change-password', undefined, {
     method: 'PATCH',
     body: JSON.stringify(payload),
   });

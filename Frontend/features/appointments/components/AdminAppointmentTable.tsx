@@ -2,6 +2,7 @@
 
 import { EmptyStateAlert } from '../../../components/common/StatusAlert';
 import { AdminAppointment } from '@features/appointments/types';
+import { formatVisitorPublicId } from '@/lib/visitor-public-id';
 
 type Props = { appointments: AdminAppointment[] };
 
@@ -17,7 +18,7 @@ export default function AdminAppointmentTable({ appointments }: Props) {
         <tbody>
           {appointments.map((appointment) => (
             <tr key={appointment.id}>
-              <td>{appointment.visitor.name}</td><td>{appointment.prisoner.name}</td><td>{formatDateTime(appointment.requestedDate)}</td><td>{appointment.relationship}</td><td>{appointment.message || 'N/A'}</td><td>{appointment.status}</td><td>{appointment.officer?.name || 'Not reviewed'}</td><td>{appointment.replyMessage || 'N/A'}</td><td>{formatDateTime(appointment.createdAt)}</td>
+              <td>{appointment.visitor.name}<small className="d-block text-muted">{formatVisitorPublicId(appointment.visitor.publicId)}</small></td><td>{appointment.prisoner.name}</td><td>{formatDateTime(appointment.requestedDate)}</td><td>{appointment.relationship}</td><td>{appointment.message || 'N/A'}</td><td>{appointment.status}</td><td>{appointment.officer?.name || 'Not reviewed'}</td><td>{appointment.replyMessage || 'N/A'}</td><td>{formatDateTime(appointment.createdAt)}</td>
             </tr>
           ))}
         </tbody>

@@ -5,6 +5,7 @@ type LandingHeaderProps = {
   isScrolled: boolean;
   onLoginDropdownToggle: () => void;
   onMobileNavToggle: () => void;
+  onVisitorEntry: () => void;
 };
 
 export default function LandingHeader({
@@ -12,6 +13,7 @@ export default function LandingHeader({
   isScrolled,
   onLoginDropdownToggle,
   onMobileNavToggle,
+  onVisitorEntry,
 }: LandingHeaderProps) {
   return (
     <header
@@ -59,16 +61,24 @@ export default function LandingHeader({
               </button>
               <ul className={isLoginDropdownOpen ? 'dropdown-active' : ''}>
                 <li>
-                  <Link href="/register">Visitor Login/Register</Link>
+                  <Link
+                    href="/register?role=visitor"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      onVisitorEntry();
+                    }}
+                  >
+                    Visitor Login/Register
+                  </Link>
                 </li>
                 <li>
-                  <Link href="/officer">Officers</Link>
+                  <Link href="/login?role=officer">Officers</Link>
                 </li>
                 <li>
-                  <Link href="/prisoner">Prisoners</Link>
+                  <Link href="/login?role=prisoner">Prisoners</Link>
                 </li>
                 <li>
-                  <Link href="/admin">Admin</Link>
+                  <Link href="/login?role=admin">Admin</Link>
                 </li>
               </ul>
             </li>

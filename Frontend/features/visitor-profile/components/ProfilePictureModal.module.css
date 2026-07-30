@@ -1,0 +1,327 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1090;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+  background: rgba(17, 17, 17, 0.58);
+}
+
+.dialog {
+  width: min(100%, 620px);
+  max-height: calc(100dvh - 40px);
+  margin: auto;
+  overflow-y: auto;
+  color: #171717;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 24px 70px rgba(17, 24, 39, 0.22);
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 22px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.headerActions,
+.footerActions,
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.iconButton {
+  display: inline-flex;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  color: #171717;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 50%;
+}
+
+.iconButton svg,
+.optionButton svg,
+.secondaryButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+.overflowWrap {
+  position: relative;
+}
+
+.overflowMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 5;
+  width: 230px;
+  padding: 6px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(17, 24, 39, 0.14);
+}
+
+.overflowMenu button {
+  width: 100%;
+  padding: 10px 12px;
+  color: #dc2626;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+}
+
+.overflowMenu button:hover {
+  background: #fef2f2;
+}
+
+.body {
+  padding: 26px;
+}
+
+.largeAvatar,
+.removeAvatar {
+  display: block;
+  width: 180px;
+  height: 180px;
+  margin: 4px auto 26px;
+  object-fit: cover;
+  border: 4px solid #fff2ed;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px #ff5b32;
+}
+
+.optionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.optionButton,
+.primaryButton,
+.secondaryButton,
+.dangerButton {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 10px 16px;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+.optionButton {
+  color: #171717;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.optionButton:hover {
+  color: #e84c26;
+  border-color: #ff5b32;
+  background: #fff2ed;
+}
+
+.primaryButton {
+  color: #ffffff;
+  background: #ff5b32;
+  border: 1px solid #ff5b32;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: #e84c26;
+  border-color: #e84c26;
+}
+
+.secondaryButton {
+  color: #171717;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+}
+
+.dangerButton {
+  color: #ffffff;
+  background: #dc2626;
+  border: 1px solid #dc2626;
+}
+
+.iconButton:focus-visible,
+.optionButton:focus-visible,
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.dangerButton:focus-visible,
+.overflowMenu button:focus-visible,
+.controls input:focus-visible {
+  outline: 3px solid rgba(255, 91, 50, 0.3);
+  outline-offset: 2px;
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled,
+.dangerButton:disabled,
+.iconButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.help {
+  margin: 16px 0 0;
+  color: #667085;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.hiddenInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.error {
+  margin: 0 0 18px;
+  padding: 11px 13px;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+}
+
+.centerState,
+.removeState {
+  display: flex;
+  min-height: 280px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.centerState p,
+.removeState p {
+  color: #667085;
+}
+
+.spinner {
+  width: 38px;
+  height: 38px;
+  margin-bottom: 16px;
+  border: 4px solid #ffe0d5;
+  border-top-color: #ff5b32;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.cropArea {
+  position: relative;
+  width: 100%;
+  height: min(52vh, 390px);
+  min-height: 280px;
+  overflow: hidden;
+  background: #111111;
+  border-radius: 12px;
+}
+
+.controls {
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.controls label {
+  font-weight: 600;
+}
+
+.controls input {
+  min-width: 160px;
+  flex: 1;
+  accent-color: #ff5b32;
+}
+
+.footerActions {
+  justify-content: flex-end;
+  margin-top: 22px;
+}
+
+.removeAvatar {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 20px;
+}
+
+.removeState h3 {
+  margin-bottom: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 575px) {
+  .backdrop {
+    align-items: flex-end;
+    padding: 10px;
+  }
+
+  .dialog {
+    max-height: calc(100dvh - 20px);
+    border-radius: 16px;
+  }
+
+  .header,
+  .body {
+    padding: 18px;
+  }
+
+  .optionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .largeAvatar {
+    width: 150px;
+    height: 150px;
+  }
+
+  .cropArea {
+    height: 42vh;
+    min-height: 240px;
+  }
+
+  .footerActions {
+    align-items: stretch;
+  }
+
+  .footerActions > button {
+    flex: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+}

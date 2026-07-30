@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 
 import PrisonerLayout from '../../components/layouts/prisoner/PrisonerLayout';
+import RoleGuard from '@features/auth/components/RoleGuard';
 
 type PrisonerRouteLayoutProps = {
   children: ReactNode;
@@ -259,17 +260,19 @@ export default function PrisonerRouteLayout({
   children,
 }: PrisonerRouteLayoutProps) {
   return (
-    <>
-      <link
-        href="/images/logos/favicon.jpg"
-        rel="icon"
-        type="image/jpeg"
-      />
-      {prisonerStylesheets.map((href) => (
-        <link href={href} key={href} rel="stylesheet" />
-      ))}
-      <style>{prisonerFontOverrides}</style>
-      <PrisonerLayout>{children}</PrisonerLayout>
-    </>
+    <RoleGuard expectedRole="PRISONER">
+      <>
+        <link
+          href="/images/logos/favicon.jpg"
+          rel="icon"
+          type="image/jpeg"
+        />
+        {prisonerStylesheets.map((href) => (
+          <link href={href} key={href} rel="stylesheet" />
+        ))}
+        <style>{prisonerFontOverrides}</style>
+        <PrisonerLayout>{children}</PrisonerLayout>
+      </>
+    </RoleGuard>
   );
 }

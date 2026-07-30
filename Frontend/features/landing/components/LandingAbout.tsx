@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { LANDING_MEDIA_URLS } from '@features/landing/landing-assets';
 
 type LandingAboutProps = {
   arrowIcon: ReactNode;
@@ -12,7 +13,7 @@ export default function LandingAbout({ arrowIcon }: LandingAboutProps) {
           <div className="col-lg-6" data-aos="fade-up" data-aos-delay="100">
             <h3>Our Mission: Keeping Families Connected</h3>
             <img
-              src="/images/landing/prisoner-img-1.jpg"
+              src={LANDING_MEDIA_URLS.prisonerSection}
               className="img-fluid rounded-4 mb-4"
               alt="Prison visit support"
             />
@@ -63,13 +64,13 @@ export default function LandingAbout({ arrowIcon }: LandingAboutProps) {
               </p>
               <div className="position-relative">
                 <img
-                  src="/images/landing/video-thumbnail.jpg"
+                  src={LANDING_MEDIA_URLS.videoThumbnail}
                   className="img-fluid rounded-4"
                   alt="JailMeet introduction video"
                 />
 
                 <a
-                  href="/videos/jailmeet-introduction.mp4"
+                  href={LANDING_MEDIA_URLS.introductionVideo}
                   className="glightbox pulsating-play-btn"
                   aria-label="Play JailMeet introduction video"
                 />

@@ -56,7 +56,7 @@ export default function VisitorNavbar({ user, onToggleMenu, menuOpen = false }: 
             <li className={`nav-item ${styles.profileActions}`}>
               <VisitorProfilePill
                 fullName={user?.name ?? 'Visitor'}
-                profileImage={null}
+                profileImage={user?.profileImageUrl}
               />
               <button
                 className={styles.logoutButton}

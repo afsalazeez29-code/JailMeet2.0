@@ -1,21 +1,38 @@
-.readonlyValue {
-  min-height: 38px;
-  display: flex;
-  align-items: center;
-  color: #697a8d;
-  background-color: #f5f5f9;
-  border: 1px solid #d9dee3;
-  border-radius: 0.375rem;
-  padding: 0.4375rem 0.875rem;
-}
-
-.avatarPreview {
-  width: 115px;
-  height: 115px;
-  flex-shrink: 0;
-  object-fit: cover;
-}
-
-.notice {
-  margin-bottom: 0;
-}
+.page { min-height: 100%; padding: 30px 24px; background: #f8f9fb; }
+.content { width: min(100%, 1050px); margin: 0 auto; }
+.backLink { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 18px; color: #667085; font-weight: 600; text-decoration: none; }
+.backLink:hover { color: #e84c26; }
+.backLink svg { width: 18px; height: 18px; }
+.pageHeader { margin-bottom: 22px; }
+.pageHeader h1 { margin: 0 0 5px; color: #111; font-size: clamp(1.6rem, 3vw, 2.1rem); }
+.pageHeader p, .identityRow p, .sectionHeading p { margin: 0; color: #667085; overflow-wrap: anywhere; }
+.card { padding: 28px; background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 8px 24px rgba(17, 24, 39, .06); }
+.identityRow { display: flex; align-items: center; gap: 22px; padding-bottom: 26px; border-bottom: 1px solid #e5e7eb; }
+.identityRow h2 { margin: 0 0 4px; font-size: 1.3rem; overflow-wrap: anywhere; }
+.avatarButton { position: relative; flex: 0 0 112px; width: 112px; height: 112px; padding: 0; background: #fff; border: 2px solid #ff5b32; border-radius: 50%; cursor: pointer; }
+.avatarButton img { width: 100%; height: 100%; object-fit: cover; border: 4px solid #fff; border-radius: 50%; }
+.avatarButton span { position: absolute; right: -1px; bottom: 4px; display: grid; width: 34px; height: 34px; place-items: center; color: #fff; background: #ff5b32; border: 3px solid #fff; border-radius: 50%; }
+.avatarButton svg { width: 17px; height: 17px; }
+.changePhotoButton { margin-top: 10px; padding: 0; color: #e84c26; font-weight: 650; background: transparent; border: 0; }
+.sectionHeading { margin: 28px 0 16px; }
+.sectionHeading h2 { margin: 0 0 3px; font-size: 1.12rem; }
+.sectionHeading p { font-size: .88rem; }
+.formGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.formGrid label { display: flex; min-width: 0; flex-direction: column; gap: 7px; color: #344054; font-size: .87rem; font-weight: 650; }
+.formGrid input, .formGrid textarea { width: 100%; min-height: 44px; padding: 10px 12px; color: #171717; font: inherit; font-weight: 500; background: #fff; border: 1px solid #d1d5db; border-radius: 9px; outline: none; }
+.formGrid textarea { min-height: 92px; resize: vertical; }
+.formGrid input[readonly] { color: #667085; background: #f3f4f6; cursor: default; }
+.formGrid input:focus:not([readonly]), .formGrid textarea:focus { border-color: #ff5b32; box-shadow: 0 0 0 3px rgba(255, 91, 50, .16); }
+.formGrid input[aria-invalid="true"], .formGrid textarea[aria-invalid="true"] { border-color: #dc2626; }
+.addressField { grid-column: 1 / -1; }
+.fieldError { color: #dc2626; font-size: .78rem; font-weight: 500; }
+.actions { display: flex; flex-wrap: wrap; gap: 11px; margin-top: 28px; padding-top: 22px; border-top: 1px solid #e5e7eb; }
+.primaryButton, .secondaryButton, .cancelButton { min-height: 44px; padding: 10px 17px; font-weight: 650; border-radius: 9px; }
+.primaryButton { color: #fff; background: #ff5b32; border: 1px solid #ff5b32; }
+.primaryButton:hover:not(:disabled) { background: #e84c26; border-color: #e84c26; }
+.secondaryButton { color: #d64018; background: #fff; border: 1px solid #ff5b32; }
+.cancelButton { color: #344054; background: #fff; border: 1px solid #d1d5db; }
+.primaryButton:disabled, .secondaryButton:disabled, .cancelButton:disabled { cursor: not-allowed; opacity: .55; }
+.avatarButton:focus-visible, .changePhotoButton:focus-visible, .backLink:focus-visible, .primaryButton:focus-visible, .secondaryButton:focus-visible, .cancelButton:focus-visible { outline: 3px solid rgba(255, 91, 50, .3); outline-offset: 3px; }
+@media (max-width: 700px) { .page { padding: 22px 14px; } .card { padding: 22px 16px; } .formGrid { grid-template-columns: 1fr; } .addressField { grid-column: auto; } .actions { flex-direction: column; } .actions button { width: 100%; } }
+@media (max-width: 430px) { .identityRow { flex-direction: column; text-align: center; } .avatarButton { flex-basis: 104px; width: 104px; height: 104px; } }

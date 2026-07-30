@@ -5,6 +5,12 @@ import { Role } from '@prisma/client';
 import config from '../../config';
 import prisma from '../../config/prisma';
 import {
+  generateUniqueVisitorPublicId,
+  isVisitorPublicIdCollision,
+  VISITOR_PUBLIC_ID_MAX_ATTEMPTS,
+  VisitorPublicIdGenerationError,
+} from '../../utils/visitor-public-id';
+import {
   AuthUser,
   AuthUserPayload,
   ChangePasswordInput,
@@ -21,14 +27,20 @@ const userSelect = {
   isActive: true,
   adminProfile: { select: { name: true } },
   officerProfile: { select: { name: true } },
-  visitorProfile: { select: { name: true } },
+  visitorProfile: {
+    select: { name: true, publicId: true, profilePic: true },
+  },
   prisonerProfile: { select: { name: true } },
 };
 
 const getProfileName = (user: {
   adminProfile?: { name: string } | null;
   officerProfile?: { name: string } | null;
-  visitorProfile?: { name: string } | null;
+  visitorProfile?: {
+    name: string;
+    publicId: string | null;
+    profilePic: string | null;
+  } | null;
   prisonerProfile?: { name: string } | null;
 }): string =>
   user.adminProfile?.name ??
@@ -43,13 +55,19 @@ const toAuthUser = (user: {
   role: Role;
   adminProfile?: { name: string } | null;
   officerProfile?: { name: string } | null;
-  visitorProfile?: { name: string } | null;
+  visitorProfile?: {
+    name: string;
+    publicId: string | null;
+    profilePic: string | null;
+  } | null;
   prisonerProfile?: { name: string } | null;
 }): AuthUser => ({
   id: user.id,
+  publicId: user.visitorProfile?.publicId ?? null,
   name: getProfileName(user),
   email: user.email ?? '',
   role: user.role,
+  profileImageUrl: user.visitorProfile?.profilePic ?? null,
 });
 
 const createAccessToken = (user: AuthUser): string => {
@@ -79,7 +97,10 @@ export const loginUser = async (
 
   const passwordMatches = await bcrypt.compare(input.password, user.password);
 
-  if (!passwordMatches) {
+  if (
+    !passwordMatches ||
+    (input.expectedRole !== undefined && user.role !== input.expectedRole)
+  ) {
     return null;
   }
 
@@ -107,60 +128,98 @@ export const getAuthenticatedUser = async (
 export const registerVisitor = async (
   input: RegisterVisitorInput,
 ): Promise<VisitorRegistrationResult | null> => {
-  const existingUser = await prisma.user.findUnique({
-    where: { email: input.email },
-    select: { id: true },
-  });
+  const [existingUser, existingPhone] = await Promise.all([
+    prisma.user.findUnique({
+      where: { email: input.email },
+      select: { id: true },
+    }),
+    prisma.visitorProfile.findFirst({
+      where: { phone: input.phone },
+      select: { id: true },
+    }),
+  ]);
 
-  if (existingUser) {
+  if (existingUser || existingPhone) {
     return null;
   }
 
   const hashedPassword = await bcrypt.hash(input.password, 12);
 
-  return prisma.$transaction(async (tx) => {
-    const user = await tx.user.create({
-      data: {
-        email: input.email,
-        password: hashedPassword,
-        role: Role.VISITOR,
-      },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-      },
-    });
+  let registration: Omit<VisitorRegistrationResult, 'accessToken'> | null =
+    null;
 
-    const visitorProfile = await tx.visitorProfile.create({
-      data: {
-        userId: user.id,
-        name: input.name,
-        phone: input.phone,
-        address: input.address,
-        state: input.state,
-        zip: input.zip,
-      },
-      select: {
-        id: true,
-        name: true,
-        phone: true,
-        address: true,
-        state: true,
-        zip: true,
-      },
-    });
+  for (
+    let attempt = 0;
+    attempt < VISITOR_PUBLIC_ID_MAX_ATTEMPTS;
+    attempt += 1
+  ) {
+    try {
+      registration = await prisma.$transaction(async (tx) => {
+        const publicId = await generateUniqueVisitorPublicId(tx);
+        const user = await tx.user.create({
+          data: {
+            email: input.email,
+            password: hashedPassword,
+            role: Role.VISITOR,
+          },
+          select: {
+            id: true,
+            email: true,
+            role: true,
+          },
+        });
 
-    return {
-      user: {
-        id: user.id,
-        name: visitorProfile.name,
-        email: user.email ?? '',
-        role: user.role,
-      },
-      visitorProfile,
-    };
-  });
+        const createdVisitorProfile = await tx.visitorProfile.create({
+          data: {
+            publicId,
+            userId: user.id,
+            name: input.name,
+            phone: input.phone,
+            address: input.address,
+            state: input.state,
+            zip: input.zip,
+          },
+          select: {
+            id: true,
+            publicId: true,
+            name: true,
+            phone: true,
+            address: true,
+            state: true,
+            zip: true,
+          },
+        });
+
+        const visitorProfile = {
+          ...createdVisitorProfile,
+          publicId,
+        };
+
+        return {
+          user: {
+            id: user.id,
+            publicId: visitorProfile.publicId,
+            name: visitorProfile.name,
+            email: user.email ?? '',
+            role: user.role,
+            profileImageUrl: null,
+          },
+          visitorProfile,
+        };
+      });
+      break;
+    } catch (error) {
+      if (isVisitorPublicIdCollision(error)) continue;
+      throw error;
+    }
+  }
+
+  if (!registration) throw new VisitorPublicIdGenerationError();
+
+  return {
+    ...registration,
+    accessToken: createAccessToken(registration.user),
+  };
 };
 
 export class AuthServiceError extends Error {

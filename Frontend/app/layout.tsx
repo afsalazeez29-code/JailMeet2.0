@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Montserrat, Raleway } from 'next/font/google';
 
 import './globals.css';
+import AuthProvider from '@features/auth/context/AuthProvider';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -35,7 +36,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <head>
         <link href="/images/logos/favicon.jpg" rel="icon" />
       </head>
-      <body>{children}</body>
+      <body>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

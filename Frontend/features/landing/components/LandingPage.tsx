@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { IoIosArrowForward } from 'react-icons/io';
 
 import SiteFooter from '../../../components/common/SiteFooter';
@@ -8,8 +9,12 @@ import LandingAbout from './LandingAbout';
 import LandingAssets from './LandingAssets';
 import LandingHeader from './LandingHeader';
 import LandingHero from './LandingHero';
+import { getCurrentUser } from '@features/auth/services/auth.service';
+import { getAccessToken } from '@features/auth/services/token.service';
+import { LANDING_MEDIA_URLS } from '@features/landing/landing-assets';
 
 export default function LandingPage() {
+  const router = useRouter();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isLoginDropdownOpen, setIsLoginDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -30,6 +35,25 @@ export default function LandingPage() {
   useEffect(() => {
     document.body.classList.toggle('mobile-nav-active', isMobileNavOpen);
   }, [isMobileNavOpen]);
+
+  const handleVisitorEntry = async () => {
+    const token = getAccessToken();
+
+    if (token) {
+      try {
+        const user = await getCurrentUser(token);
+
+        if (user.role === 'VISITOR') {
+          router.push('/visitor/dashboard');
+          return;
+        }
+      } catch {
+        // The shared authenticated request flow clears invalid or expired tokens.
+      }
+    }
+
+    router.push('/register?role=visitor');
+  };
 
   const arrowIcon = (
     <IoIosArrowForward
@@ -56,10 +80,11 @@ export default function LandingPage() {
           setIsLoginDropdownOpen((current) => !current)
         }
         onMobileNavToggle={() => setIsMobileNavOpen((current) => !current)}
+        onVisitorEntry={() => void handleVisitorEntry()}
       />
 
       <main className="main">
-        <LandingHero />
+        <LandingHero onVisitorEntry={() => void handleVisitorEntry()} />
         <LandingAbout arrowIcon={arrowIcon} />
 
         <section id="stats" className="stats section light-background">
@@ -148,7 +173,7 @@ export default function LandingPage() {
                 <div className="service-item">
                   <div className="img">
                     <img
-                      src="/images/landing/prisoner-2.jpeg"
+                      src={LANDING_MEDIA_URLS.prisoner2}
                       className="img-fluid"
                       alt="Visit Scheduling"
                     />
@@ -173,7 +198,7 @@ export default function LandingPage() {
                 <div className="service-item">
                   <div className="img">
                     <img
-                      src="/images/landing/prisoner-3.jpeg"
+                      src={LANDING_MEDIA_URLS.prisoner3}
                       className="img-fluid"
                       alt="Parole Support"
                     />
@@ -198,7 +223,7 @@ export default function LandingPage() {
                 <div className="service-item">
                   <div className="img">
                     <img
-                      src="/images/landing/prisoner.jpeg"
+                      src={LANDING_MEDIA_URLS.prisoner}
                       className="img-fluid"
                       alt="Virtual Visitation"
                     />

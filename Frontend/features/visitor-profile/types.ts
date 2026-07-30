@@ -2,6 +2,7 @@ import { ApiResponse } from '@/types/api';
 import { AuthUser } from '@features/auth/types';
 
 export type VisitorProfile = {
+  publicId: string | null;
   phone: string;
   address: string | null;
   state: string | null;
@@ -9,7 +10,7 @@ export type VisitorProfile = {
 };
 
 export type VisitorProfileData = {
-  user: AuthUser;
+  user: AuthUser & { isActive?: boolean };
   visitorProfile: VisitorProfile;
 };
 
@@ -20,4 +21,8 @@ export type UpdateVisitorProfileInput = {
   address?: string;
   state?: string;
   zip?: string;
+};
+
+export type ProfileImageData = {
+  profileImageUrl: string | null;
 };

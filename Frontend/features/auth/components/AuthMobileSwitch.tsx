@@ -1,12 +1,14 @@
 import styles from './AuthPanel.module.css';
 
 type AuthMobileSwitchProps = {
+  canRegister: boolean;
   isRegisterMode: boolean;
   onShowLogin: () => void;
   onShowRegister: () => void;
 };
 
 export default function AuthMobileSwitch({
+  canRegister,
   isRegisterMode,
   onShowLogin,
   onShowRegister,
@@ -26,6 +28,9 @@ export default function AuthMobileSwitch({
         type="button"
         onClick={onShowRegister}
         aria-pressed={isRegisterMode}
+        disabled={!canRegister}
+        aria-disabled={!canRegister}
+        tabIndex={canRegister ? 0 : -1}
       >
         Register
       </button>

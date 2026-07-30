@@ -5,12 +5,14 @@ import iconStyles from '../../../components/common/LucideIcon.module.css';
 import styles from './AuthPanel.module.css';
 
 type AuthOverlayProps = {
+  canRegister: boolean;
   onGoHome: () => void;
   onShowLogin: () => void;
   onShowRegister: () => void;
 };
 
 export default function AuthOverlay({
+  canRegister,
   onGoHome,
   onShowLogin,
   onShowRegister,
@@ -69,7 +71,14 @@ export default function AuthOverlay({
           <p className={styles.overlayCopy}>
             create your account and stay connected with your loved ones.
           </p>
-          <button className={styles.outlineButton} type="button" onClick={onShowRegister}>
+          <button
+            className={styles.outlineButton}
+            type="button"
+            onClick={onShowRegister}
+            disabled={!canRegister}
+            aria-disabled={!canRegister}
+            tabIndex={canRegister ? 0 : -1}
+          >
             <span className={styles.buttonText}>
               <span className={styles.buttonTextOriginal}>Register</span>
               <span className={styles.buttonTextCopy} aria-hidden="true">
@@ -77,6 +86,11 @@ export default function AuthOverlay({
               </span>
             </span>
           </button>
+          {!canRegister ? (
+            <p className={styles.registrationDisabledMessage}>
+              Registration is managed by Admin.
+            </p>
+          ) : null}
         </div>
       </div>
     </div>

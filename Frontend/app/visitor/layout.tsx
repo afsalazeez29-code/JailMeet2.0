@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 
 import VisitorLayout from '../../components/layouts/visitor/VisitorLayout';
+import RoleGuard from '@features/auth/components/RoleGuard';
 
 type VisitorRouteLayoutProps = {
   children: ReactNode;
@@ -264,13 +265,15 @@ export default function VisitorRouteLayout({
   children,
 }: VisitorRouteLayoutProps) {
   return (
-    <>
-      <link href="/images/logos/favicon.jpg" rel="icon" />
-      {visitorStylesheets.map((href) => (
-        <link href={href} key={href} rel="stylesheet" />
-      ))}
-      <style>{visitorFontOverrides}</style>
-      <VisitorLayout>{children}</VisitorLayout>
-    </>
+    <RoleGuard expectedRole="VISITOR">
+      <>
+        <link href="/images/logos/favicon.jpg" rel="icon" />
+        {visitorStylesheets.map((href) => (
+          <link href={href} key={href} rel="stylesheet" />
+        ))}
+        <style>{visitorFontOverrides}</style>
+        <VisitorLayout>{children}</VisitorLayout>
+      </>
+    </RoleGuard>
   );
 }

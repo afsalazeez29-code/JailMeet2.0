@@ -1,300 +1,177 @@
 'use client';
 
-import { ErrorAlert, SuccessAlert, WarningAlert } from '../../../components/common/StatusAlert';
-import { FormEvent, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { UserRound } from 'lucide-react';
-import iconStyles from '../../../components/common/LucideIcon.module.css';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Camera } from 'lucide-react';
 
+import { ErrorAlert, SuccessAlert } from '@components/common/StatusAlert';
+import { isApiServiceError } from '@/types/api';
 import { clearAccessToken } from '@features/auth/services/token.service';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
+import { formatVisitorPublicId } from '@/lib/visitor-public-id';
 import { updateVisitorProfile } from '@features/visitor-profile/services/visitor.service';
-import { isApiServiceError } from '@/types/api';
-import {
+import type {
   UpdateVisitorProfileInput,
   VisitorProfileData,
 } from '@features/visitor-profile/types';
+import ProfilePictureModal from './ProfilePictureModal';
 import styles from './VisitorSettingsForm.module.css';
-import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 
-type VisitorSettingsFormProps = {
-  profileData: VisitorProfileData;
+const DEFAULT_AVATAR = '/images/avatars/visitor-default.png';
+
+type FormState = {
+  phone: string;
+  address: string;
+  state: string;
+  zip: string;
 };
 
-type FormState = Required<UpdateVisitorProfileInput>;
+type FieldErrors = Partial<Record<keyof FormState, string>>;
 
-const displayValue = (value?: string | null) => value || 'Not provided';
-
-const toFormState = (
-  profile: VisitorProfileData['visitorProfile'],
-): FormState => ({
+const toFormState = (profile: VisitorProfileData['visitorProfile']): FormState => ({
   phone: profile.phone ?? '',
   address: profile.address ?? '',
   state: profile.state ?? '',
   zip: profile.zip ?? '',
 });
 
-export default function VisitorSettingsForm({
-  profileData,
-}: VisitorSettingsFormProps) {
+const normalize = (form: FormState): FormState => ({
+  phone: form.phone.trim(),
+  address: form.address.trim(),
+  state: form.state.trim(),
+  zip: form.zip.trim(),
+});
+
+export default function VisitorSettingsForm({ profileData }: { profileData: VisitorProfileData }) {
   const router = useRouter();
-  const [savedProfileData, setSavedProfileData] = useState(profileData);
-  const [formData, setFormData] = useState<FormState>(
-    toFormState(profileData.visitorProfile),
-  );
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [savedProfile, setSavedProfile] = useState(profileData);
+  const [form, setForm] = useState(() => toFormState(profileData.visitorProfile));
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [requestError, setRequestError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const user = savedProfileData.user;
+  const [saving, setSaving] = useState(false);
+  const [pictureOpen, setPictureOpen] = useState(false);
+  const user = savedProfile.user;
+  const savedForm = useMemo(() => normalize(toFormState(savedProfile.visitorProfile)), [savedProfile]);
+  const normalizedForm = normalize(form);
+  const dirty = (Object.keys(form) as Array<keyof FormState>).some(
+    (field) => normalizedForm[field] !== savedForm[field],
+  );
 
   useEffect(() => {
-    setSavedProfileData(profileData);
-    setFormData(toFormState(profileData.visitorProfile));
+    setSavedProfile(profileData);
+    setForm(toFormState(profileData.visitorProfile));
   }, [profileData]);
 
-  const updateField = (field: keyof FormState, value: string) => {
-    setFormData((currentData) => ({
-      ...currentData,
-      [field]: value,
-    }));
-  };
-
-  const validateForm = (): string | null => {
-    if (!/^[0-9]{10}$/.test(formData.phone)) {
-      return 'Phone must be exactly 10 digits';
-    }
-
-    if (formData.zip && !/^[0-9]{6}$/.test(formData.zip)) {
-      return 'Zip must be exactly 6 digits';
-    }
-
-    return null;
-  };
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setError(null);
+  const setField = (field: keyof FormState, value: string) => {
+    setForm((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: undefined }));
+    setRequestError(null);
     setSuccess(null);
+  };
 
-    const validationError = validateForm();
+  const validate = (): FieldErrors => {
+    const next: FieldErrors = {};
+    if (!/^[0-9]{10}$/.test(normalizedForm.phone)) next.phone = 'Phone must be exactly 10 digits';
+    if (normalizedForm.address.length > 255) next.address = 'Address must be 255 characters or fewer';
+    if (normalizedForm.state.length > 100) next.state = 'State or district must be 100 characters or fewer';
+    if (normalizedForm.zip && !/^[0-9]{6}$/.test(normalizedForm.zip)) next.zip = 'ZIP code must be exactly 6 digits';
+    return next;
+  };
 
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (saving || !dirty) return;
+    const fieldErrors = validate();
+    setErrors(fieldErrors);
+    setRequestError(null);
+    setSuccess(null);
+    if (Object.keys(fieldErrors).length) return;
+
+    const payload: UpdateVisitorProfileInput = {};
+    if (normalizedForm.phone !== savedForm.phone) payload.phone = normalizedForm.phone;
+    if (normalizedForm.address !== savedForm.address) payload.address = normalizedForm.address;
+    if (normalizedForm.state !== savedForm.state) payload.state = normalizedForm.state;
+    if (normalizedForm.zip !== savedForm.zip) payload.zip = normalizedForm.zip;
 
     setSaving(true);
-
     try {
-      const updatedProfile = await updateVisitorProfile({
-        phone: formData.phone.trim(),
-        address: formData.address.trim(),
-        state: formData.state.trim(),
-        zip: formData.zip.trim(),
-      });
-
-      setSavedProfileData(updatedProfile);
-      setFormData(toFormState(updatedProfile.visitorProfile));
-      setSuccess('Changes Saved Successfully!');
+      const updated = await updateVisitorProfile(payload);
+      setSavedProfile(updated);
+      setForm(toFormState(updated.visitorProfile));
+      setSuccess('Profile details updated successfully.');
     } catch (caughtError) {
-      if (isApiServiceError(caughtError)) {
-        if (caughtError.status === 401) {
-          clearAccessToken();
-          navigateToLogin(router);
-          return;
-        }
-
-        if (caughtError.status === 403) {
-          setError('Access denied');
-          return;
-        }
-
-        setError(caughtError.message || 'Unable to update visitor profile');
+      if (isApiServiceError(caughtError) && caughtError.status === 401) {
+        clearAccessToken();
+        navigateToLogin(router);
         return;
       }
-
-      setError('Unable to update visitor profile');
+      setRequestError(
+        isApiServiceError(caughtError) && caughtError.status === 403
+          ? 'Access denied'
+          : 'Unable to update your profile. Review the fields and try again.',
+      );
     } finally {
       setSaving(false);
     }
   };
 
+  const updatePicture = (profileImageUrl: string | null) => {
+    setSavedProfile((current) => ({
+      ...current,
+      user: { ...current.user, profileImageUrl },
+    }));
+    setSuccess(profileImageUrl ? 'Profile picture updated successfully.' : 'Profile picture removed successfully.');
+  };
+
   return (
-    <div className="container-xxl flex-grow-1 container-p-y">
-      <h4 className="fw-bold py-3 mb-4">
-        <span className="text-muted fw-light">Account Settings</span>
-      </h4>
+    <div className={styles.page}>
+      <div className={styles.content}>
+        <Link className={styles.backLink} href="/visitor/profile"><ArrowLeft aria-hidden="true" /> Back to Profile</Link>
+        <header className={styles.pageHeader}>
+          <div><h1>Edit Profile</h1><p>Update the contact information permitted for your Visitor account.</p></div>
+        </header>
 
-      <div className="row">
-        <div className="col-md-12">
-          <ul className="nav nav-pills flex-column flex-md-row mb-3">
-            <li className="nav-item">
-              <Link href="/visitor/profile" className="btn btn-primary d-inline-flex align-items-center">
-                <UserRound
-                  className={`${iconStyles.icon} ${iconStyles.action} me-2`}
-                  aria-hidden="true"
-                />
-                <AnimatedButtonText>My Profile</AnimatedButtonText>
-              </Link>
-            </li>
-          </ul>
+        {success ? <SuccessAlert role="status">{success}</SuccessAlert> : null}
+        {requestError ? <ErrorAlert role="alert">{requestError}</ErrorAlert> : null}
 
-          <div className="card mb-4">
-            <h5 className="card-header">Profile Details</h5>
-            <hr className="my-0" />
-            <div className="card-body">
-              <div className="d-flex align-items-start align-items-sm-center gap-4 mb-4">
-                <img
-                  src="/images/avatars/visitor-default.png"
-                  alt="Visitor avatar"
-                  className={`d-block rounded ${styles.avatarPreview}`}
-                />
-                <div>
-                  <h5 className="mb-1">{displayValue(user.name)}</h5>
-                  <p className="text-muted mb-0">
-                    Profile image upload is not available yet.
-                  </p>
-                </div>
-              </div>
-
-              {success ? (
-                <SuccessAlert className="text-center" role="status">{success}</SuccessAlert>
-              ) : null}
-
-              {error ? (
-                <ErrorAlert role="alert">{error}</ErrorAlert>
-              ) : null}
-
-              <form id="formAccountSettings" onSubmit={handleSubmit}>
-                <div className="row">
-                <div className="mb-3 col-md-6">
-                  <label className="form-label">Full Name</label>
-                  <div className={styles.readonlyValue}>
-                    {displayValue(user.name)}
-                  </div>
-                </div>
-
-                <div className="mb-3 col-md-6">
-                  <label className="form-label">E-mail</label>
-                  <div className={styles.readonlyValue}>
-                    {displayValue(user.email)}
-                  </div>
-                </div>
-
-                <div className="mb-3 col-md-6">
-                  <label className="form-label">Visitor/User ID</label>
-                  <div className={styles.readonlyValue}>
-                    {displayValue(user.id)}
-                  </div>
-                </div>
-
-                <div className="mb-3 col-md-6">
-                  <label className="form-label">Role</label>
-                  <div className={styles.readonlyValue}>
-                    {displayValue(user.role)}
-                  </div>
-                </div>
-
-                <div className="mb-3 col-md-6">
-                  <label className="form-label">Phone Number</label>
-                  <div className="input-group">
-                    <span className="input-group-text">IN(+91)</span>
-                    <input
-                      className="form-control"
-                      id="phoneNumber"
-                      maxLength={10}
-                      name="phoneNumber"
-                      onChange={(event) =>
-                        updateField(
-                          'phone',
-                          event.target.value.replace(/\D/g, '').slice(0, 10),
-                        )
-                      }
-                      pattern="[0-9]{10}"
-                      required
-                      type="text"
-                      value={formData.phone}
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-3 col-md-6">
-                  <label className="form-label">State</label>
-                  <input
-                    className="form-control"
-                    id="state"
-                    maxLength={100}
-                    name="state"
-                    onChange={(event) => updateField('state', event.target.value)}
-                    type="text"
-                    value={formData.state}
-                  />
-                </div>
-
-                <div className="mb-3 col-md-6">
-                  <label className="form-label">Address</label>
-                  <input
-                    className="form-control"
-                    id="address"
-                    maxLength={255}
-                    name="address"
-                    onChange={(event) =>
-                      updateField('address', event.target.value)
-                    }
-                    type="text"
-                    value={formData.address}
-                  />
-                </div>
-
-                <div className="mb-3 col-md-6">
-                  <label className="form-label">Zip Code</label>
-                  <input
-                    className="form-control"
-                    id="zipCode"
-                    maxLength={6}
-                    name="zipCode"
-                    onChange={(event) =>
-                      updateField(
-                        'zip',
-                        event.target.value.replace(/\D/g, '').slice(0, 6),
-                      )
-                    }
-                    pattern="[0-9]{6}"
-                    type="text"
-                    value={formData.zip}
-                  />
-                </div>
-
-                <div className="mt-3">
-                  <button
-                    className="btn btn-primary"
-                    disabled={saving}
-                    type="submit"
-                  >
-                    <AnimatedButtonText>{saving ? 'Saving...' : 'Save Changes'}</AnimatedButtonText>
-                  </button>
-                </div>
-              </div>
-              </form>
-            </div>
+        <section className={styles.card}>
+          <div className={styles.identityRow}>
+            <button className={styles.avatarButton} onClick={() => setPictureOpen(true)} type="button" aria-label="Change profile picture">
+              <img src={user.profileImageUrl || DEFAULT_AVATAR} alt={`${user.name || 'Visitor'} profile picture`} />
+              <span><Camera aria-hidden="true" /></span>
+            </button>
+            <div><h2>{user.name || 'Not provided'}</h2><p>{user.email || 'Not provided'}</p><button className={styles.changePhotoButton} onClick={() => setPictureOpen(true)} type="button">Change profile picture</button></div>
           </div>
 
-          <div className="card">
-            <h5 className="card-header">Security</h5>
-            <div className="card-body">
-              <WarningAlert className={styles.notice}>Password changes are handled separately from profile updates.</WarningAlert>
-              <Link href="/visitor/change-password" className="btn btn-primary mt-3">
-                <AnimatedButtonText>Change Password</AnimatedButtonText>
-              </Link>
+          <form noValidate onSubmit={submit}>
+            <div className={styles.sectionHeading}><h2>Account information</h2><p>Identity details are read-only.</p></div>
+            <div className={styles.formGrid}>
+              <label><span>Visitor ID</span><input readOnly value={formatVisitorPublicId(savedProfile.visitorProfile.publicId)} /></label>
+              <label><span>Full Name</span><input readOnly value={user.name || 'Not provided'} /></label>
+              <label><span>Email</span><input readOnly value={user.email || 'Not provided'} /></label>
+              <label><span>Role</span><input readOnly value={user.role} /></label>
             </div>
-          </div>
-        </div>
+
+            <div className={styles.sectionHeading}><h2>Contact information</h2><p>Fields marked with an asterisk are required.</p></div>
+            <div className={styles.formGrid}>
+              <label><span>Phone Number *</span><input aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? 'phone-error' : undefined} disabled={saving} inputMode="numeric" maxLength={10} onChange={(event) => setField('phone', event.target.value.replace(/\D/g, '').slice(0, 10))} value={form.phone} />{errors.phone ? <small id="phone-error" className={styles.fieldError}>{errors.phone}</small> : null}</label>
+              <label><span>State / District</span><input aria-invalid={Boolean(errors.state)} aria-describedby={errors.state ? 'state-error' : undefined} disabled={saving} maxLength={100} onChange={(event) => setField('state', event.target.value)} value={form.state} />{errors.state ? <small id="state-error" className={styles.fieldError}>{errors.state}</small> : null}</label>
+              <label className={styles.addressField}><span>Address</span><textarea aria-invalid={Boolean(errors.address)} aria-describedby={errors.address ? 'address-error' : undefined} disabled={saving} maxLength={255} onChange={(event) => setField('address', event.target.value)} rows={3} value={form.address} />{errors.address ? <small id="address-error" className={styles.fieldError}>{errors.address}</small> : null}</label>
+              <label><span>ZIP / Postal Code</span><input aria-invalid={Boolean(errors.zip)} aria-describedby={errors.zip ? 'zip-error' : undefined} disabled={saving} inputMode="numeric" maxLength={6} onChange={(event) => setField('zip', event.target.value.replace(/\D/g, '').slice(0, 6))} value={form.zip} />{errors.zip ? <small id="zip-error" className={styles.fieldError}>{errors.zip}</small> : null}</label>
+            </div>
+
+            <div className={styles.actions}>
+              <button className={styles.primaryButton} disabled={saving || !dirty} type="submit">{saving ? 'Saving...' : 'Save Changes'}</button>
+              <button className={styles.secondaryButton} disabled={saving || !dirty} onClick={() => { setForm(toFormState(savedProfile.visitorProfile)); setErrors({}); setRequestError(null); setSuccess(null); }} type="button">Reset</button>
+              <button className={styles.cancelButton} disabled={saving} onClick={() => router.push('/visitor/profile')} type="button">Cancel</button>
+            </div>
+          </form>
+        </section>
       </div>
+
+      <ProfilePictureModal currentImageUrl={user.profileImageUrl} visitorName={user.name} open={pictureOpen} onClose={() => setPictureOpen(false)} onUpdated={updatePicture} />
     </div>
   );
 }
-
-
-
-

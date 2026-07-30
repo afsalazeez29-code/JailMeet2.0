@@ -42,6 +42,7 @@ export type VisitorAppointment = {
 export type OfficerAppointment = VisitorAppointment & {
   visitor: {
     id: string;
+    publicId: string | null;
     name: string;
     phone: string;
   };
@@ -56,7 +57,7 @@ export type AdminAppointment = {
   replyMessage: string | null;
   createdAt: string;
   updatedAt: string;
-  visitor: { id: string; name: string; phone: string };
+  visitor: { id: string; publicId: string | null; name: string; phone: string };
   prisoner: { id: string; name: string };
   officer: { id: string; name: string } | null;
 };

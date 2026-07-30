@@ -15,6 +15,7 @@ import {
 } from '@features/appointments/types';
 import styles from './OfficerAppointmentList.module.css';
 import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
+import { formatVisitorPublicId } from '@/lib/visitor-public-id';
 
 type OfficerAppointmentListProps = {
   appointments: OfficerAppointment[];
@@ -149,7 +150,12 @@ export default function OfficerAppointmentList({
                 <tbody>
                   {appointments.map((appointment) => (
                     <tr key={appointment.id}>
-                      <td>{appointment.visitor.name}</td>
+                      <td>
+                        {appointment.visitor.name}
+                        <small className="d-block text-muted">
+                          {formatVisitorPublicId(appointment.visitor.publicId)}
+                        </small>
+                      </td>
                       <td>{appointment.visitor.phone}</td>
                       <td>{appointment.prisoner.name}</td>
                       <td>{formatDateTime(appointment.appointmentAt)}</td>

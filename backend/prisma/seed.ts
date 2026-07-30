@@ -11,6 +11,7 @@ import 'dotenv/config';
 import { PrismaClient, Role } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import bcrypt from 'bcrypt';
+import { generateUniqueVisitorPublicId } from '../src/utils/visitor-public-id';
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
@@ -86,6 +87,7 @@ async function main() {
   console.log(`Officer user seeded: ${officer.email}`);
 
   const visitorPassword = await bcrypt.hash('visitor123', 12);
+  const visitorPublicId = await generateUniqueVisitorPublicId(prisma);
 
   const visitor = await prisma.user.upsert({
     where: { email: 'visitor@jailmeet.com' },
@@ -100,6 +102,7 @@ async function main() {
       role: Role.VISITOR,
       visitorProfile: {
         create: {
+          publicId: visitorPublicId,
           name: 'Test Visitor',
           phone: '9999990002',
           state: 'Test State',
@@ -114,6 +117,7 @@ async function main() {
     where: { userId: visitor.id },
     update: {},
     create: {
+      publicId: visitorPublicId,
       userId: visitor.id,
       name: 'Test Visitor',
       phone: '9999990002',

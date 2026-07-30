@@ -18,6 +18,7 @@ export type AdminUserListFilters = {
 
 export type AdminUser = {
   id: string;
+  publicId?: string | null;
   name: string;
   email: string | null;
   role: AdminUserRole;
@@ -37,6 +38,7 @@ export type UpdateUserStatusInput = {
 
 export type AdminVisitor = {
   id: string;
+  publicId: string | null;
   name: string;
   phone: string;
   state: string | null;

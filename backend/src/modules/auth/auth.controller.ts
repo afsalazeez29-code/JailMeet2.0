@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { Prisma } from '@prisma/client';
 
 import {
   AuthServiceError,
@@ -53,7 +54,8 @@ export const me = async (req: Request, res: Response): Promise<void> => {
   if (!req.user) {
     res.status(401).json({
       success: false,
-      message: 'Authentication required',
+      message: 'Unauthorized',
+      errors: [],
     });
     return;
   }
@@ -62,9 +64,10 @@ export const me = async (req: Request, res: Response): Promise<void> => {
     const user = await getAuthenticatedUser(req.user.id);
 
     if (!user) {
-      res.status(404).json({
+      res.status(401).json({
         success: false,
-        message: 'Authenticated user not found',
+        message: 'Unauthorized',
+        errors: [],
       });
       return;
     }
@@ -103,7 +106,7 @@ export const registerVisitorController = async (
     if (!result) {
       res.status(409).json({
         success: false,
-        message: 'Email already registered',
+        message: 'Email or phone already registered',
       });
       return;
     }
@@ -114,6 +117,17 @@ export const registerVisitorController = async (
       data: result,
     });
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    ) {
+      res.status(409).json({
+        success: false,
+        message: 'Email or phone already registered',
+      });
+      return;
+    }
+
     console.error('[AuthController] Visitor registration failed:', error);
     res.status(500).json({
       success: false,
@@ -129,7 +143,8 @@ export const changePasswordController = async (
   if (!req.user) {
     res.status(401).json({
       success: false,
-      message: 'Authentication required',
+      message: 'Unauthorized',
+      errors: [],
     });
     return;
   }
@@ -150,7 +165,7 @@ export const changePasswordController = async (
     res.status(200).json({
       success: true,
       message: 'Password changed successfully',
-      data: null,
+      data: { changed: true },
     });
   } catch (error) {
     if (error instanceof AuthServiceError) {

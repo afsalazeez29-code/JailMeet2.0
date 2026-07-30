@@ -48,7 +48,7 @@ const pagination = (page: number, limit: number, totalItems: number) => ({
 const getProfileName = (user: {
   adminProfile?: { name: string } | null;
   officerProfile?: { name: string } | null;
-  visitorProfile?: { name: string } | null;
+  visitorProfile?: { name: string; publicId: string | null } | null;
   prisonerProfile?: { name: string } | null;
 }): string =>
   user.adminProfile?.name ??
@@ -66,7 +66,7 @@ const safeUserSelect = {
   updatedAt: true,
   adminProfile: { select: { name: true } },
   officerProfile: { select: { name: true } },
-  visitorProfile: { select: { name: true } },
+  visitorProfile: { select: { name: true, publicId: true } },
   prisonerProfile: { select: { name: true } },
 };
 
@@ -79,10 +79,11 @@ const toSafeUser = (user: {
   updatedAt: Date;
   adminProfile?: { name: string } | null;
   officerProfile?: { name: string } | null;
-  visitorProfile?: { name: string } | null;
+  visitorProfile?: { name: string; publicId: string | null } | null;
   prisonerProfile?: { name: string } | null;
 }): SafeAdminUser => ({
   id: user.id,
+  publicId: user.visitorProfile?.publicId ?? null,
   name: getProfileName(user),
   email: user.email,
   role: user.role,
@@ -101,6 +102,11 @@ const userSearchWhere = (search?: string): Prisma.UserWhereInput[] => {
     { adminProfile: { name: { contains: search, mode: 'insensitive' } } },
     { officerProfile: { name: { contains: search, mode: 'insensitive' } } },
     { visitorProfile: { name: { contains: search, mode: 'insensitive' } } },
+    {
+      visitorProfile: {
+        publicId: { equals: search, mode: 'insensitive' },
+      },
+    },
     { prisonerProfile: { name: { contains: search, mode: 'insensitive' } } },
   ];
 };
@@ -148,6 +154,7 @@ export const getUserDetail = async (
       visitorProfile: {
         select: {
           id: true,
+          publicId: true,
           name: true,
           phone: true,
           state: true,
@@ -250,6 +257,7 @@ export const listVisitors = async (query: ProfileListQuery) => {
   const where: Prisma.VisitorProfileWhereInput = query.search
     ? {
         OR: [
+          { publicId: { contains: query.search, mode: 'insensitive' } },
           { name: { contains: query.search, mode: 'insensitive' } },
           { phone: { contains: query.search, mode: 'insensitive' } },
           { user: { email: { contains: query.search, mode: 'insensitive' } } },
@@ -264,6 +272,7 @@ export const listVisitors = async (query: ProfileListQuery) => {
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
+        publicId: true,
         name: true,
         phone: true,
         state: true,
@@ -286,6 +295,7 @@ export const getVisitorDetail = async (visitorId: string) => {
     where: { id: visitorId },
     select: {
       id: true,
+      publicId: true,
       name: true,
       phone: true,
       state: true,
@@ -686,7 +696,9 @@ export const listAppointments = async (
         replyMessage: true,
         createdAt: true,
         updatedAt: true,
-        visitor: { select: { id: true, name: true, phone: true } },
+        visitor: {
+          select: { id: true, publicId: true, name: true, phone: true },
+        },
         prisoner: { select: { id: true, name: true } },
         officer: { select: { id: true, name: true } },
       },

@@ -38,11 +38,13 @@ const requestApiResponse = async <TData>(
   options: ApiRequestOptions = {},
 ): Promise<{ payload: ApiResponse<TData>; status: number; ok: boolean }> => {
   const { token, headers, ...fetchOptions } = options;
+  const hasFormDataBody =
+    typeof FormData !== 'undefined' && fetchOptions.body instanceof FormData;
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...fetchOptions,
     headers: {
-      'Content-Type': 'application/json',
+      ...(!hasFormDataBody ? { 'Content-Type': 'application/json' } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },

@@ -13,9 +13,11 @@ export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 
 export type AuthUser = {
   id: string;
+  publicId: string | null;
   name: string;
   email: string;
   role: Role;
+  profileImageUrl: string | null;
 };
 
 export type AuthUserPayload = {
@@ -26,8 +28,10 @@ export type AuthUserPayload = {
 
 export type VisitorRegistrationResult = {
   user: AuthUser;
+  accessToken: string;
   visitorProfile: {
     id: string;
+    publicId: string;
     name: string;
     phone: string;
     address: string | null;

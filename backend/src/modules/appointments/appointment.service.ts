@@ -47,11 +47,17 @@ const mapVisitorAppointment = (appointment: {
 });
 
 const mapOfficerAppointment = (appointment: Parameters<typeof mapVisitorAppointment>[0] & {
-  visitor: { id: string; name: string; phone: string };
+  visitor: {
+    id: string;
+    publicId: string | null;
+    name: string;
+    phone: string;
+  };
 }): OfficerAppointmentResult => ({
   ...mapVisitorAppointment(appointment),
   visitor: {
     id: appointment.visitor.id,
+    publicId: appointment.visitor.publicId,
     name: appointment.visitor.name,
     phone: appointment.visitor.phone,
   },
@@ -79,6 +85,7 @@ const officerAppointmentSelect = {
   visitor: {
     select: {
       id: true,
+      publicId: true,
       name: true,
       phone: true,
     },

@@ -5,9 +5,11 @@ export type Role = UserRole;
 
 export type AuthUser = {
   id: string;
+  publicId: string | null;
   name: string;
   email: string;
   role: Role;
+  profileImageUrl: string | null;
 };
 
 export type LoginData = {
@@ -31,6 +33,7 @@ export type VisitorRegistrationPayload = {
 
 export type VisitorProfile = {
   id: string;
+  publicId: string;
   name: string;
   phone: string;
   address: string | null;
@@ -40,6 +43,7 @@ export type VisitorProfile = {
 
 export type VisitorRegistrationData = {
   user: AuthUser;
+  accessToken: string;
   visitorProfile: VisitorProfile;
 };
 
@@ -53,4 +57,8 @@ export interface ChangePasswordInput {
   newPassword: string;
 }
 
-export type ChangePasswordResponse = ApiResponse<null>;
+export type ChangePasswordData = {
+  changed: boolean;
+};
+
+export type ChangePasswordResponse = ApiResponse<ChangePasswordData>;

@@ -31,6 +31,7 @@ export type PaginatedResult<T> = {
 
 export type SafeAdminUser = {
   id: string;
+  publicId: string | null;
   name: string;
   email: string | null;
   role: Role;
@@ -53,7 +54,12 @@ export type AdminAppointmentOverview = {
   replyMessage: string | null;
   createdAt: string;
   updatedAt: string;
-  visitor: { id: string; name: string; phone: string };
+  visitor: {
+    id: string;
+    publicId: string | null;
+    name: string;
+    phone: string;
+  };
   prisoner: { id: string; name: string };
   officer: { id: string; name: string } | null;
 };

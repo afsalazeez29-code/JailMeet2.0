@@ -17,6 +17,7 @@ export type OfficerDashboardSummary = {
 };
 
 export type VisitorDashboardSummary = {
+  publicId: string | null;
   myAppointments: number;
   pendingAppointments: number;
   approvedAppointments: number;

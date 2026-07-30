@@ -84,11 +84,16 @@ export const getVisitorDashboard = async (
   const visitorWhere = { visitor: { userId } };
 
   const [
+    visitorProfile,
     myAppointments,
     pendingAppointments,
     approvedAppointments,
     rejectedAppointments,
   ] = await prisma.$transaction([
+    prisma.visitorProfile.findUnique({
+      where: { userId },
+      select: { publicId: true },
+    }),
     prisma.appointment.count({ where: visitorWhere }),
     prisma.appointment.count({
       where: {
@@ -110,7 +115,12 @@ export const getVisitorDashboard = async (
     }),
   ]);
 
+  if (!visitorProfile) {
+    throw new Error('Visitor profile not found');
+  }
+
   return {
+    publicId: visitorProfile.publicId,
     myAppointments,
     pendingAppointments,
     approvedAppointments,

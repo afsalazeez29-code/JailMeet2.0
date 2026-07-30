@@ -19,6 +19,28 @@ export const roleDashboardRoutes: Record<Role, string> = {
 export const getRoleDashboardRoute = (role: Role): string =>
   roleDashboardRoutes[role];
 
+export const getRoleLoginRoute = (role?: Role): string =>
+  role ? `${LOGIN_ROUTE}?role=${role.toLowerCase()}` : LOGIN_ROUTE;
+
+export const parseAuthRole = (
+  value: string | string[] | undefined,
+): Role | null => {
+  const normalized = Array.isArray(value) ? value[0] : value;
+
+  switch (normalized?.toLowerCase()) {
+    case 'admin':
+      return 'ADMIN';
+    case 'officer':
+      return 'OFFICER';
+    case 'visitor':
+      return 'VISITOR';
+    case 'prisoner':
+      return 'PRISONER';
+    default:
+      return null;
+  }
+};
+
 export const navigateToRoleDashboard = (
   router: AuthRouter,
   role: Role,
@@ -33,8 +55,9 @@ export const navigateToHome = (router: AuthRouter): void => {
 export const navigateToLogin = (
   router: AuthRouter,
   method: 'push' | 'replace' = 'replace',
+  role?: Role,
 ): void => {
-  router[method](LOGIN_ROUTE);
+  router[method](getRoleLoginRoute(role));
 };
 
 export const navigateToLoginAfterPasswordChange = (
