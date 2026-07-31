@@ -66,5 +66,8 @@ jailmeet-2-docs/
 prompt*.txt
 **/prompt*.txt
 
+# Local public backups (never track contents)
+/Backup-Public/
+
 # Legacy PHP reference files
 Frontend/**/*.php
