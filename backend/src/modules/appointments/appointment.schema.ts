@@ -4,7 +4,11 @@ import { z } from 'zod';
 
 export const createAppointmentSchema = z
   .object({
-    prisonerId: z.string().trim().min(1, 'Prisoner is required'),
+    prisonerPublicId: z
+      .string()
+      .trim()
+      .regex(/^PRN-\d{3}$/i, 'Valid Prisoner ID is required')
+      .transform((value) => value.toUpperCase()),
     appointmentAt: z.string().datetime('Valid appointment date/time is required'),
     reason: z
       .string()
@@ -29,6 +33,14 @@ export const reviewAppointmentSchema = z
 
 export const appointmentParamsSchema = z.object({
   appointmentId: z.string().trim().min(1, 'Appointment ID is required'),
+});
+
+export const prisonerPublicIdParamsSchema = z.object({
+  prisonerPublicId: z
+    .string()
+    .trim()
+    .regex(/^PRN-\d{3}$/i, 'Valid Prisoner ID is required')
+    .transform((value) => value.toUpperCase()),
 });
 
 
@@ -78,4 +90,10 @@ export const validateAppointmentParams = validate(
   appointmentParamsSchema,
   'params',
   'Invalid appointment data',
+);
+
+export const validatePrisonerPublicIdParams = validate(
+  prisonerPublicIdParamsSchema,
+  'params',
+  'Invalid Prisoner ID',
 );

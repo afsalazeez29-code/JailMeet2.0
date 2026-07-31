@@ -3,7 +3,7 @@
 import { ErrorAlert, SuccessAlert, WarningAlert } from '../../../components/common/StatusAlert';
 import Link from 'next/link';
 import { FormEvent, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { clearAccessToken } from '@features/auth/services/token.service';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
@@ -24,12 +24,18 @@ export default function AppointmentBookingForm({
   prisoners,
 }: AppointmentBookingFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const tomorrow = useMemo(() => {
     const date = new Date();
     date.setDate(date.getDate() + 1);
     return getDateInputValue(date);
   }, []);
-  const [prisonerId, setPrisonerId] = useState('');
+  const initialPrisoner = searchParams.get('prisoner') ?? '';
+  const [prisonerPublicId, setPrisonerPublicId] = useState(
+    prisoners.some((prisoner) => prisoner.publicId === initialPrisoner)
+      ? initialPrisoner
+      : '',
+  );
   const [appointmentDate, setAppointmentDate] = useState(tomorrow);
   const [appointmentTime, setAppointmentTime] = useState('10:00');
   const [reason, setReason] = useState('');
@@ -38,7 +44,7 @@ export default function AppointmentBookingForm({
   const [success, setSuccess] = useState<string | null>(null);
 
   const validateForm = (): string | null => {
-    if (!prisonerId) {
+    if (!prisonerPublicId) {
       return 'Please select a prisoner';
     }
 
@@ -75,7 +81,7 @@ export default function AppointmentBookingForm({
       ).toISOString();
 
       await createVisitorAppointment({
-        prisonerId,
+        prisonerPublicId,
         appointmentAt,
         reason: reason.trim(),
       });
@@ -108,6 +114,10 @@ export default function AppointmentBookingForm({
     }
   };
 
+  const selectedPrisoner = prisoners.find(
+    (prisoner) => prisoner.publicId === prisonerPublicId,
+  );
+
   return (
     <div className="container-xxl flex-grow-1 container-p-y">
       <h4 className="fw-bold py-3 mb-4">
@@ -131,25 +141,32 @@ export default function AppointmentBookingForm({
 
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
-              <label className="form-label" htmlFor="prisonerId">
+              <label className="form-label" htmlFor="prisonerPublicId">
                 Select Prisoner
               </label>
               <select
                 className="form-select"
                 disabled={submitting || prisoners.length === 0}
-                id="prisonerId"
-                onChange={(event) => setPrisonerId(event.target.value)}
+                id="prisonerPublicId"
+                onChange={(event) => setPrisonerPublicId(event.target.value)}
                 required
-                value={prisonerId}
+                value={prisonerPublicId}
               >
                 <option value="">Choose prisoner</option>
                 {prisoners.map((prisoner) => (
-                  <option key={prisoner.id} value={prisoner.id}>
-                    {prisoner.name}
+                  <option key={prisoner.publicId} value={prisoner.publicId}>
+                    {prisoner.name} — {prisoner.publicId}
                   </option>
                 ))}
               </select>
             </div>
+
+            {selectedPrisoner ? (
+              <div className={styles.selectedPrisoner}>
+                <img alt={`${selectedPrisoner.name} profile picture`} height={64} src={selectedPrisoner.profilePic || '/images/avatars/prisoner-default.PNG'} width={64} />
+                <div><strong>{selectedPrisoner.name}</strong><span>{selectedPrisoner.publicId}</span></div>
+              </div>
+            ) : null}
 
             <div className="row">
               <div className="mb-3 col-md-6">

@@ -12,3 +12,5 @@
 .emptyState {
   margin-bottom: 0;
 }
+
+.cards { display: grid; gap: 1rem; }

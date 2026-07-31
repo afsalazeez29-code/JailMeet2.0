@@ -6,6 +6,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { CreatePrisonerInput, UpdatePrisonerInput } from '@features/admin-users/types';
 import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
 import { validateAdminCreateCredentials, validateRequiredName } from '@features/admin-users/admin-users.validation';
+import { NEW_PASSWORD_HELP, NEW_PASSWORD_MAX_LENGTH, NEW_PASSWORD_MIN_LENGTH } from '@features/auth/password-policy';
 
 type PrisonerFormProps = {
   mode: 'create' | 'edit';
@@ -81,7 +82,7 @@ export default function PrisonerForm({
         {mode === 'create' ? (
           <div className="row">
             <div className="form-group col-md-6"><label>Email</label><input className="form-control" onChange={(event) => setEmail(event.target.value)} required type="email" value={email} /></div>
-            <div className="form-group col-md-6"><label>Password</label><input className="form-control" minLength={8} onChange={(event) => setPassword(event.target.value)} required type="password" value={password} /></div>
+            <div className="form-group col-md-6"><label htmlFor="prisoner-password">Password</label><input aria-describedby="prisoner-password-help" className="form-control" id="prisoner-password" maxLength={NEW_PASSWORD_MAX_LENGTH} minLength={NEW_PASSWORD_MIN_LENGTH} onChange={(event) => setPassword(event.target.value)} required type="password" value={password} /><small className="form-text" id="prisoner-password-help">{NEW_PASSWORD_HELP}</small></div>
           </div>
         ) : null}
         <div className="row">

@@ -1,6 +1,11 @@
 import { FormEvent } from 'react';
 
 import { VisitorRegistrationPayload } from '@features/auth/types';
+import {
+  NEW_PASSWORD_HELP,
+  NEW_PASSWORD_MAX_LENGTH,
+  NEW_PASSWORD_MIN_LENGTH,
+} from '@features/auth/password-policy';
 
 import styles from './AuthPanel.module.css';
 import AuthSocialLinks from './AuthSocialLinks';
@@ -68,10 +73,16 @@ export default function RegisterPanelForm({
         className={styles.input}
         type="password"
         placeholder="Password"
+        minLength={NEW_PASSWORD_MIN_LENGTH}
+        maxLength={NEW_PASSWORD_MAX_LENGTH}
+        aria-describedby="registration-password-help"
         value={form.password}
         onChange={(event) => onFieldChange('password', event.target.value)}
         required
       />
+      <span className={styles.helperText} id="registration-password-help">
+        {NEW_PASSWORD_HELP}
+      </span>
       <select
         className={`${styles.input} ${styles.select}`}
         value={form.state}

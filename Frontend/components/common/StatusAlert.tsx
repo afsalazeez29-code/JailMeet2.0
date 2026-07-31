@@ -6,6 +6,7 @@ type StatusAlertProps = {
   children: ReactNode;
   className?: string;
   role?: 'alert' | 'status';
+  id?: string;
   variant: StatusAlertVariant;
 };
 
@@ -13,6 +14,7 @@ export function StatusAlert({
   children,
   className = '',
   role,
+  id,
   variant,
 }: StatusAlertProps) {
   const classes = ['alert', `alert-${variant}`, className]
@@ -20,7 +22,7 @@ export function StatusAlert({
     .join(' ');
 
   return (
-    <div className={classes} role={role}>
+    <div className={classes} id={id} role={role}>
       {children}
     </div>
   );

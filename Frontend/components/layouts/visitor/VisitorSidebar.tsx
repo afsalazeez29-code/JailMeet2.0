@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Fragment, type ComponentType, type SVGProps } from 'react';
+import { type ComponentType, type SVGProps } from 'react';
 import {
   CalendarCheck,
   CalendarPlus,
@@ -10,7 +10,6 @@ import {
   House,
   LockKeyhole,
   UserRound,
-  UserRoundPen,
   X,
 } from 'lucide-react';
 
@@ -48,12 +47,6 @@ const menuItems = [
     legacyHref: 'profile.php',
     icon: UserRound,
     label: 'My Profile',
-  },
-  {
-    href: '/visitor/settings',
-    legacyHref: 'accountsettings.php',
-    icon: UserRoundPen,
-    label: 'Edit Profile',
   },
   {
     href: '/visitor/change-password',
@@ -113,11 +106,16 @@ export default function VisitorSidebar({ onCloseMenu }: VisitorSidebarProps = {}
       <ul className="menu-inner py-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
+          const isActive =
+            pathname === item.href ||
+            (item.href !== '/visitor/appointments' &&
+              pathname.startsWith(`${item.href}/`)) ||
+            (item.href === '/visitor/profile' && pathname === '/visitor/settings');
 
           return (
             <li
               key={item.href}
-              className={`menu-item${pathname === item.href ? ' active' : ''}`}
+              className={`menu-item${isActive ? ' active' : ''}`}
             >
               <Link
                 href={item.href}

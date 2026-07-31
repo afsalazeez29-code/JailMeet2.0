@@ -5,6 +5,7 @@ import {
   AppointmentStatusFilterInput,
   CreateAppointmentInput,
   OfficerAppointmentResult,
+  PublicPrisonerDetail,
   PrisonerOption,
   ReviewAppointmentInput,
   VisitorAppointmentResult,
@@ -31,7 +32,7 @@ const mapVisitorAppointment = (appointment: {
   replyMessage: string | null;
   createdAt: Date;
   updatedAt: Date;
-  prisoner: { id: string; name: string };
+  prisoner: { publicId: string | null; name: string; profilePic: string | null };
 }): VisitorAppointmentResult => ({
   id: appointment.id,
   appointmentAt: toIso(appointment.requestedDate),
@@ -41,8 +42,9 @@ const mapVisitorAppointment = (appointment: {
   createdAt: toIso(appointment.createdAt),
   updatedAt: toIso(appointment.updatedAt),
   prisoner: {
-    id: appointment.prisoner.id,
+    publicId: appointment.prisoner.publicId ?? 'PRN-UNKNOWN',
     name: appointment.prisoner.name,
+    profilePic: appointment.prisoner.profilePic,
   },
 });
 
@@ -74,8 +76,9 @@ const appointmentSelect = {
   updatedAt: true,
   prisoner: {
     select: {
-      id: true,
+      publicId: true,
       name: true,
+      profilePic: true,
     },
   },
 };
@@ -94,14 +97,58 @@ const officerAppointmentSelect = {
 
 export const getPrisonerOptions = async (): Promise<PrisonerOption[]> => {
   const prisoners = await prisma.prisonerProfile.findMany({
+    where: {
+      publicId: { not: null },
+      user: { isActive: true, role: 'PRISONER' },
+    },
     orderBy: { name: 'asc' },
     select: {
-      id: true,
+      publicId: true,
       name: true,
+      profilePic: true,
+      caseDetails: true,
+      jailType: true,
+      jailName: true,
     },
   });
 
-  return prisoners;
+  return prisoners.map((prisoner) => ({
+    ...prisoner,
+    publicId: prisoner.publicId as string,
+  }));
+};
+
+export const getPublicPrisoner = async (
+  publicId: string,
+): Promise<PublicPrisonerDetail> => {
+  const prisoner = await prisma.prisonerProfile.findFirst({
+    where: {
+      publicId,
+      user: { isActive: true, role: 'PRISONER' },
+    },
+    select: {
+      publicId: true,
+      name: true,
+      profilePic: true,
+      age: true,
+      gender: true,
+      admissionDate: true,
+      caseDetails: true,
+      sentencePeriod: true,
+      jailType: true,
+      jailName: true,
+    },
+  });
+
+  if (!prisoner?.publicId) {
+    throw new AppointmentError(404, 'Prisoner not found');
+  }
+
+  return {
+    ...prisoner,
+    publicId: prisoner.publicId,
+    admissionDate: toIso(prisoner.admissionDate),
+  };
 };
 
 export const createVisitorAppointment = async (
@@ -119,8 +166,11 @@ export const createVisitorAppointment = async (
       where: { userId },
       select: { id: true },
     }),
-    prisma.prisonerProfile.findUnique({
-      where: { id: input.prisonerId },
+    prisma.prisonerProfile.findFirst({
+      where: {
+        publicId: input.prisonerPublicId,
+        user: { isActive: true, role: 'PRISONER' },
+      },
       select: { id: true },
     }),
   ]);

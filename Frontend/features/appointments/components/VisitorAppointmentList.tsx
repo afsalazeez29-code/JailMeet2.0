@@ -5,49 +5,29 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 
 import {
-  AppointmentStatus,
   VisitorAppointment,
 } from '@features/appointments/types';
 import styles from './VisitorAppointmentList.module.css';
 import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
+import VisitorAppointmentCard from './VisitorAppointmentCard';
 
 type VisitorAppointmentListProps = {
   appointments: VisitorAppointment[];
 };
 
-const filters: Array<{ label: string; value: AppointmentStatus | 'ALL' }> = [
+type BookingFilter = 'ALL' | 'PENDING' | 'ACCEPTED' | 'REJECTED';
+
+const filters: Array<{ label: string; value: BookingFilter }> = [
   { label: 'All', value: 'ALL' },
   { label: 'Pending', value: 'PENDING' },
   { label: 'Approved', value: 'ACCEPTED' },
   { label: 'Rejected', value: 'REJECTED' },
 ];
 
-const statusLabels: Record<AppointmentStatus, string> = {
-  PENDING: 'Pending',
-  ACCEPTED: 'Approved',
-  REJECTED: 'Rejected',
-  COMPLETED: 'Completed',
-  CANCELLED: 'Cancelled',
-};
-
-const statusClasses: Record<AppointmentStatus, string> = {
-  PENDING: 'bg-label-warning',
-  ACCEPTED: 'bg-label-success',
-  REJECTED: 'bg-label-danger',
-  COMPLETED: 'bg-label-primary',
-  CANCELLED: 'bg-label-secondary',
-};
-
-const formatDateTime = (value: string): string =>
-  new Intl.DateTimeFormat('en-IN', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value));
-
 export default function VisitorAppointmentList({
   appointments,
 }: VisitorAppointmentListProps) {
-  const [filter, setFilter] = useState<AppointmentStatus | 'ALL'>('ALL');
+  const [filter, setFilter] = useState<BookingFilter>('ALL');
   const filteredAppointments = useMemo(
     () =>
       filter === 'ALL'
@@ -55,6 +35,21 @@ export default function VisitorAppointmentList({
         : appointments.filter((appointment) => appointment.status === filter),
     [appointments, filter],
   );
+  const counts = useMemo(
+    () => ({
+      ALL: appointments.length,
+      PENDING: appointments.filter((item) => item.status === 'PENDING').length,
+      ACCEPTED: appointments.filter((item) => item.status === 'ACCEPTED').length,
+      REJECTED: appointments.filter((item) => item.status === 'REJECTED').length,
+    }),
+    [appointments],
+  );
+  const emptyMessages = {
+    ALL: 'You have not booked any appointments yet.',
+    PENDING: 'You have no pending appointments.',
+    ACCEPTED: 'You have no approved appointments.',
+    REJECTED: 'You have no rejected appointments.',
+  } as const;
 
   return (
     <div className="container-xxl flex-grow-1 container-p-y">
@@ -75,7 +70,7 @@ export default function VisitorAppointmentList({
                 onClick={() => setFilter(item.value)}
                 type="button"
               >
-                <AnimatedButtonText>{item.label}</AnimatedButtonText>
+                <AnimatedButtonText>{item.label} ({counts[item.value]})</AnimatedButtonText>
               </button>
             ))}
             <Link href="/visitor/appointments/book" className="btn btn-success">
@@ -84,39 +79,12 @@ export default function VisitorAppointmentList({
           </div>
 
           {filteredAppointments.length === 0 ? (
-            <EmptyStateAlert className={styles.emptyState}>No appointment requests found.</EmptyStateAlert>
+            <EmptyStateAlert className={styles.emptyState}>{emptyMessages[filter]}</EmptyStateAlert>
           ) : (
-            <div className="table-responsive text-nowrap">
-              <table className="table table-hover">
-                <thead>
-                  <tr>
-                    <th>Prisoner</th>
-                    <th>Date & Time</th>
-                    <th>Reason</th>
-                    <th>Status</th>
-                    <th>Officer Note</th>
-                    <th>Created</th>
-                  </tr>
-                </thead>
-                <tbody className="table-border-bottom-0">
-                  {filteredAppointments.map((appointment) => (
-                    <tr key={appointment.id}>
-                      <td>{appointment.prisoner.name}</td>
-                      <td>{formatDateTime(appointment.appointmentAt)}</td>
-                      <td>{appointment.reason}</td>
-                      <td>
-                        <span
-                          className={`badge ${statusClasses[appointment.status]} ${styles.statusBadge}`}
-                        >
-                          {statusLabels[appointment.status]}
-                        </span>
-                      </td>
-                      <td>{appointment.officerNote || 'Not reviewed yet'}</td>
-                      <td>{formatDateTime(appointment.createdAt)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className={styles.cards}>
+              {filteredAppointments.map((appointment) => (
+                <VisitorAppointmentCard appointment={appointment} key={appointment.id} />
+              ))}
             </div>
           )}
         </div>

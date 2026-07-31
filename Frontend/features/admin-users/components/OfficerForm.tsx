@@ -6,6 +6,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { CreateOfficerInput, UpdateOfficerInput } from '@features/admin-users/types';
 import { validateAdminCreateCredentials, validateRequiredName } from '@features/admin-users/admin-users.validation';
 import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
+import { NEW_PASSWORD_HELP, NEW_PASSWORD_MAX_LENGTH, NEW_PASSWORD_MIN_LENGTH } from '@features/auth/password-policy';
 
 type OfficerFormProps = {
   mode: 'create' | 'edit';
@@ -75,7 +76,8 @@ export default function OfficerForm({
             </div>
             <div className="form-group">
               <label htmlFor="password">Password</label>
-              <input className="form-control" id="password" minLength={8} onChange={(event) => setPassword(event.target.value)} required type="password" value={password} />
+              <input aria-describedby="officer-password-help" className="form-control" id="password" maxLength={NEW_PASSWORD_MAX_LENGTH} minLength={NEW_PASSWORD_MIN_LENGTH} onChange={(event) => setPassword(event.target.value)} required type="password" value={password} />
+              <small className="form-text" id="officer-password-help">{NEW_PASSWORD_HELP}</small>
             </div>
           </>
         ) : null}

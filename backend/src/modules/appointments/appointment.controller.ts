@@ -4,6 +4,7 @@ import {
   AppointmentError,
   createVisitorAppointment,
   getOfficerAppointments,
+  getPublicPrisoner,
   getPrisonerOptions,
   getVisitorAppointments,
   reviewAppointment,
@@ -31,6 +32,28 @@ export const listPrisoners = async (
       success: false,
       message: 'Failed to fetch prisoners',
     });
+  }
+};
+
+export const getPrisoner = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const prisoner = await getPublicPrisoner(req.params.prisonerPublicId);
+    res.status(200).json({
+      success: true,
+      message: 'Prisoner fetched successfully',
+      data: prisoner,
+    });
+  } catch (error) {
+    if (error instanceof AppointmentError) {
+      res.status(error.statusCode).json({ success: false, message: error.message });
+      return;
+    }
+
+    console.error('[VisitorController] Fetch prisoner failed:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch prisoner' });
   }
 };
 

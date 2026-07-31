@@ -13,6 +13,7 @@ import {
 } from '@features/auth/services/navigation.service';
 import { isApiServiceError } from '@/types/api';
 import { Role, VisitorRegistrationPayload } from '@features/auth/types';
+import { validateNewPassword } from '@features/auth/password-policy';
 
 import styles from './AuthPanel.module.css';
 import AuthMobileSwitch from './AuthMobileSwitch';
@@ -128,9 +129,8 @@ export default function AuthPanel({
       return 'Invalid phone number! Enter exactly 10 digits.';
     }
 
-    if (registerForm.password.length < 6) {
-      return 'Password must be at least 6 characters';
-    }
+    const passwordError = validateNewPassword(registerForm.password);
+    if (passwordError) return passwordError;
 
     if (!registerForm.state) {
       return 'District is required';

@@ -154,7 +154,8 @@ export const changePasswordController = async (
   if (!parsedBody.success) {
     res.status(400).json({
       success: false,
-      message: 'Invalid password-change data',
+      message:
+        parsedBody.error.issues[0]?.message || 'Invalid password-change data',
     });
     return;
   }

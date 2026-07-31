@@ -18,12 +18,23 @@ export type PaginatedResponse<T> = PaginatedData<T>;
 
 
 export type PrisonerOption = {
-  id: string;
+  publicId: string;
   name: string;
+  profilePic: string | null;
+  caseDetails: string | null;
+  jailType: string | null;
+  jailName: string | null;
+};
+
+export type PublicPrisonerDetail = PrisonerOption & {
+  age: number;
+  gender: string;
+  admissionDate: string;
+  sentencePeriod: string | null;
 };
 
 export type CreateAppointmentInput = {
-  prisonerId: string;
+  prisonerPublicId: string;
   appointmentAt: string;
   reason: string;
 };
@@ -36,7 +47,7 @@ export type VisitorAppointment = {
   officerNote: string | null;
   createdAt: string;
   updatedAt: string;
-  prisoner: PrisonerOption;
+  prisoner: Pick<PrisonerOption, 'publicId' | 'name' | 'profilePic'>;
 };
 
 export type OfficerAppointment = VisitorAppointment & {

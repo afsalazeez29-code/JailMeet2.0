@@ -2,6 +2,8 @@ import { AppointmentStatus, ParoleStatus, Role } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
 
+import { newPasswordSchema } from '../../utils/password-policy';
+
 const paginationFields = {
   search: z.string().trim().max(100).optional(),
   page: z.coerce.number().int().min(1).default(1),
@@ -51,7 +53,7 @@ export const updateUserStatusSchema = z
 export const createOfficerSchema = z
   .object({
     email: z.string().trim().email('Valid email is required'),
-    password: z.string().min(8, 'Password must be at least 8 characters').max(100),
+    password: newPasswordSchema,
     name: z.string().trim().min(1, 'Name is required').max(100),
     phone: z.string().trim().max(20).optional(),
   })
@@ -70,7 +72,7 @@ export const updateOfficerSchema = z
 export const createPrisonerSchema = z
   .object({
     email: z.string().trim().email('Valid email is required'),
-    password: z.string().min(8, 'Password must be at least 8 characters').max(100),
+    password: newPasswordSchema,
     name: z.string().trim().min(1, 'Name is required').max(100),
     age: z.coerce.number().int().min(1).max(120),
     gender: z.string().trim().min(1, 'Gender is required').max(50),

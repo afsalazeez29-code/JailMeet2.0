@@ -1,3 +1,5 @@
+import type { AppointmentStatus } from '@prisma/client';
+
 export type AdminDashboardSummary = {
   totalUsers: number;
   totalVisitors: number;
@@ -22,6 +24,20 @@ export type VisitorDashboardSummary = {
   pendingAppointments: number;
   approvedAppointments: number;
   rejectedAppointments: number;
+  appointments: Array<{
+    id: string;
+    appointmentAt: string;
+    reason: string;
+    status: AppointmentStatus;
+    officerNote: string | null;
+    createdAt: string;
+    updatedAt: string;
+    prisoner: {
+      publicId: string;
+      name: string;
+      profilePic: string | null;
+    };
+  }>;
 };
 
 export type PrisonerDashboardSummary = {

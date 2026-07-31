@@ -1,0 +1,36 @@
+.card {
+  align-items: flex-start;
+  background: #fff;
+  border: 1px solid #e7e7ea;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(28, 31, 36, 0.06);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 1rem;
+}
+
+.main { display: flex; gap: 1rem; min-width: 0; }
+.avatar { border-radius: 12px; flex: 0 0 auto; object-fit: cover; }
+.content { min-width: 0; }
+.content h3 { color: #2f3349; font-size: 1rem; margin: 0 0 0.2rem; overflow-wrap: anywhere; }
+.prisonerId { color: #697a8d; font-size: 0.82rem; margin: 0 0 0.65rem; }
+.details { display: grid; gap: 0.35rem; margin: 0; }
+.details div { display: grid; gap: 0.2rem; grid-template-columns: minmax(90px, auto) 1fr; }
+.details dt { color: #697a8d; font-size: 0.82rem; font-weight: 600; }
+.details dd { color: #3a3f51; margin: 0; overflow-wrap: anywhere; }
+.status { border-radius: 999px; flex: 0 0 auto; font-size: 0.78rem; font-weight: 700; padding: 0.45rem 0.75rem; }
+.pending { background: #fff3cd; color: #8a6100; }
+.accepted { background: #d8f3e5; color: #146c43; }
+.rejected { background: #fde2e1; color: #a52821; }
+.completed { background: #e0edff; color: #245c9f; }
+.cancelled { background: #eceef1; color: #596273; }
+.compact { box-shadow: none; }
+
+@media (max-width: 575.98px) {
+  .card { align-items: stretch; flex-direction: column; }
+  .main { align-items: flex-start; }
+  .avatar { height: 56px; width: 56px; }
+  .status { align-self: flex-start; }
+  .details div { grid-template-columns: 1fr; }
+}

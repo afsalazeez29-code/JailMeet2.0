@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import {
   createAppointment,
+  getPrisoner,
   listAppointments,
   listOfficerAppointments,
   listPrisoners,
@@ -11,11 +12,17 @@ import {
   validateAppointmentParams,
   validateAppointmentStatusFilter,
   validateCreateAppointment,
+  validatePrisonerPublicIdParams,
   validateReviewAppointment,
 } from './appointment.schema';
 
 export const registerVisitorAppointmentRoutes = (router: Router): void => {
   router.get('/prisoners', listPrisoners);
+  router.get(
+    '/prisoners/:prisonerPublicId',
+    validatePrisonerPublicIdParams,
+    getPrisoner,
+  );
   router.post('/appointments', validateCreateAppointment, createAppointment);
   router.get('/appointments', listAppointments);
 };

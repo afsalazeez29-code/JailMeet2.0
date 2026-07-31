@@ -14,8 +14,19 @@ export type AppointmentStatusFilterInput = z.infer<
 export type ReviewAppointmentInput = z.infer<typeof reviewAppointmentSchema>;
 
 export type PrisonerOption = {
-  id: string;
+  publicId: string;
   name: string;
+  profilePic: string | null;
+  caseDetails: string | null;
+  jailType: string | null;
+  jailName: string | null;
+};
+
+export type PublicPrisonerDetail = PrisonerOption & {
+  age: number;
+  gender: string;
+  admissionDate: string;
+  sentencePeriod: string | null;
 };
 
 export type VisitorAppointmentResult = {
@@ -26,7 +37,7 @@ export type VisitorAppointmentResult = {
   officerNote: string | null;
   createdAt: string;
   updatedAt: string;
-  prisoner: PrisonerOption;
+  prisoner: Pick<PrisonerOption, 'publicId' | 'name' | 'profilePic'>;
 };
 
 export type OfficerAppointmentResult = VisitorAppointmentResult & {

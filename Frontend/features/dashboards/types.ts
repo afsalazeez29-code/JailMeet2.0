@@ -1,3 +1,5 @@
+import type { VisitorAppointment } from '@features/appointments/types';
+
 export type AdminDashboardData = {
   totalUsers: number;
   totalVisitors: number;
@@ -22,6 +24,7 @@ export type VisitorDashboardData = {
   pendingAppointments: number;
   approvedAppointments: number;
   rejectedAppointments: number;
+  appointments: VisitorAppointment[];
 };
 
 export type PrisonerDashboardData = {

@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { Role } from '@prisma/client';
 
+import { newPasswordSchema } from '../../utils/password-policy';
+
 export const keralaDistricts = [
   'Alappuzha',
   'Ernakulam',
@@ -38,10 +40,7 @@ export const registerVisitorSchema = z
       .trim()
       .email('Valid email is required')
       .transform((email) => email.toLowerCase()),
-    password: z
-      .string()
-      .min(6, 'Password must be at least 6 characters')
-      .max(100, 'Password is too long'),
+    password: newPasswordSchema,
     phone: z
       .string()
       .trim()
@@ -57,9 +56,11 @@ export const changePasswordSchema = z
     currentPassword: z
       .string()
       .min(1, 'Current password is required'),
-    newPassword: z
-      .string()
-      .min(8, 'New password must contain at least 8 characters')
-      .max(100, 'New password is too long'),
+    newPassword: newPasswordSchema,
+    confirmNewPassword: newPasswordSchema,
   })
-  .strict();
+  .strict()
+  .refine((value) => value.newPassword === value.confirmNewPassword, {
+    message: 'New passwords do not match',
+    path: ['confirmNewPassword'],
+  });

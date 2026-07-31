@@ -6,6 +6,7 @@ import {
   CreateAppointmentInput,
   OfficerAppointment,
   PaginatedResponse,
+  PublicPrisonerDetail,
   PrisonerOption,
   ReviewAppointmentInput,
   VisitorAppointment,
@@ -27,6 +28,13 @@ const buildQuery = (filters: AppointmentListFilters = {}): string => {
 
 export const getAvailablePrisoners = async (): Promise<PrisonerOption[]> =>
   requestWithAuth<PrisonerOption[]>('/visitor/prisoners');
+
+export const getPublicPrisoner = async (
+  publicId: string,
+): Promise<PublicPrisonerDetail> =>
+  requestWithAuth<PublicPrisonerDetail>(
+    `/visitor/prisoners/${encodeURIComponent(publicId)}`,
+  );
 
 export const createVisitorAppointment = async (
   payload: CreateAppointmentInput,

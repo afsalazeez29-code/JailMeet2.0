@@ -11,6 +11,12 @@ import { navigateToLoginAfterPasswordChange } from '@features/auth/services/navi
 import { isApiServiceError } from '@/types/api';
 import styles from './ChangePasswordForm.module.css';
 import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
+import {
+  NEW_PASSWORD_HELP,
+  NEW_PASSWORD_MAX_LENGTH,
+  NEW_PASSWORD_MIN_LENGTH,
+  validateNewPassword,
+} from '@features/auth/password-policy';
 
 type VisibilityField = 'current' | 'new' | 'confirm';
 
@@ -41,9 +47,8 @@ export default function ChangePasswordForm({
   const validate = (): string | null => {
     if (!currentPassword) return 'Current password is required';
     if (!newPassword) return 'New password is required';
-    if (newPassword.length < 8) {
-      return 'New password must contain at least 8 characters';
-    }
+    const passwordError = validateNewPassword(newPassword);
+    if (passwordError) return passwordError;
     if (newPassword !== confirmPassword) return 'New passwords do not match';
     return null;
   };
@@ -62,7 +67,7 @@ export default function ChangePasswordForm({
     setSubmitting(true);
 
     try {
-      await changePassword({ currentPassword, newPassword });
+      await changePassword({ currentPassword, newPassword, confirmNewPassword: confirmPassword });
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -85,12 +90,18 @@ export default function ChangePasswordForm({
     label: string,
     value: string,
     onChange: (value: string) => void,
+    isNewPassword = false,
   ) => (
     <div className="form-group">
-      <label>{label}</label>
+      <label htmlFor={`password-${field}`}>{label}</label>
       <div className={styles.passwordRow}>
         <input
+          aria-describedby={`${isNewPassword ? `${field}-password-help ` : ''}${error ? 'change-password-error' : ''}`.trim() || undefined}
+          aria-invalid={Boolean(error)}
           className="form-control"
+          id={`password-${field}`}
+          maxLength={isNewPassword ? NEW_PASSWORD_MAX_LENGTH : undefined}
+          minLength={isNewPassword ? NEW_PASSWORD_MIN_LENGTH : undefined}
           onChange={(event) => onChange(event.target.value)}
           type={visible[field] ? 'text' : 'password'}
           value={value}
@@ -109,6 +120,11 @@ export default function ChangePasswordForm({
           )}
         </button>
       </div>
+      {isNewPassword ? (
+        <div className={styles.helpText} id={`${field}-password-help`}>
+          {NEW_PASSWORD_HELP}
+        </div>
+      ) : null}
     </div>
   );
 
@@ -120,11 +136,11 @@ export default function ChangePasswordForm({
         </div>
         <div className="card-body">
           {success ? <SuccessAlert>{success}</SuccessAlert> : null}
-          {error ? <ErrorAlert>{error}</ErrorAlert> : null}
+          {error ? <ErrorAlert id="change-password-error" role="alert">{error}</ErrorAlert> : null}
           <form onSubmit={handleSubmit}>
             {passwordInput('current', 'Current password', currentPassword, setCurrentPassword)}
-            {passwordInput('new', 'New password', newPassword, setNewPassword)}
-            {passwordInput('confirm', 'Confirm password', confirmPassword, setConfirmPassword)}
+            {passwordInput('new', 'New password', newPassword, setNewPassword, true)}
+            {passwordInput('confirm', 'Confirm password', confirmPassword, setConfirmPassword, true)}
             <div className={styles.submitWrapper}>
               <button className={buttonClassName} disabled={submitting} type="submit">
                 <AnimatedButtonText>{submitting ? 'Changing...' : 'Change Password'}</AnimatedButtonText>

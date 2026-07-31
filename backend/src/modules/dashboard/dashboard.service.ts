@@ -81,50 +81,61 @@ export const getOfficerDashboard = async (): Promise<OfficerDashboardSummary> =>
 export const getVisitorDashboard = async (
   userId: string,
 ): Promise<VisitorDashboardSummary> => {
-  const visitorWhere = { visitor: { userId } };
-
-  const [
-    visitorProfile,
-    myAppointments,
-    pendingAppointments,
-    approvedAppointments,
-    rejectedAppointments,
-  ] = await prisma.$transaction([
-    prisma.visitorProfile.findUnique({
-      where: { userId },
-      select: { publicId: true },
-    }),
-    prisma.appointment.count({ where: visitorWhere }),
-    prisma.appointment.count({
-      where: {
-        ...visitorWhere,
-        status: AppointmentStatus.PENDING,
+  const visitorProfile = await prisma.visitorProfile.findUnique({
+    where: { userId },
+    select: {
+      publicId: true,
+      appointments: {
+        orderBy: { requestedDate: 'desc' },
+        select: {
+          id: true,
+          requestedDate: true,
+          message: true,
+          relationship: true,
+          status: true,
+          replyMessage: true,
+          createdAt: true,
+          updatedAt: true,
+          prisoner: {
+            select: { publicId: true, name: true, profilePic: true },
+          },
+        },
       },
-    }),
-    prisma.appointment.count({
-      where: {
-        ...visitorWhere,
-        status: AppointmentStatus.ACCEPTED,
-      },
-    }),
-    prisma.appointment.count({
-      where: {
-        ...visitorWhere,
-        status: AppointmentStatus.REJECTED,
-      },
-    }),
-  ]);
+    },
+  });
 
   if (!visitorProfile) {
     throw new Error('Visitor profile not found');
   }
 
+  const appointments = visitorProfile.appointments.map((appointment) => ({
+    id: appointment.id,
+    appointmentAt: appointment.requestedDate.toISOString(),
+    reason: appointment.message ?? appointment.relationship,
+    status: appointment.status,
+    officerNote: appointment.replyMessage,
+    createdAt: appointment.createdAt.toISOString(),
+    updatedAt: appointment.updatedAt.toISOString(),
+    prisoner: {
+      publicId: appointment.prisoner.publicId ?? 'PRN-UNKNOWN',
+      name: appointment.prisoner.name,
+      profilePic: appointment.prisoner.profilePic,
+    },
+  }));
+
   return {
     publicId: visitorProfile.publicId,
-    myAppointments,
-    pendingAppointments,
-    approvedAppointments,
-    rejectedAppointments,
+    myAppointments: appointments.length,
+    pendingAppointments: appointments.filter(
+      (appointment) => appointment.status === AppointmentStatus.PENDING,
+    ).length,
+    approvedAppointments: appointments.filter(
+      (appointment) => appointment.status === AppointmentStatus.ACCEPTED,
+    ).length,
+    rejectedAppointments: appointments.filter(
+      (appointment) => appointment.status === AppointmentStatus.REJECTED,
+    ).length,
+    appointments,
   };
 };
 
