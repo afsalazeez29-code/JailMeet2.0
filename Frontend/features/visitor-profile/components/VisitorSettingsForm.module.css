@@ -19,10 +19,10 @@
 .sectionHeading p { font-size: .88rem; }
 .formGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .formGrid label { display: flex; min-width: 0; flex-direction: column; gap: 7px; color: #344054; font-size: .87rem; font-weight: 650; }
-.formGrid input, .formGrid textarea { width: 100%; min-height: 44px; padding: 10px 12px; color: #171717; font: inherit; font-weight: 500; background: #fff; border: 1px solid #d1d5db; border-radius: 9px; outline: none; }
+.formGrid input, .formGrid textarea, .formGrid select { width: 100%; min-height: 44px; padding: 10px 12px; color: #171717; font: inherit; font-weight: 500; background: #fff; border: 1px solid #d1d5db; border-radius: 9px; outline: none; }
 .formGrid textarea { min-height: 92px; resize: vertical; }
 .formGrid input[readonly] { color: #667085; background: #f3f4f6; cursor: default; }
-.formGrid input:focus:not([readonly]), .formGrid textarea:focus { border-color: #ff5b32; box-shadow: 0 0 0 3px rgba(255, 91, 50, .16); }
+.formGrid input:focus:not([readonly]), .formGrid textarea:focus, .formGrid select:focus { border-color: #ff5b32; box-shadow: 0 0 0 3px rgba(255, 91, 50, .16); }
 .formGrid input[aria-invalid="true"], .formGrid textarea[aria-invalid="true"] { border-color: #dc2626; }
 .addressField { grid-column: 1 / -1; }
 .fieldError { color: #dc2626; font-size: .78rem; font-weight: 500; }

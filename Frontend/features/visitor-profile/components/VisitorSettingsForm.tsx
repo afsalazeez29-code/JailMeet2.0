@@ -23,8 +23,12 @@ const DEFAULT_AVATAR = '/images/avatars/visitor-default.png';
 type FormState = {
   phone: string;
   address: string;
+  city: string;
   state: string;
+  country: string;
   zip: string;
+  dateOfBirth: string;
+  gender: string;
 };
 
 type FieldErrors = Partial<Record<keyof FormState, string>>;
@@ -32,15 +36,23 @@ type FieldErrors = Partial<Record<keyof FormState, string>>;
 const toFormState = (profile: VisitorProfileData['visitorProfile']): FormState => ({
   phone: profile.phone ?? '',
   address: profile.address ?? '',
+  city: profile.city ?? '',
   state: profile.state ?? '',
+  country: profile.country ?? '',
   zip: profile.zip ?? '',
+  dateOfBirth: profile.dateOfBirth ?? '',
+  gender: profile.gender ?? '',
 });
 
 const normalize = (form: FormState): FormState => ({
   phone: form.phone.trim(),
   address: form.address.trim(),
+  city: form.city.trim(),
   state: form.state.trim(),
+  country: form.country.trim(),
   zip: form.zip.trim(),
+  dateOfBirth: form.dateOfBirth.trim(),
+  gender: form.gender.trim(),
 });
 
 export default function VisitorSettingsForm({ profileData }: { profileData: VisitorProfileData }) {
@@ -75,8 +87,11 @@ export default function VisitorSettingsForm({ profileData }: { profileData: Visi
     const next: FieldErrors = {};
     if (!/^[0-9]{10}$/.test(normalizedForm.phone)) next.phone = 'Phone must be exactly 10 digits';
     if (normalizedForm.address.length > 255) next.address = 'Address must be 255 characters or fewer';
+    if (normalizedForm.city.length > 100) next.city = 'City must be 100 characters or fewer';
     if (normalizedForm.state.length > 100) next.state = 'State or district must be 100 characters or fewer';
-    if (normalizedForm.zip && !/^[0-9]{6}$/.test(normalizedForm.zip)) next.zip = 'ZIP code must be exactly 6 digits';
+    if (normalizedForm.country.length > 100) next.country = 'Country must be 100 characters or fewer';
+    if (normalizedForm.zip && !/^[A-Za-z0-9][A-Za-z0-9 -]{1,11}$/.test(normalizedForm.zip)) next.zip = 'Postal code must be 2 to 12 letters, numbers, spaces, or hyphens';
+    if (normalizedForm.dateOfBirth && !/^\d{4}-\d{2}-\d{2}$/.test(normalizedForm.dateOfBirth)) next.dateOfBirth = 'Enter a valid date of birth';
     return next;
   };
 
@@ -92,8 +107,12 @@ export default function VisitorSettingsForm({ profileData }: { profileData: Visi
     const payload: UpdateVisitorProfileInput = {};
     if (normalizedForm.phone !== savedForm.phone) payload.phone = normalizedForm.phone;
     if (normalizedForm.address !== savedForm.address) payload.address = normalizedForm.address;
+    if (normalizedForm.city !== savedForm.city) payload.city = normalizedForm.city;
     if (normalizedForm.state !== savedForm.state) payload.state = normalizedForm.state;
+    if (normalizedForm.country !== savedForm.country) payload.country = normalizedForm.country;
     if (normalizedForm.zip !== savedForm.zip) payload.zip = normalizedForm.zip;
+    if (normalizedForm.dateOfBirth !== savedForm.dateOfBirth) payload.dateOfBirth = normalizedForm.dateOfBirth;
+    if (normalizedForm.gender !== savedForm.gender) payload.gender = normalizedForm.gender as UpdateVisitorProfileInput['gender'];
 
     setSaving(true);
     try {
@@ -157,9 +176,13 @@ export default function VisitorSettingsForm({ profileData }: { profileData: Visi
             <div className={styles.sectionHeading}><h2>Contact information</h2><p>Fields marked with an asterisk are required.</p></div>
             <div className={styles.formGrid}>
               <label><span>Phone Number *</span><input aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? 'phone-error' : undefined} disabled={saving} inputMode="numeric" maxLength={10} onChange={(event) => setField('phone', event.target.value.replace(/\D/g, '').slice(0, 10))} value={form.phone} />{errors.phone ? <small id="phone-error" className={styles.fieldError}>{errors.phone}</small> : null}</label>
+              <label><span>City</span><input aria-invalid={Boolean(errors.city)} aria-describedby={errors.city ? 'city-error' : undefined} disabled={saving} maxLength={100} onChange={(event) => setField('city', event.target.value)} value={form.city} />{errors.city ? <small id="city-error" className={styles.fieldError}>{errors.city}</small> : null}</label>
               <label><span>State / District</span><input aria-invalid={Boolean(errors.state)} aria-describedby={errors.state ? 'state-error' : undefined} disabled={saving} maxLength={100} onChange={(event) => setField('state', event.target.value)} value={form.state} />{errors.state ? <small id="state-error" className={styles.fieldError}>{errors.state}</small> : null}</label>
+              <label><span>Country</span><input aria-invalid={Boolean(errors.country)} aria-describedby={errors.country ? 'country-error' : undefined} disabled={saving} maxLength={100} onChange={(event) => setField('country', event.target.value)} value={form.country} />{errors.country ? <small id="country-error" className={styles.fieldError}>{errors.country}</small> : null}</label>
               <label className={styles.addressField}><span>Address</span><textarea aria-invalid={Boolean(errors.address)} aria-describedby={errors.address ? 'address-error' : undefined} disabled={saving} maxLength={255} onChange={(event) => setField('address', event.target.value)} rows={3} value={form.address} />{errors.address ? <small id="address-error" className={styles.fieldError}>{errors.address}</small> : null}</label>
-              <label><span>ZIP / Postal Code</span><input aria-invalid={Boolean(errors.zip)} aria-describedby={errors.zip ? 'zip-error' : undefined} disabled={saving} inputMode="numeric" maxLength={6} onChange={(event) => setField('zip', event.target.value.replace(/\D/g, '').slice(0, 6))} value={form.zip} />{errors.zip ? <small id="zip-error" className={styles.fieldError}>{errors.zip}</small> : null}</label>
+              <label><span>ZIP / Postal Code</span><input aria-invalid={Boolean(errors.zip)} aria-describedby={errors.zip ? 'zip-error' : undefined} disabled={saving} maxLength={12} onChange={(event) => setField('zip', event.target.value.slice(0, 12))} value={form.zip} />{errors.zip ? <small id="zip-error" className={styles.fieldError}>{errors.zip}</small> : null}</label>
+              <label><span>Date of Birth</span><input aria-invalid={Boolean(errors.dateOfBirth)} aria-describedby={errors.dateOfBirth ? 'date-of-birth-error' : undefined} disabled={saving} onChange={(event) => setField('dateOfBirth', event.target.value)} type="date" value={form.dateOfBirth} />{errors.dateOfBirth ? <small id="date-of-birth-error" className={styles.fieldError}>{errors.dateOfBirth}</small> : null}</label>
+              <label><span>Gender</span><select disabled={saving} onChange={(event) => setField('gender', event.target.value)} value={form.gender}><option value="">Not provided</option><option value="MALE">Male</option><option value="FEMALE">Female</option><option value="OTHER">Other</option></select></label>
             </div>
 
             <div className={styles.actions}>

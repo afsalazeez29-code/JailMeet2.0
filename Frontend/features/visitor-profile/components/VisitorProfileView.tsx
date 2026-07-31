@@ -12,6 +12,8 @@ import styles from './VisitorProfileView.module.css';
 
 const DEFAULT_AVATAR = '/images/avatars/visitor-default.png';
 const display = (value?: string | null) => value?.trim() || 'Not provided';
+const displayGender = (value?: string | null) =>
+  value ? `${value.charAt(0)}${value.slice(1).toLowerCase()}` : 'Not provided';
 
 export default function VisitorProfileView({ profileData }: { profileData: VisitorProfileData }) {
   const [profile, setProfile] = useState(profileData);
@@ -36,8 +38,12 @@ export default function VisitorProfileView({ profileData }: { profileData: Visit
     ['Full Name', display(user.name)],
     ['Email', display(user.email)],
     ['Phone Number', display(visitorProfile.phone)],
+    ['City', display(visitorProfile.city)],
     ['State / District', display(visitorProfile.state)],
+    ['Country', display(visitorProfile.country)],
     ['ZIP / Postal Code', display(visitorProfile.zip)],
+    ['Date of Birth', display(visitorProfile.dateOfBirth)],
+    ['Gender', displayGender(visitorProfile.gender)],
     ['Address', display(visitorProfile.address)],
     ['Role', display(user.role)],
   ];

@@ -21,7 +21,11 @@ export type VisitorProfileResult = {
     publicId: string | null;
     phone: string;
     address: string | null;
+    city: string | null;
     state: string | null;
+    country: string | null;
     zip: string | null;
+    dateOfBirth: string | null;
+    gender: string | null;
   };
 };

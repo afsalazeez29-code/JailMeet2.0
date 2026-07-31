@@ -1,6 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
 
+const isValidDateOnly = (value: string): boolean => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+};
+
 export const updateVisitorProfileSchema = z
   .object({
     phone: z
@@ -20,13 +26,40 @@ export const updateVisitorProfileSchema = z
       .max(100, 'State is too long')
       .transform((value) => value || null)
       .optional(),
+    city: z
+      .string()
+      .trim()
+      .max(100, 'City is too long')
+      .transform((value) => value || null)
+      .optional(),
+    country: z
+      .string()
+      .trim()
+      .max(100, 'Country is too long')
+      .transform((value) => value || null)
+      .optional(),
     zip: z
       .string()
       .trim()
       .refine(
-        (value) => value === '' || /^[0-9]{6}$/.test(value),
-        'Zip must be exactly 6 digits',
+        (value) => value === '' || /^[A-Za-z0-9][A-Za-z0-9 -]{1,11}$/.test(value),
+        'Postal code must be between 2 and 12 letters, numbers, spaces, or hyphens',
       )
+      .transform((value) => value || null)
+      .optional(),
+    dateOfBirth: z
+      .string()
+      .trim()
+      .refine(
+        (value) => value === '' || isValidDateOnly(value),
+        'Date of birth must be a valid date',
+      )
+      .transform((value) =>
+        value ? new Date(`${value}T00:00:00.000Z`) : null,
+      )
+      .optional(),
+    gender: z
+      .union([z.enum(['MALE', 'FEMALE', 'OTHER']), z.literal('')])
       .transform((value) => value || null)
       .optional(),
   })

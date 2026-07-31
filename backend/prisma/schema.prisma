@@ -80,19 +80,29 @@ model AdminProfile {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  name String
+  name                 String
+  profilePic           String?
+  profileImagePublicId String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model OfficerProfile {
-  id     String @id @default(uuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id       String  @id @default(uuid())
+  publicId String? @unique
+  userId   String  @unique
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  name  String
-  phone String?
+  name                 String
+  phone                String?
+  designation          String?
+  department           String?
+  joiningDate          DateTime? @db.Date
+  shift                String?
+  officeLocation       String?
+  profilePic           String?
+  profileImagePublicId String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -113,7 +123,11 @@ model VisitorProfile {
   phone                String
   state                String?
   address              String?
+  city                 String?
+  country              String?
   zip                  String?
+  dateOfBirth          DateTime? @db.Date
+  gender               String?
   profilePic           String?
   profileImagePublicId String?
 
@@ -125,20 +139,24 @@ model VisitorProfile {
 }
 
 model PrisonerProfile {
-  id     String @id @default(uuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id       String  @id @default(uuid())
+  publicId String? @unique
+  userId   String  @unique
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  name           String
-  age            Int
-  gender         String
-  caseDetails    String?
-  admissionDate  DateTime
-  sentencePeriod String?
-  jailType       String?
-  jailName       String?
-  cellNumber     String?
-  profilePic     String?
+  name                 String
+  age                  Int
+  gender               String
+  dateOfBirth          DateTime? @db.Date
+  nationality          String?
+  caseDetails          String?
+  admissionDate        DateTime
+  sentencePeriod       String?
+  jailType             String?
+  jailName             String?
+  cellNumber           String?
+  profilePic           String?
+  profileImagePublicId String?
 
   // Track which officer added them to the system
   createdByOfficerId String?

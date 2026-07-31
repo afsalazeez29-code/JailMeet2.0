@@ -36,6 +36,8 @@ export class AdminError extends Error {
   }
 }
 
+const PERMANENT_ADMIN_EMAIL = 'admin@jailmeet.com';
+
 const toIso = (date: Date): string => date.toISOString();
 
 const pagination = (page: number, limit: number, totalItems: number) => ({
@@ -207,17 +209,21 @@ export const updateUserStatus = async (
   targetUserId: string,
   input: UpdateUserStatusInput,
 ): Promise<SafeAdminUser> => {
-  if (adminUserId === targetUserId && input.isActive === false) {
-    throw new AdminError(400, 'Admins cannot deactivate their own account');
-  }
-
   const target = await prisma.user.findUnique({
     where: { id: targetUserId },
-    select: { id: true, role: true, isActive: true },
+    select: { id: true, email: true, role: true, isActive: true },
   });
 
   if (!target) {
     throw new AdminError(404, 'User not found');
+  }
+
+  if (target.email === PERMANENT_ADMIN_EMAIL && input.isActive === false) {
+    throw new AdminError(403, 'The permanent Admin cannot be deactivated');
+  }
+
+  if (adminUserId === targetUserId && input.isActive === false) {
+    throw new AdminError(400, 'Admins cannot deactivate their own account');
   }
 
   if (

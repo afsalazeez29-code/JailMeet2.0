@@ -17,8 +17,12 @@ const visitorProfileSelect = {
       name: true,
       phone: true,
       address: true,
+      city: true,
       state: true,
+      country: true,
       zip: true,
+      dateOfBirth: true,
+      gender: true,
       profilePic: true,
     },
   },
@@ -34,8 +38,12 @@ const toVisitorProfileResult = (user: {
     name: string;
     phone: string;
     address: string | null;
+    city: string | null;
     state: string | null;
+    country: string | null;
     zip: string | null;
+    dateOfBirth: Date | null;
+    gender: string | null;
     profilePic: string | null;
   } | null;
 }): VisitorProfileResult | null => {
@@ -57,8 +65,14 @@ const toVisitorProfileResult = (user: {
       publicId: user.visitorProfile.publicId,
       phone: user.visitorProfile.phone,
       address: user.visitorProfile.address,
+      city: user.visitorProfile.city,
       state: user.visitorProfile.state,
+      country: user.visitorProfile.country,
       zip: user.visitorProfile.zip,
+      dateOfBirth: user.visitorProfile.dateOfBirth
+        ? user.visitorProfile.dateOfBirth.toISOString().slice(0, 10)
+        : null,
+      gender: user.visitorProfile.gender,
     },
   };
 };

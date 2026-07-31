@@ -12,6 +12,11 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "seed": "tsx prisma/seed.ts",
+    "seed:four-visitors": "tsx prisma/seed-four-visitors.ts",
+    "seed:four-officers": "tsx prisma/seed-four-officers.ts",
+    "seed:permanent-admin": "tsx prisma/seed-permanent-admin.ts",
+    "seed:ten-prisoners": "tsx prisma/seed-ten-prisoners.ts",
+    "update:prisoner-case-details": "tsx prisma/update-prisoner-case-details.ts",
     "backfill:visitor-public-ids": "tsx scripts/backfill-visitor-public-ids.ts",
     "lint": "echo \"Add ESLint in a future step\""
   },
