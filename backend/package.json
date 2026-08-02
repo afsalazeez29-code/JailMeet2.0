@@ -17,6 +17,8 @@
     "seed:permanent-admin": "tsx prisma/seed-permanent-admin.ts",
     "seed:ten-prisoners": "tsx prisma/seed-ten-prisoners.ts",
     "update:prisoner-case-details": "tsx prisma/update-prisoner-case-details.ts",
+    "seed:jail-rules": "tsx prisma/seed-jail-rules.ts",
+    "seed:prisoner-rules": "tsx prisma/seed-prisoner-rules.ts",
     "backfill:visitor-public-ids": "tsx scripts/backfill-visitor-public-ids.ts",
     "lint": "echo \"Add ESLint in a future step\""
   },

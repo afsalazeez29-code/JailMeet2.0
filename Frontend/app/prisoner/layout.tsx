@@ -8,17 +8,17 @@ type PrisonerRouteLayoutProps = {
 };
 
 const prisonerStylesheets = [
-  '/legacy/visitor/visitorpage/assets/vendor/fonts/boxicons.css',
-  '/legacy/visitor/visitorpage/assets/vendor/css/core.css',
-  '/legacy/visitor/visitorpage/assets/vendor/css/theme-default.css',
-  '/legacy/visitor/visitorpage/assets/css/demo.css',
-  '/legacy/visitor/visitorpage/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css',
-  '/legacy/prisoner/assets/plugins/simplebar/css/simplebar.css',
-  '/legacy/prisoner/assets/css/bootstrap.min.css',
-  '/legacy/prisoner/assets/css/animate.css',
-  '/legacy/prisoner/assets/css/icons.css',
-  '/legacy/prisoner/assets/css/sidebar-menu.css',
-  '/legacy/prisoner/assets/css/app-style.css',
+  '/legacy/Active/visitor-boxicons.css',
+  '/legacy/Active/visitor-core.css',
+  '/legacy/Active/visitor-theme-default.css',
+  '/legacy/Active/visitor-demo.css',
+  '/legacy/Active/visitor-perfect-scrollbar.css',
+  '/legacy/Active/prisoner-simplebar.css',
+  '/legacy/Active/prisoner-bootstrap.min.css',
+  '/legacy/Active/prisoner-animate.css',
+  '/legacy/Active/prisoner-icons.css',
+  '/legacy/Active/prisoner-sidebar-menu.css',
+  '/legacy/Active/prisoner-app-style.css',
 ];
 
 const prisonerFontOverrides = `

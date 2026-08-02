@@ -38,11 +38,16 @@ export const getPublicPrisoner = async (
 
 export const createVisitorAppointment = async (
   payload: CreateAppointmentInput,
-): Promise<VisitorAppointment> =>
-  requestWithAuth<VisitorAppointment>('/visitor/appointments', undefined, {
+): Promise<VisitorAppointment> => {
+  const appointment = await requestWithAuth<VisitorAppointment>('/visitor/appointments', undefined, {
     method: 'POST',
     body: JSON.stringify(payload),
   });
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('jailmeet:notifications-refresh'));
+  }
+  return appointment;
+};
 
 export const getVisitorAppointments = async (): Promise<
   VisitorAppointment[]

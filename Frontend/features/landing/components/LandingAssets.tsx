@@ -3,21 +3,21 @@
 import { useEffect } from 'react';
 
 const landingStylesheets = [
-  '/legacy/landing/assets/vendor/bootstrap/css/bootstrap.min.css',
-  '/legacy/landing/assets/vendor/bootstrap-icons/bootstrap-icons.css',
-  '/legacy/landing/assets/vendor/aos/aos.css',
-  '/legacy/landing/assets/vendor/glightbox/css/glightbox.min.css',
-  '/legacy/landing/assets/vendor/swiper/swiper-bundle.min.css',
-  '/styles/landing/main.css',
+  '/legacy/Active/landing-bootstrap.min.css',
+  '/legacy/Active/landing-bootstrap-icons.css',
+  '/legacy/Active/landing-aos.css',
+  '/legacy/Active/landing-glightbox.min.css',
+  '/legacy/Active/landing-swiper-bundle.min.css',
+  '/legacy/Active/landing-main.css',
 ];
 
 const landingScripts = [
-  '/legacy/landing/assets/vendor/bootstrap/js/bootstrap.bundle.min.js',
-  '/legacy/landing/assets/vendor/aos/aos.js',
-  '/legacy/landing/assets/vendor/purecounter/purecounter_vanilla.js',
-  '/legacy/landing/assets/vendor/glightbox/js/glightbox.min.js',
-  '/legacy/landing/assets/vendor/swiper/swiper-bundle.min.js',
-  '/legacy/landing/assets/js/main.js',
+  '/legacy/Active/landing-bootstrap.bundle.min.js',
+  '/legacy/Active/landing-aos.js',
+  '/legacy/Active/landing-purecounter-vanilla.js',
+  '/legacy/Active/landing-glightbox.min.js',
+  '/legacy/Active/landing-swiper-bundle.min.js',
+  '/legacy/Active/landing-main.js',
 ];
 
 type LandingWindow = Window &

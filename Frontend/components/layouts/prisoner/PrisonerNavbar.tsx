@@ -11,6 +11,7 @@ import { useAuth } from '@features/auth/hooks/useAuth';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
 import { clearAccessToken } from '@features/auth/services/token.service';
 import PrisonerProfilePill from './PrisonerProfilePill';
+import NotificationBell from '@features/visitor-services/components/NotificationBell';
 import s from './PrisonerTheme.module.css';
 
 type PrisonerNavbarProps = {
@@ -60,9 +61,10 @@ export default function PrisonerNavbar({
         <div className={`navbar-nav-right d-flex align-items-center ${s.navbarNavRight}`} id="navbar-collapse">
           <ul className="navbar-nav flex-row align-items-center ms-auto">
             <li className={`nav-item ${s.profileActions}`}>
+              <NotificationBell defaultHref="/prisoner/dashboard" />
               <PrisonerProfilePill
                 displayName={displayName}
-                avatarSrc={fallbackPrisonerImage}
+                avatarSrc={user?.profileImageUrl || fallbackPrisonerImage}
               />
               <button
                 className={s.logoutButton}

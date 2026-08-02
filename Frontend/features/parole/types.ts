@@ -23,6 +23,7 @@ export type CreateParoleRequestInput = {
 
 export type PrisonerParoleRequest = {
   id: string;
+  reference: string;
   relativeName: string;
   relationship: string;
   purpose: string;

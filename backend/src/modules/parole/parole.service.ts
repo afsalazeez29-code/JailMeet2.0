@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import { ParoleStatus } from '@prisma/client';
 
 import prisma from '../../config/prisma';
@@ -8,6 +9,7 @@ import {
   PrisonerParoleRequestResult,
   ReviewParoleRequestInput,
 } from './parole.types';
+import { createNotification } from '../notifications';
 
 export class ParoleError extends Error {
   statusCode: number;
@@ -20,6 +22,8 @@ export class ParoleError extends Error {
 }
 
 const toIso = (date: Date): string => date.toISOString();
+const paroleReference = (id: string): string =>
+  `PAR-${createHash('sha256').update(id).digest('hex').slice(0, 10).toUpperCase()}`;
 
 const prisonerParoleSelect = {
   id: true,
@@ -59,6 +63,7 @@ const mapPrisonerParoleRequest = (request: {
   updatedAt: Date;
 }): PrisonerParoleRequestResult => ({
   id: request.id,
+  reference: paroleReference(request.id),
   relativeName: request.relativeName,
   relationship: request.relationship,
   purpose: request.purpose,
@@ -129,18 +134,28 @@ export const createPrisonerParoleRequest = async (
 
   const { fromDate, toDate } = parseParoleDates(input);
 
-  const request = await prisma.paroleRequest.create({
-    data: {
-      prisonerId: prisoner.id,
-      relativeName: input.relativeName,
-      relationship: input.relationship,
-      purpose: input.purpose,
-      message: input.message,
-      fromDate,
-      toDate,
-      status: ParoleStatus.PENDING,
-    },
-    select: prisonerParoleSelect,
+  const request = await prisma.$transaction(async (tx) => {
+    const created = await tx.paroleRequest.create({
+      data: {
+        prisonerId: prisoner.id,
+        relativeName: input.relativeName,
+        relationship: input.relationship,
+        purpose: input.purpose,
+        message: input.message,
+        fromDate,
+        toDate,
+        status: ParoleStatus.PENDING,
+      },
+      select: prisonerParoleSelect,
+    });
+    await createNotification({
+      userId,
+      type: 'PAROLE_SUBMITTED',
+      title: 'Parole request submitted',
+      message: 'Your parole request was submitted for Officer review.',
+      link: '/prisoner/parole',
+    }, tx);
+    return created;
   });
 
   return mapPrisonerParoleRequest(request);
@@ -195,7 +210,11 @@ export const reviewParoleRequest = async (
 
   const paroleRequest = await prisma.paroleRequest.findUnique({
     where: { id: paroleRequestId },
-    select: { id: true, status: true },
+    select: {
+      id: true,
+      status: true,
+      prisoner: { select: { userId: true } },
+    },
   });
 
   if (!paroleRequest) {
@@ -206,14 +225,27 @@ export const reviewParoleRequest = async (
     throw new ParoleError(409, 'Only pending parole requests can be reviewed');
   }
 
-  const updatedRequest = await prisma.paroleRequest.update({
-    where: { id: paroleRequestId },
-    data: {
-      status: input.status,
-      officerReply: input.replyMessage,
-      officerId: officer.id,
-    },
-    select: officerParoleSelect,
+  const updatedRequest = await prisma.$transaction(async (tx) => {
+    const updated = await tx.paroleRequest.update({
+      where: { id: paroleRequestId },
+      data: {
+        status: input.status,
+        officerReply: input.replyMessage,
+        officerId: officer.id,
+      },
+      select: officerParoleSelect,
+    });
+    const approved = input.status === ParoleStatus.ACCEPTED;
+    await createNotification({
+      userId: paroleRequest.prisoner.userId,
+      type: approved ? 'PAROLE_APPROVED' : 'PAROLE_REJECTED',
+      title: approved ? 'Parole request approved' : 'Parole request rejected',
+      message: approved
+        ? 'Your parole request was approved. Open Parole Status for details.'
+        : 'Your parole request was rejected. Open Parole Status to read the Officer reply.',
+      link: '/prisoner/parole',
+    }, tx);
+    return updated;
   });
 
   return mapOfficerParoleRequest(updatedRequest);

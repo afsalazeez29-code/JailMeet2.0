@@ -1,0 +1,133 @@
+.dashboard {
+  color: #171717;
+}
+
+.welcomeCard {
+  margin-bottom: 1.5rem;
+  padding: 1.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+  color: #171717;
+}
+
+.eyebrow {
+  margin: 0 0 0.45rem;
+  color: #f04a1d;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.welcomeTitle {
+  margin: 0;
+  color: #111111;
+  font-size: clamp(1.55rem, 3vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.identityList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 2.5rem;
+  margin: 1.25rem 0 0;
+}
+
+.identityList div {
+  min-width: 0;
+}
+
+.identityList dt {
+  margin-bottom: 0.15rem;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.identityList dd {
+  margin: 0;
+  color: #171717;
+  font-size: 0.96rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.supportingText {
+  margin: 1.15rem 0 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.sectionTitle {
+  margin: 0 0 1rem;
+  color: #111111;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.statCard {
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+  color: #111111;
+}
+
+.statCardBody {
+  min-height: 160px;
+  padding: 1.5rem;
+}
+
+.statIconBox {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.15rem;
+  border-radius: 8px;
+}
+
+.statTitle {
+  min-height: 2.8em;
+  margin: 0 0 0.4rem;
+  color: #111111;
+  font-size: 0.96rem;
+  font-weight: 650;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.statValue {
+  margin: 0;
+  color: #111111;
+  font-size: 1.8rem;
+  font-weight: 750;
+  line-height: 1.15;
+}
+
+@media (max-width: 575px) {
+  .welcomeCard {
+    padding: 1.25rem;
+  }
+
+  .identityList {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .statCardBody {
+    min-height: 140px;
+    padding: 1.25rem;
+  }
+
+  .statTitle {
+    min-height: 0;
+  }
+}

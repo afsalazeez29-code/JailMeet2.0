@@ -8,11 +8,11 @@ type VisitorRouteLayoutProps = {
 };
 
 const visitorStylesheets = [
-  '/legacy/visitor/visitorpage/assets/vendor/fonts/boxicons.css',
-  '/legacy/visitor/visitorpage/assets/vendor/css/core.css',
-  '/legacy/visitor/visitorpage/assets/vendor/css/theme-default.css',
-  '/legacy/visitor/visitorpage/assets/css/demo.css',
-  '/legacy/visitor/visitorpage/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css',
+  '/legacy/Active/visitor-boxicons.css',
+  '/legacy/Active/visitor-core.css',
+  '/legacy/Active/visitor-theme-default.css',
+  '/legacy/Active/visitor-demo.css',
+  '/legacy/Active/visitor-perfect-scrollbar.css',
 ];
 
 const visitorFontOverrides = `

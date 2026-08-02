@@ -1,6 +1,8 @@
 import { AppointmentStatus } from '@prisma/client';
 
 import prisma from '../../config/prisma';
+import { createNotification } from '../notifications';
+import { issueOrRotateVisitPass } from '../visit-passes';
 import {
   AppointmentStatusFilterInput,
   CreateAppointmentInput,
@@ -33,6 +35,7 @@ const mapVisitorAppointment = (appointment: {
   createdAt: Date;
   updatedAt: Date;
   prisoner: { publicId: string | null; name: string; profilePic: string | null };
+  changeRequests?: Array<{ id: string }>;
 }): VisitorAppointmentResult => ({
   id: appointment.id,
   appointmentAt: toIso(appointment.requestedDate),
@@ -46,11 +49,11 @@ const mapVisitorAppointment = (appointment: {
     name: appointment.prisoner.name,
     profilePic: appointment.prisoner.profilePic,
   },
+  hasPendingChangeRequest: Boolean(appointment.changeRequests?.length),
 });
 
 const mapOfficerAppointment = (appointment: Parameters<typeof mapVisitorAppointment>[0] & {
   visitor: {
-    id: string;
     publicId: string | null;
     name: string;
     phone: string;
@@ -58,7 +61,6 @@ const mapOfficerAppointment = (appointment: Parameters<typeof mapVisitorAppointm
 }): OfficerAppointmentResult => ({
   ...mapVisitorAppointment(appointment),
   visitor: {
-    id: appointment.visitor.id,
     publicId: appointment.visitor.publicId,
     name: appointment.visitor.name,
     phone: appointment.visitor.phone,
@@ -87,11 +89,19 @@ const officerAppointmentSelect = {
   ...appointmentSelect,
   visitor: {
     select: {
-      id: true,
       publicId: true,
       name: true,
       phone: true,
     },
+  },
+};
+
+const visitorAppointmentSelect = {
+  ...appointmentSelect,
+  changeRequests: {
+    where: { status: 'PENDING' as const },
+    take: 1,
+    select: { id: true },
   },
 };
 
@@ -197,16 +207,26 @@ export const createVisitorAppointment = async (
     throw new AppointmentError(409, 'Appointment already exists');
   }
 
-  const appointment = await prisma.appointment.create({
-    data: {
-      visitorId: visitor.id,
-      prisonerId: prisoner.id,
-      requestedDate,
-      relationship: 'Visitor',
-      message: input.reason,
-      status: AppointmentStatus.PENDING,
-    },
-    select: appointmentSelect,
+  const appointment = await prisma.$transaction(async (tx) => {
+    const created = await tx.appointment.create({
+      data: {
+        visitorId: visitor.id,
+        prisonerId: prisoner.id,
+        requestedDate,
+        relationship: 'Visitor',
+        message: input.reason,
+        status: AppointmentStatus.PENDING,
+      },
+      select: appointmentSelect,
+    });
+    await createNotification({
+      userId,
+      type: 'APPOINTMENT_SUBMITTED',
+      title: 'Appointment submitted',
+      message: `Your appointment request for ${created.prisoner.name} was submitted for review.`,
+      link: '/visitor/appointments',
+    }, tx);
+    return created;
   });
 
   return mapVisitorAppointment(appointment);
@@ -227,7 +247,7 @@ export const getVisitorAppointments = async (
   const appointments = await prisma.appointment.findMany({
     where: { visitorId: visitor.id },
     orderBy: { requestedDate: 'desc' },
-    select: appointmentSelect,
+    select: visitorAppointmentSelect,
   });
 
   return appointments.map(mapVisitorAppointment);
@@ -261,7 +281,13 @@ export const reviewAppointment = async (
 
   const appointment = await prisma.appointment.findUnique({
     where: { id: appointmentId },
-    select: { id: true, status: true },
+    select: {
+      id: true,
+      status: true,
+      requestedDate: true,
+      visitor: { select: { userId: true, publicId: true, name: true } },
+      prisoner: { select: { name: true, userId: true } },
+    },
   });
 
   if (!appointment) {
@@ -272,14 +298,55 @@ export const reviewAppointment = async (
     throw new AppointmentError(409, 'Only pending appointments can be reviewed');
   }
 
-  const updatedAppointment = await prisma.appointment.update({
-    where: { id: appointmentId },
-    data: {
-      status: input.status,
-      replyMessage: input.officerNote,
-      officerId: officer.id,
-    },
-    select: officerAppointmentSelect,
+  const updatedAppointment = await prisma.$transaction(async (tx) => {
+    const updated = await tx.appointment.update({
+      where: { id: appointmentId },
+      data: {
+        status: input.status,
+        replyMessage: input.officerNote,
+        officerId: officer.id,
+      },
+      select: officerAppointmentSelect,
+    });
+
+    if (input.status === AppointmentStatus.ACCEPTED) {
+      await issueOrRotateVisitPass(tx, appointmentId, appointment.requestedDate);
+      await createNotification({
+        userId: appointment.visitor.userId,
+        type: 'APPOINTMENT_APPROVED',
+        title: 'Appointment approved',
+        message: `Your appointment with ${appointment.prisoner.name} was approved.`,
+        link: '/visitor/visit-passes',
+      }, tx);
+      await createNotification({
+        userId: appointment.visitor.userId,
+        type: 'VISIT_PASS_ISSUED',
+        title: 'Visit pass issued',
+        message: 'Your secure visit pass is ready.',
+        link: '/visitor/visit-passes',
+      }, tx);
+      await createNotification({
+        userId: appointment.prisoner.userId,
+        type: 'PRISONER_VISIT_APPROVED',
+        title: 'Upcoming visit approved',
+        message: `An upcoming visit with ${appointment.visitor.name} (${appointment.visitor.publicId ?? 'Visitor ID unavailable'}) was approved.`,
+        link: '/prisoner/upcoming-visits',
+      }, tx);
+    } else {
+      await tx.visitPass.updateMany({
+        where: { appointmentId, status: 'ACTIVE' },
+        data: { status: 'REVOKED' },
+      });
+      await createNotification({
+        userId: appointment.visitor.userId,
+        type: 'APPOINTMENT_REJECTED',
+        title: 'Appointment rejected',
+        message: `Your appointment with ${appointment.prisoner.name} was rejected.`,
+        link: '/visitor/appointments',
+      }, tx);
+    }
+
+    return updated;
   });
 
   return mapOfficerAppointment(updatedAppointment);

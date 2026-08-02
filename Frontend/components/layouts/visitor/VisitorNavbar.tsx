@@ -12,6 +12,7 @@ import { navigateToLogin } from '@features/auth/services/navigation.service';
 import { AuthUser } from '@features/auth/types';
 import VisitorProfilePill from '@features/visitor-profile/components/VisitorProfilePill';
 import styles from '@features/visitor-profile/components/VisitorProfilePill.module.css';
+import NotificationBell from '@features/visitor-services/components/NotificationBell';
 
 type VisitorNavbarProps = {
   user: AuthUser | null;
@@ -54,6 +55,7 @@ export default function VisitorNavbar({ user, onToggleMenu, menuOpen = false }: 
         <div className="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
           <ul className="navbar-nav flex-row align-items-center ms-auto">
             <li className={`nav-item ${styles.profileActions}`}>
+              <NotificationBell />
               <VisitorProfilePill
                 fullName={user?.name ?? 'Visitor'}
                 profileImage={user?.profileImageUrl}

@@ -9,6 +9,7 @@ import {
 
 export type PrisonerParoleRequestResult = {
   id: string;
+  reference: string;
   relativeName: string;
   relationship: string;
   purpose: string;

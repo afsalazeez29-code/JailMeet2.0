@@ -12,6 +12,7 @@ import { dashboardRoutes } from './modules/dashboard';
 import { officerRoutes } from './modules/officer';
 import { paroleRoutes } from './modules/parole';
 import { visitorRoutes } from './modules/visitor';
+import { notificationRoutes } from './modules/notifications';
 
 const app: Application = express();
 
@@ -47,6 +48,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/visitor', visitorRoutes);
 app.use('/api/officer', officerRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use('/api', paroleRoutes);
 // app.use('/api/users', usersRouter);
 

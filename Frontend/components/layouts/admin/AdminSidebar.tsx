@@ -9,6 +9,8 @@ import {
   FileText,
   House,
   LockKeyhole,
+  LifeBuoy,
+  ShieldCheck,
   UserCheck,
   UserRound,
   UsersRound,
@@ -62,6 +64,24 @@ const navItems = [
     legacyHref: 'parolerequests.php',
     icon: FileText,
     label: 'Parole Requests',
+  },
+  {
+    href: '/admin/support-requests',
+    legacyHref: 'support-requests',
+    icon: LifeBuoy,
+    label: 'Support Requests',
+  },
+  {
+    href: '/admin/prisoner-support-requests',
+    legacyHref: 'prisoner-support-requests',
+    icon: LifeBuoy,
+    label: 'Prisoner Support',
+  },
+  {
+    href: '/admin/jail-rules',
+    legacyHref: 'jail-rules',
+    icon: ShieldCheck,
+    label: 'Jail Rules',
   },
   {
     href: '/admin/change-password',

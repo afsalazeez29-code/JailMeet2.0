@@ -19,13 +19,20 @@ export default function PrisonerProfilePill({
 
   return (
     <Link
-      href="/prisoner/dashboard"
+      href="/prisoner/profile"
       className={s.profilePill}
       aria-label={`Open ${safeName} profile`}
     >
       <span className={s.avatarWrap}>
         {avatarSrc ? (
-          <img src={avatarSrc} alt={`${safeName} profile`} className={s.avatar} />
+          <img
+            src={avatarSrc}
+            alt={`${safeName} profile`}
+            className={s.avatar}
+            onError={(event) => {
+              event.currentTarget.src = '/images/avatars/prisoner-default.png';
+            }}
+          />
         ) : (
           <span className={s.avatar}>P</span>
         )}

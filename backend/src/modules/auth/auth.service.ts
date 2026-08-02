@@ -30,7 +30,9 @@ const userSelect = {
   visitorProfile: {
     select: { name: true, publicId: true, profilePic: true },
   },
-  prisonerProfile: { select: { name: true } },
+  prisonerProfile: {
+    select: { name: true, publicId: true, profilePic: true },
+  },
 };
 
 const getProfileName = (user: {
@@ -41,7 +43,11 @@ const getProfileName = (user: {
     publicId: string | null;
     profilePic: string | null;
   } | null;
-  prisonerProfile?: { name: string } | null;
+  prisonerProfile?: {
+    name: string;
+    publicId: string | null;
+    profilePic: string | null;
+  } | null;
 }): string =>
   user.adminProfile?.name ??
   user.officerProfile?.name ??
@@ -60,14 +66,20 @@ const toAuthUser = (user: {
     publicId: string | null;
     profilePic: string | null;
   } | null;
-  prisonerProfile?: { name: string } | null;
+  prisonerProfile?: {
+    name: string;
+    publicId: string | null;
+    profilePic: string | null;
+  } | null;
 }): AuthUser => ({
   id: user.id,
-  publicId: user.visitorProfile?.publicId ?? null,
+  publicId:
+    user.visitorProfile?.publicId ?? user.prisonerProfile?.publicId ?? null,
   name: getProfileName(user),
   email: user.email ?? '',
   role: user.role,
-  profileImageUrl: user.visitorProfile?.profilePic ?? null,
+  profileImageUrl:
+    user.visitorProfile?.profilePic ?? user.prisonerProfile?.profilePic ?? null,
 });
 
 const createAccessToken = (user: AuthUser): string => {

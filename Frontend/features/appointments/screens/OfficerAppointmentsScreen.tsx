@@ -13,6 +13,7 @@ import {
 import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
 
 import OfficerAppointmentList from '@features/appointments/components/OfficerAppointmentList';
+import OfficerVisitorTools from '@features/visitor-services/components/OfficerVisitorTools';
 
 export default function OfficerAppointmentsPage() {
   const protectedPage = useProtectedPage();
@@ -107,12 +108,15 @@ export default function OfficerAppointmentsPage() {
   }
 
   return (
-    <OfficerAppointmentList
-      appointments={appointments}
-      filter={filter}
-      onFilterChange={setFilter}
-      onReviewed={handleReviewed}
-    />
+    <>
+      <OfficerAppointmentList
+        appointments={appointments}
+        filter={filter}
+        onFilterChange={setFilter}
+        onReviewed={handleReviewed}
+      />
+      <OfficerVisitorTools />
+    </>
   );
 }
 

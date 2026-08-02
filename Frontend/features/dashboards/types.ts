@@ -28,9 +28,17 @@ export type VisitorDashboardData = {
 };
 
 export type PrisonerDashboardData = {
-  myParoleRequests: number;
-  pendingParoleRequests: number;
-  approvedParoleRequests: number;
-  rejectedParoleRequests: number;
-  myAppointments: number;
+  prisoner: {
+    name: string;
+    email: string;
+    publicId: string | null;
+    profilePic: string | null;
+  };
+  summary: {
+    myParoleRequests: number;
+    pendingParoleRequests: number;
+    approvedParoleRequests: number;
+    rejectedParoleRequests: number;
+    myAppointments: number;
+  };
 };

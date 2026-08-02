@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type ComponentType, type SVGProps } from 'react';
-import { CalendarDays, FileText, History, LayoutDashboard, LockKeyhole, X } from 'lucide-react';
+import { CalendarCheck, CalendarDays, FileText, Gavel, History, LayoutDashboard, LifeBuoy, LockKeyhole, ScrollText, UserRound, X } from 'lucide-react';
 
 import iconStyles from '../../common/LucideIcon.module.css';
 import s from './PrisonerTheme.module.css';
@@ -28,18 +28,46 @@ const menuItems = [
     label: 'Submit Parole Request',
   },
   {
-    href: '/prisoner/visits/history',
-    legacyHref: 'visitorhistory.php',
-    icon: History,
-    label: 'Visitors History',
-    disabled: true,
-    title: 'Visitor history is not implemented yet',
-  },
-  {
     href: '/prisoner/parole',
     legacyHref: 'parolestatus.php',
     icon: CalendarDays,
     label: 'Parole Status',
+  },
+  {
+    href: '/prisoner/upcoming-visits',
+    legacyHref: 'upcomingvisits.php',
+    icon: CalendarCheck,
+    label: 'Upcoming Visits',
+  },
+  {
+    href: '/prisoner/visits/history',
+    legacyHref: 'visitorhistory.php',
+    icon: History,
+    label: 'Visitors History',
+  },
+  {
+    href: '/prisoner/profile',
+    legacyHref: 'profile.php',
+    icon: UserRound,
+    label: 'My Profile',
+  },
+  {
+    href: '/prisoner/case-summary',
+    legacyHref: 'case-summary.php',
+    icon: Gavel,
+    label: 'Case & Sentence',
+  },
+  {
+    href: '/prisoner/support',
+    legacyHref: 'support.php',
+    icon: LifeBuoy,
+    label: 'Support / Grievance',
+  },
+  {
+    href: '/prisoner/jail-rules',
+    legacyHref: 'jail-rules.php',
+    icon: ScrollText,
+    label: 'Jail Rules',
   },
   {
     href: '/prisoner/change-password',
@@ -52,8 +80,6 @@ const menuItems = [
   legacyHref: string;
   icon: SidebarIcon;
   label: string;
-  disabled?: boolean;
-  title?: string;
 }>;
 
 export default function PrisonerSidebar({
@@ -110,25 +136,14 @@ export default function PrisonerSidebar({
               key={item.href}
               className={`menu-item${isActive ? ' active' : ''}`}
             >
-              {item.disabled ? (
-                <span
-                  className={`menu-link ${s.sidebarItem} ${s.sidebarItemDisabled}`}
-                  aria-disabled="true"
-                  data-legacy-href={item.legacyHref}
-                  title={item.title}
-                >
-                  {content}
-                </span>
-              ) : (
-                <Link
-                  href={item.href}
-                  data-legacy-href={item.legacyHref}
-                  className={`menu-link ${s.sidebarItem} ${isActive ? s.sidebarItemActive : ''}`}
-                  onClick={onCloseSidebar}
-                >
-                  {content}
-                </Link>
-              )}
+              <Link
+                href={item.href}
+                data-legacy-href={item.legacyHref}
+                className={`menu-link ${s.sidebarItem} ${isActive ? s.sidebarItemActive : ''}`}
+                onClick={onCloseSidebar}
+              >
+                {content}
+              </Link>
             </li>
           );
         })}

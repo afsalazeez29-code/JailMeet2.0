@@ -5,12 +5,13 @@
   border-radius: 14px;
   box-shadow: 0 4px 18px rgba(28, 31, 36, 0.06);
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   justify-content: space-between;
   padding: 1rem;
 }
 
-.main { display: flex; gap: 1rem; min-width: 0; }
+.main { display: flex; flex: 1 1 420px; gap: 1rem; min-width: 0; }
 .avatar { border-radius: 12px; flex: 0 0 auto; object-fit: cover; }
 .content { min-width: 0; }
 .content h3 { color: #2f3349; font-size: 1rem; margin: 0 0 0.2rem; overflow-wrap: anywhere; }
@@ -26,6 +27,16 @@
 .completed { background: #e0edff; color: #245c9f; }
 .cancelled { background: #eceef1; color: #596273; }
 .compact { box-shadow: none; }
+.changeActions { display: flex; flex-wrap: wrap; gap: .5rem; width: 100%; }
+.requestForm { background: #fff8f4; border: 1px solid #ffd8c8; border-radius: 10px; display: grid; gap: .7rem; padding: .85rem; width: 100%; }
+.requestForm h4 { color: #2f3349; font-size: .95rem; margin: 0; }
+.requestForm label { color: #4d5363; display: grid; font-size: .82rem; font-weight: 600; gap: .3rem; }
+.requestForm input, .requestForm textarea { border: 1px solid #d9dce2; border-radius: 8px; padding: .6rem .7rem; width: 100%; }
+.requestForm textarea { min-height: 85px; resize: vertical; }
+.requestError { color: #a52821; margin: 0; }
+.requestSuccess { color: #146c43; font-size: .85rem; margin: 0; width: 100%; }
+.confirmation { align-items: flex-start; display: flex !important; flex-direction: row; gap: .55rem !important; }
+.confirmation input { flex: 0 0 auto; margin-top: .15rem; width: auto; }
 
 @media (max-width: 575.98px) {
   .card { align-items: stretch; flex-direction: column; }

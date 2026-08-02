@@ -5,81 +5,79 @@ import { CalendarCheck, CircleCheck, CircleX, Clock3, FileText } from 'lucide-re
 
 import { ErrorAlert, ForbiddenAlert, LoadingAlert } from '../../../components/common/StatusAlert';
 import iconStyles from '../../../components/common/LucideIcon.module.css';
-import s from '../../../components/layouts/prisoner/PrisonerTheme.module.css';
+import themeStyles from '../../../components/layouts/prisoner/PrisonerTheme.module.css';
 import { useDashboard } from '@features/dashboards/services/useDashboard';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { getPrisonerDashboard } from '@features/dashboards/services/dashboard.service';
-import { PrisonerDashboardData } from '@features/dashboards/types';
-
-const fallbackPrisonerImage = '/images/avatars/prisoner-default.png';
+import type { PrisonerDashboardData } from '@features/dashboards/types';
+import styles from './PrisonerDashboard.module.css';
 
 type CardIcon = ComponentType<SVGProps<SVGSVGElement>>;
+type SummaryField = keyof PrisonerDashboardData['summary'];
 
 const statCards = [
   {
     label: 'My Parole Requests',
     field: 'myParoleRequests',
     icon: FileText,
-    colorClass: s.iconPrimary,
+    colorClass: themeStyles.iconPrimary,
   },
   {
     label: 'Pending Parole Requests',
     field: 'pendingParoleRequests',
     icon: Clock3,
-    colorClass: s.iconWarning,
+    colorClass: themeStyles.iconWarning,
   },
   {
     label: 'Approved Parole Requests',
     field: 'approvedParoleRequests',
     icon: CircleCheck,
-    colorClass: s.iconSuccess,
+    colorClass: themeStyles.iconSuccess,
   },
   {
     label: 'Rejected Parole Requests',
     field: 'rejectedParoleRequests',
     icon: CircleX,
-    colorClass: s.iconDanger,
+    colorClass: themeStyles.iconDanger,
   },
   {
     label: 'My Appointments',
     field: 'myAppointments',
     icon: CalendarCheck,
-    colorClass: s.iconInfo,
+    colorClass: themeStyles.iconInfo,
   },
 ] satisfies ReadonlyArray<{
   label: string;
-  field: keyof PrisonerDashboardData;
+  field: SummaryField;
   icon: CardIcon;
   colorClass: string;
 }>;
 
 function PrisonerStatCard({
   colorClass,
-  data,
-  field,
+  value,
   icon: Icon,
   label,
 }: {
   colorClass: string;
-  data: PrisonerDashboardData;
-  field: keyof PrisonerDashboardData;
+  value: number;
   icon: CardIcon;
   label: string;
 }) {
   return (
-    <div className="col-lg-3 col-md-6 col-12 mb-4">
-      <div className={s.statCard}>
-        <div className={s.statCardBody}>
-          <div className={`${s.statIconBox} ${colorClass}`}>
+    <div className="col-xl-3 col-md-6 col-12 mb-4">
+      <article className={styles.statCard} aria-label={`${label}: ${value}`}>
+        <div className={styles.statCardBody}>
+          <div className={`${styles.statIconBox} ${colorClass}`}>
             <Icon
               aria-hidden="true"
               className={`${iconStyles.icon} ${iconStyles.card}`}
             />
           </div>
-          <span className={s.statTitle}>{label}</span>
-          <h3 className={s.statValue}>{data[field] ?? 0}</h3>
+          <h2 className={styles.statTitle}>{label}</h2>
+          <p className={styles.statValue}>{value}</p>
         </div>
-      </div>
+      </article>
     </div>
   );
 }
@@ -100,11 +98,7 @@ export default function PrisonerDashboardPage() {
   ) {
     return (
       <div className="container-xxl flex-grow-1 container-p-y">
-        <div className="card">
-          <div className="card-body">
-            <LoadingAlert className="mb-0">Loading prisoner dashboard...</LoadingAlert>
-          </div>
-        </div>
+        <LoadingAlert>Loading prisoner dashboard...</LoadingAlert>
       </div>
     );
   }
@@ -112,11 +106,7 @@ export default function PrisonerDashboardPage() {
   if (protectedPage.isForbidden || dashboard.isForbidden) {
     return (
       <div className="container-xxl flex-grow-1 container-p-y">
-        <div className="card">
-          <div className="card-body">
-            <ForbiddenAlert className="mb-0" />
-          </div>
-        </div>
+        <ForbiddenAlert />
       </div>
     );
   }
@@ -129,116 +119,52 @@ export default function PrisonerDashboardPage() {
   if (protectedPage.error || dashboard.error) {
     return (
       <div className="container-xxl flex-grow-1 container-p-y">
-        <div className="card">
-          <div className="card-body">
-            <ErrorAlert className="mb-0">{errorMessage}</ErrorAlert>
-          </div>
-        </div>
+        <ErrorAlert>{errorMessage}</ErrorAlert>
       </div>
     );
   }
 
   const data = dashboard.data;
-  const user = protectedPage.user;
-
-  if (!data) {
-    return null;
-  }
+  if (!data) return null;
 
   return (
-    <div className="container-xxl flex-grow-1 container-p-y">
-      <div className="card">
-        <div className="card-header">
-          <h5>Prisoner Profile</h5>
-        </div>
-        <div className="card-body">
-          <div className="row">
-            <div className="col-md-4 text-center">
-              <div className="prisoner-photo mb-4">
-                <img
-                  src={fallbackPrisonerImage}
-                  alt="Prisoner profile placeholder"
-                  className="img-thumbnail"
-                  style={{ maxHeight: '300px' }}
-                />
-              </div>
-              <div className="prisoner-id">
-                <h4 className="text-primary">ID: {user?.id ?? ''}</h4>
-              </div>
-            </div>
-
-            <div className="col-md-8">
-              <div className="table-responsive">
-                <table className="table table-bordered">
-                  <tbody>
-                    <tr>
-                      <th style={{ width: '30%' }}>Full Name</th>
-                      <td>{user?.name ?? 'Prisoner'}</td>
-                    </tr>
-                    <tr>
-                      <th>Email</th>
-                      <td>{user?.email ?? ''}</td>
-                    </tr>
-                    <tr>
-                      <th>Role</th>
-                      <td>
-                        <span className="badge badge-primary">
-                          {user?.role ?? 'PRISONER'}
-                        </span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>Parole Summary</th>
-                      <td>
-                        <span className="badge badge-warning mr-2">
-                          Pending: {data.pendingParoleRequests ?? 0}
-                        </span>
-                        <span className="badge badge-success mr-2">
-                          Approved: {data.approvedParoleRequests ?? 0}
-                        </span>
-                        <span className="badge badge-danger">
-                          Rejected: {data.rejectedParoleRequests ?? 0}
-                        </span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>Visitation Status</th>
-                      <td>
-                        <span className="badge badge-info">
-                          Appointments: {data.myAppointments ?? 0}
-                        </span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="additional-info mt-4">
-                <h5 className="mb-3">Dashboard Summary</h5>
-                <p className="text-muted mb-0">
-                  Profile-only fields from the old PHP dashboard, such as age,
-                  crime, jail name, FIR details, medical records, cell block,
-                  and visitor names/dates, are not shown because the current
-                  backend dashboard API does not provide them.
-                </p>
-              </div>
-            </div>
+    <div className={`container-xxl flex-grow-1 container-p-y ${styles.dashboard}`}>
+      <section className={styles.welcomeCard} aria-labelledby="prisoner-welcome-heading">
+        <p className={styles.eyebrow}>Prisoner Dashboard</p>
+        <h1 className={styles.welcomeTitle} id="prisoner-welcome-heading">
+          Welcome, {data.prisoner.name || 'Prisoner'}
+        </h1>
+        <dl className={styles.identityList}>
+          <div>
+            <dt>Email</dt>
+            <dd>{data.prisoner.email || 'Not provided'}</dd>
           </div>
-        </div>
-      </div>
+          <div>
+            <dt>Prisoner ID</dt>
+            <dd>{data.prisoner.publicId || 'Prisoner ID unavailable'}</dd>
+          </div>
+        </dl>
+        <p className={styles.supportingText}>
+          View your parole requests, appointments, and account information.
+        </p>
+      </section>
 
-      <div className="row mt-3">
-        {statCards.map((card) => (
-          <PrisonerStatCard
-            colorClass={card.colorClass}
-            data={data}
-            field={card.field}
-            icon={card.icon}
-            key={card.field}
-            label={card.label}
-          />
-        ))}
-      </div>
+      <section aria-labelledby="prisoner-summary-heading">
+        <h2 className={styles.sectionTitle} id="prisoner-summary-heading">
+          Activity Summary
+        </h2>
+        <div className="row">
+          {statCards.map((card) => (
+            <PrisonerStatCard
+              colorClass={card.colorClass}
+              icon={card.icon}
+              key={card.field}
+              label={card.label}
+              value={data.summary[card.field] ?? 0}
+            />
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

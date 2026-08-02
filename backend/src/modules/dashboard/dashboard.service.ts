@@ -145,12 +145,22 @@ export const getPrisonerDashboard = async (
   const prisonerWhere = { prisoner: { userId } };
 
   const [
+    prisoner,
     myParoleRequests,
     pendingParoleRequests,
     approvedParoleRequests,
     rejectedParoleRequests,
     myAppointments,
   ] = await prisma.$transaction([
+    prisma.prisonerProfile.findUnique({
+      where: { userId },
+      select: {
+        name: true,
+        publicId: true,
+        profilePic: true,
+        user: { select: { email: true } },
+      },
+    }),
     prisma.paroleRequest.count({ where: prisonerWhere }),
     prisma.paroleRequest.count({
       where: {
@@ -173,11 +183,23 @@ export const getPrisonerDashboard = async (
     prisma.appointment.count({ where: prisonerWhere }),
   ]);
 
+  if (!prisoner) {
+    throw new Error('Prisoner profile not found');
+  }
+
   return {
-    myParoleRequests,
-    pendingParoleRequests,
-    approvedParoleRequests,
-    rejectedParoleRequests,
-    myAppointments,
+    prisoner: {
+      name: prisoner.name,
+      email: prisoner.user.email ?? '',
+      publicId: prisoner.publicId,
+      profilePic: prisoner.profilePic,
+    },
+    summary: {
+      myParoleRequests,
+      pendingParoleRequests,
+      approvedParoleRequests,
+      rejectedParoleRequests,
+      myAppointments,
+    },
   };
 };

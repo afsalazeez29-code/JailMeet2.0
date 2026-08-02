@@ -5,10 +5,14 @@ import { usePathname } from 'next/navigation';
 import { type ComponentType, type SVGProps } from 'react';
 import {
   CalendarCheck,
+  CalendarClock,
   CalendarPlus,
   ClipboardList,
+  History,
   House,
+  LifeBuoy,
   LockKeyhole,
+  ShieldCheck,
   UserRound,
   X,
 } from 'lucide-react';
@@ -41,6 +45,30 @@ const menuItems = [
     legacyHref: 'status.php',
     icon: CalendarCheck,
     label: 'View Booking Status',
+  },
+  {
+    href: '/visitor/visit-passes',
+    legacyHref: 'visit-passes',
+    icon: CalendarClock,
+    label: 'Upcoming Visits',
+  },
+  {
+    href: '/visitor/visit-history',
+    legacyHref: 'visit-history',
+    icon: History,
+    label: 'Visit History',
+  },
+  {
+    href: '/visitor/visit-rules',
+    legacyHref: 'visit-rules',
+    icon: ShieldCheck,
+    label: 'Jail Rules',
+  },
+  {
+    href: '/visitor/support',
+    legacyHref: 'support',
+    icon: LifeBuoy,
+    label: 'Support',
   },
   {
     href: '/visitor/profile',
@@ -90,18 +118,6 @@ export default function VisitorSidebar({ onCloseMenu }: VisitorSidebarProps = {}
       </div>
 
       <div className="menu-inner-shadow"></div>
-
-      <div className="user-info text-center p-3" style={{ display: 'none' }}>
-        <img
-          src="/images/visitor/sidebar-avatar.png"
-          alt="User Avatar"
-          className="w-px-50 h-auto rounded-circle mb-2"
-        />
-        <h1>Welcome, Visitor!</h1>
-        <small className="text-muted">ID: Visitor</small>
-        <br />
-        <small className="text-muted">visitor@jailmeet.com</small>
-      </div>
 
       <ul className="menu-inner py-1">
         {menuItems.map((item) => {

@@ -12,16 +12,16 @@ type AdminLayoutProps = {
 };
 
 const adminStylesheets = [
-  '/legacy/visitor/visitorpage/assets/vendor/fonts/boxicons.css',
-  '/legacy/visitor/visitorpage/assets/vendor/css/core.css',
-  '/legacy/visitor/visitorpage/assets/vendor/css/theme-default.css',
-  '/legacy/visitor/visitorpage/assets/css/demo.css',
-  '/legacy/visitor/visitorpage/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css',
-  '/legacy/admin/assets1/css/bootstrap.min.css',
-  '/legacy/admin/assets1/css/plugins.min.css',
-  '/legacy/admin/assets1/css/kaiadmin.min.css',
-  '/legacy/admin/assets1/css/fonts.min.css',
-  '/legacy/admin/assets1/css/demo.css',
+  '/legacy/Active/visitor-boxicons.css',
+  '/legacy/Active/visitor-core.css',
+  '/legacy/Active/visitor-theme-default.css',
+  '/legacy/Active/visitor-demo.css',
+  '/legacy/Active/visitor-perfect-scrollbar.css',
+  '/legacy/Active/admin-bootstrap.min.css',
+  '/legacy/Active/admin-plugins.min.css',
+  '/legacy/Active/admin-kaiadmin.min.css',
+  '/legacy/Active/admin-fonts.min.css',
+  '/legacy/Active/admin-demo.css',
 ];
 
 const adminFontOverrides = `

@@ -1,0 +1,13 @@
+.timeline { display: grid; gap: 0; list-style: none; margin: 0 0 .65rem; padding: 0; }
+.timeline li { display: grid; grid-template-columns: 1fr auto; gap: 1rem; padding: .8rem 1rem .8rem 2.1rem; position: relative; border-left: 2px solid #e2e8f0; }
+.timeline li::before { background: #fff; border: 3px solid #94a3b8; border-radius: 50%; content: ''; height: 14px; left: -8px; position: absolute; top: 1rem; width: 14px; }
+.timeline li strong { color: #111; }
+.timeline li span { color: #64748b; text-align: right; }
+.timeline .complete { border-left-color: #3f8f2d; }
+.timeline .complete::before { border-color: #3f8f2d; background: #e8f7e1; }
+.timeline .current { border-left-color: #ff4a17; }
+.timeline .current::before { border-color: #ff4a17; background: #fff0eb; }
+.timeline .rejected { border-left-color: #b93812; }
+.timeline .rejected::before { border-color: #b93812; background: #ffe4df; }
+.timelineNote { color: #64748b; font-size: .78rem; margin: 0 0 1rem; }
+@media (max-width: 575px) { .timeline li { grid-template-columns: 1fr; gap: .2rem; } .timeline li span { text-align: left; } }

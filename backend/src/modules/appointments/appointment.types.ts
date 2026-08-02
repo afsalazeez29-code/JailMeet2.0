@@ -38,11 +38,11 @@ export type VisitorAppointmentResult = {
   createdAt: string;
   updatedAt: string;
   prisoner: Pick<PrisonerOption, 'publicId' | 'name' | 'profilePic'>;
+  hasPendingChangeRequest: boolean;
 };
 
 export type OfficerAppointmentResult = VisitorAppointmentResult & {
   visitor: {
-    id: string;
     publicId: string | null;
     name: string;
     phone: string;

@@ -3,6 +3,9 @@ import { Router } from 'express';
 
 import { authenticate } from '../../middlewares/auth.middleware';
 import { authorizeRoles } from '../../middlewares/role.middleware';
+import { registerAdminJailRuleRoutes } from '../jail-rules';
+import { registerAdminPrisonerSupportRoutes } from '../prisoner-support';
+import { registerAdminSupportRoutes } from '../support-requests';
 import * as adminController from './admin.controller';
 import {
   validateAppointmentListQuery,
@@ -76,5 +79,9 @@ adminRoutes.get(
   validateParoleListQuery,
   adminController.listParoleRequests,
 );
+
+registerAdminJailRuleRoutes(adminRoutes);
+registerAdminSupportRoutes(adminRoutes);
+registerAdminPrisonerSupportRoutes(adminRoutes);
 
 export default adminRoutes;
