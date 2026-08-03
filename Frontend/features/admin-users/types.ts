@@ -19,6 +19,7 @@ export type AdminUserListFilters = {
 export type AdminUser = {
   accountReference: string;
   publicId?: string | null;
+  profilePic?: string | null;
   name: string;
   email: string | null;
   role: AdminUserRole;
@@ -53,6 +54,10 @@ export type AdminVisitor = {
 
 export type AdminOfficer = {
   publicId: string | null;
+  profilePic: string | null;
+  designation: string | null;
+  department: string | null;
+  shift: string | null;
   medicalAccessLevel: 'NONE' | 'SUMMARY' | 'MANAGE';
   name: string;
   phone: string | null;

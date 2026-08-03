@@ -1,0 +1,12 @@
+.wrap { width: 100%; overflow-x: auto; padding: .2rem; }
+.table { min-width: 820px; border-collapse: separate; border-spacing: 0 .55rem; }
+.table thead th { border: 0; color: #4b5563; white-space: nowrap; }
+.table tbody tr { background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.05); transition: transform .18s ease, box-shadow .18s ease; }
+.table tbody tr:hover { transform: translateY(-1px); box-shadow: 0 5px 15px rgba(0,0,0,.09); }
+.table tbody td { border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; padding: .8rem; vertical-align: middle; overflow-wrap: break-word; }
+.table tbody td:first-child { border-left: 1px solid #e5e7eb; border-radius: 12px 0 0 12px; }
+.table tbody td:last-child { border-right: 1px solid #e5e7eb; border-radius: 0 12px 12px 0; }
+.identity { display: flex; align-items: center; gap: .7rem; min-width: 150px; }
+.avatar { width: 44px; height: 44px; flex: 0 0 auto; border-radius: 11px; object-fit: cover; background: #f3f4f6; }
+.actions { display: flex; flex-wrap: wrap; gap: .4rem; min-width: 160px; }
+@media (max-width: 640px) { .wrap { overflow: visible; padding: 0; } .table { min-width: 0; display: block; } .table thead { display: none; } .table tbody { display: grid; gap: .8rem; } .table tbody tr { display: grid; border: 1px solid #e5e7eb; border-radius: 12px; padding: .75rem; } .table tbody td, .table tbody td:first-child, .table tbody td:last-child { display: block; border: 0; border-bottom: 1px solid #f0f1f3; border-radius: 0; padding: .5rem 0; } .table tbody td:last-child { border-bottom: 0; } .actions > * { flex: 1 1 auto; } }

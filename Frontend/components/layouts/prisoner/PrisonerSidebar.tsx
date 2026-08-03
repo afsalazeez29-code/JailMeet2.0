@@ -94,14 +94,14 @@ export default function PrisonerSidebar({
       aria-label="Prisoner navigation"
     >
       <div className="app-brand demo">
-        <Link href="/prisoner/dashboard" className="app-brand-link" data-legacy-href="index.php">
+        <span className="app-brand-link">
           <img
             src="/images/logos/jmlogo.png"
             className="app-brand-logo"
             style={{ maxWidth: '180px', height: 'auto' }}
             alt="JailMeet"
           />
-        </Link>
+        </span>
         <button
           className="layout-menu-toggle menu-link text-large ms-auto d-xl-none border-0 bg-transparent p-0"
           type="button"

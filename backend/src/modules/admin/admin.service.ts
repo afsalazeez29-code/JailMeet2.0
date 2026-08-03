@@ -71,10 +71,10 @@ const safeUserSelect = {
   isActive: true,
   createdAt: true,
   updatedAt: true,
-  adminProfile: { select: { name: true } },
-  officerProfile: { select: { name: true, publicId: true } },
-  visitorProfile: { select: { name: true, publicId: true } },
-  prisonerProfile: { select: { name: true, publicId: true } },
+  adminProfile: { select: { name: true, profilePic: true } },
+  officerProfile: { select: { name: true, publicId: true, profilePic: true } },
+  visitorProfile: { select: { name: true, publicId: true, profilePic: true } },
+  prisonerProfile: { select: { name: true, publicId: true, profilePic: true } },
 };
 
 const toSafeUser = (user: {
@@ -84,13 +84,14 @@ const toSafeUser = (user: {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
-  adminProfile?: { name: string } | null;
-  officerProfile?: { name: string; publicId: string | null } | null;
-  visitorProfile?: { name: string; publicId: string | null } | null;
-  prisonerProfile?: { name: string; publicId: string | null } | null;
+  adminProfile?: { name: string; profilePic?: string | null } | null;
+  officerProfile?: { name: string; publicId: string | null; profilePic?: string | null } | null;
+  visitorProfile?: { name: string; publicId: string | null; profilePic?: string | null } | null;
+  prisonerProfile?: { name: string; publicId: string | null; profilePic?: string | null } | null;
 }): SafeAdminUser => ({
   accountReference: user.officerProfile?.publicId ?? user.visitorProfile?.publicId ?? user.prisonerProfile?.publicId ?? user.email ?? 'PROFILE-MISSING',
   publicId: user.officerProfile?.publicId ?? user.visitorProfile?.publicId ?? user.prisonerProfile?.publicId ?? null,
+  profilePic: user.adminProfile?.profilePic ?? user.officerProfile?.profilePic ?? user.visitorProfile?.profilePic ?? user.prisonerProfile?.profilePic ?? null,
   name: getProfileName(user),
   email: user.email,
   role: user.role,
@@ -363,6 +364,10 @@ export const listOfficers = async (query: ProfileListQuery) => {
         medicalAccessLevel: true,
         name: true,
         phone: true,
+        designation: true,
+        department: true,
+        shift: true,
+        profilePic: true,
         createdAt: true,
         updatedAt: true,
         user: { select: { email: true, isActive: true } },
@@ -383,6 +388,10 @@ export const getOfficerDetail = async (officerId: string) => {
       medicalAccessLevel: true,
       name: true,
       phone: true,
+      designation: true,
+      department: true,
+      shift: true,
+      profilePic: true,
       createdAt: true,
       updatedAt: true,
       user: { select: { email: true, role: true, isActive: true } },

@@ -3,6 +3,7 @@
 import { EmptyStateAlert } from '../../../components/common/StatusAlert';
 import { AdminUser } from '@features/admin-users/types';
 import Link from 'next/link';
+import styles from './AdminLists.module.css';
 
 type AdminUserTableProps = {
   users: AdminUser[];
@@ -25,8 +26,8 @@ export default function AdminUserTable({
   }
 
   return (
-    <div className="table-responsive">
-      <table className="table table-hover">
+    <div className={styles.wrap}>
+      <table className={styles.table}>
         <thead>
           <tr>
             <th>Name</th>
@@ -40,14 +41,14 @@ export default function AdminUserTable({
         <tbody>
           {users.map((user) => (
             <tr key={user.accountReference}>
-              <td>{user.name || 'Not provided'}</td>
+              <td><div className={styles.identity}><img alt="" className={styles.avatar} src={user.profilePic || '/images/avatars/visitor-default.png'}/><span>{user.name || 'Not provided'}<small className="d-block text-muted">{user.publicId || user.role}</small></span></div></td>
               <td>{user.email || 'No email'}</td>
               <td>{user.role}</td>
-              <td>
+              <td><div className={styles.actions}>
                 <span className={`badge ${user.isActive ? 'badge-success' : 'badge-danger'}`}>
                   {user.isActive ? 'Active' : 'Inactive'}
                 </span>
-              </td>
+              </div></td>
               <td>{formatDate(user.createdAt)}</td>
               <td>
                 <Link className="btn btn-info btn-sm mr-2" href={`/admin/users/${encodeURIComponent(user.accountReference)}`} onClick={() => onSelectUser(user)}>View</Link>

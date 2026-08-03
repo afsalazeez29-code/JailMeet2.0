@@ -30,7 +30,7 @@ export const healthDetail = withInputs((q, _r, u) => service.getHealthRecord(u, 
 export const createHealth = withInputs((q, _r, u) => service.createHealthRecord(u, q.params.publicId, q.body), 'Health record created', true);
 export const updateHealth = withInputs((q, _r, u) => service.updateHealthRecord(u, q.params.recordReference, q.body), 'Health record updated');
 export const archiveHealth = withInputs((q, _r, u) => service.archiveHealthRecord(u, q.params.recordReference, q.body.reason), 'Health record archived');
-export const search = withInputs((_q, r, u) => service.officerSearch(u, r.locals.validatedQuery.q, r.locals.validatedQuery.limit), 'Search results fetched');
+export const search = withInputs((_q, r, u) => service.officerSafeSearch(u, r.locals.validatedQuery.q, r.locals.validatedQuery.limit), 'Search results fetched');
 export const activity = withInputs((_q, r, u) => service.officerActivity(u, r.locals.validatedQuery), 'Officer activity fetched');
 export const support = withInputs((_q, _r, u) => service.listEscalatedSupport(u), 'Escalated support fetched');
 export const supportResponse = withInputs((q, _r, u) => service.respondEscalatedSupport(u, q.params.requestId, q.body), 'Officer response saved');

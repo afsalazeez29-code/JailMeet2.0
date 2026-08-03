@@ -14,7 +14,6 @@ import {
 
 export const getAdminDashboard = async (adminUserId: string): Promise<AdminDashboardSummary> => {
   const [
-    activeAdminProfiles,
     activeVisitorAccounts,
     activeVisitorsWithProfiles,
     activeOfficerAccounts,
@@ -37,7 +36,6 @@ export const getAdminDashboard = async (adminUserId: string): Promise<AdminDashb
     officerWorkload,
     recentSecurityWarnings,
   ] = await prisma.$transaction([
-    prisma.adminProfile.count({ where: { user: { role: Role.ADMIN, isActive: true } } }),
     prisma.user.count({ where: { role: Role.VISITOR, isActive: true } }),
     prisma.visitorProfile.count({ where: { user: { role: Role.VISITOR, isActive: true } } }),
     prisma.user.count({ where: { role: Role.OFFICER, isActive: true } }),
@@ -66,7 +64,7 @@ export const getAdminDashboard = async (adminUserId: string): Promise<AdminDashb
   ]);
 
   return {
-    totalActiveValidAccounts: activeAdminProfiles + activeVisitorsWithProfiles + activeOfficersWithProfiles + activePrisonersWithProfiles,
+    totalActiveValidAccounts: activeVisitorAccounts + activeOfficerAccounts + activePrisonerAccounts,
     activeVisitorAccounts,
     activeVisitorsWithProfiles,
     activeOfficerAccounts,

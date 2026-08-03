@@ -678,17 +678,37 @@
 }
 
 .dashboardRoot {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  height: 100dvh;
+  min-height: 100dvh !important;
+  display: grid !important;
+  grid-template-rows: minmax(0, 1fr) auto;
+  overflow: hidden;
 }
 
 .dashboardBody {
   flex: 1 1 auto;
-  min-height: 0;
+  min-width: 0;
+  min-height: 0 !important;
+  overflow: hidden;
 }
 
 .mainContent {
   flex: 1 1 auto;
   min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.dashboardRoot :global(.layout-page) {
+  height: 100%;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.dashboardRoot :global(.content-wrapper) {
+  height: auto;
+  min-height: 0 !important;
+  overflow: hidden !important;
 }

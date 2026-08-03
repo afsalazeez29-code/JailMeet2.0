@@ -109,15 +109,15 @@ export default function AdminJailRulesScreen() {
         </select>
       </label>
       <div className={styles.actions}>
-        <button className="btn btn-outline-primary" type="button" onClick={() => setPreviewAudience('VISITOR')}>Preview as Visitor</button>
-        <button className="btn btn-outline-primary" type="button" onClick={() => setPreviewAudience('PRISONER')}>Preview as Prisoner</button>
+        <button className={styles.adminRuleButton} type="button" onClick={() => setPreviewAudience('VISITOR')}>Preview as Visitor</button>
+        <button className={styles.adminRuleButton} type="button" onClick={() => setPreviewAudience('PRISONER')}>Preview as Prisoner</button>
       </div>
     </div>
     {previewAudience ? <section className={styles.card} aria-label={`${previewAudience} rule preview`}>
       <div className={styles.actions}><h2>{previewAudience === 'VISITOR' ? 'Visitor' : 'Prisoner'} preview</h2><button className="btn btn-outline-secondary btn-sm" type="button" onClick={() => setPreviewAudience(null)}>Close preview</button></div>
       {!previewRules.length ? <p>No active rules are visible to this audience.</p> : previewRules.map((rule) => <article key={rule.reference}><strong>{rule.title}</strong><p>{rule.content}</p></article>)}
     </section> : null}
-    <div className={styles.twoColumns}>
+    <div className={styles.ruleStack}>
       <section className={styles.card}>
         <h2>{editing ? 'Edit Rule' : 'Create Rule'}</h2>
         <form className={styles.form} onSubmit={submit}>
@@ -128,7 +128,7 @@ export default function AdminJailRulesScreen() {
           <label className={styles.field}>Display order<input min={0} type="number" value={form.sortOrder} onChange={(event) => setForm({ ...form, sortOrder: Number(event.target.value) })} /></label>
           <label><input checked={form.isActive} type="checkbox" onChange={(event) => setForm({ ...form, isActive: event.target.checked })} /> Active</label>
           <div className={styles.actions}>
-            <button className="btn btn-primary" type="submit">Save Rule</button>
+            <button className={styles.adminRuleButton} type="submit">{editing ? 'Update Rule' : 'Create Rule'}</button>
             {editing ? <button className="btn btn-outline-secondary" type="button" onClick={() => { setEditing(null); setForm(empty); }}>Cancel</button> : null}
           </div>
         </form>
@@ -140,9 +140,9 @@ export default function AdminJailRulesScreen() {
             <p className={styles.ruleCategory}>{rule.reference} · {rule.audience} · {rule.category}</p>
             <h2>{rule.title}</h2><p>{rule.content}</p><p>Status: {rule.isActive ? 'Active' : 'Inactive'}</p>
             <div className={styles.actions}>
-              <button className="btn btn-outline-primary btn-sm" type="button" onClick={() => { setEditing(rule.reference); setForm({ title: rule.title, category: rule.category, content: rule.content, sortOrder: rule.sortOrder, isActive: rule.isActive, audience: rule.audience }); }}>Edit</button>
-              <button className="btn btn-outline-secondary btn-sm" type="button" onClick={() => void updateJailRule(rule.reference, { isActive: !rule.isActive }).then(load).catch(() => setError('Unable to update Jail Rule'))}>{rule.isActive ? 'Deactivate' : 'Activate'}</button>
-              <Link className="btn btn-outline-secondary btn-sm" href={`/admin/audit-logs?entityReference=${encodeURIComponent(rule.reference)}`}>Audit history</Link>
+              <button className={styles.adminRuleButton} type="button" onClick={() => { setEditing(rule.reference); setForm({ title: rule.title, category: rule.category, content: rule.content, sortOrder: rule.sortOrder, isActive: rule.isActive, audience: rule.audience }); }}>Edit</button>
+              <button className={styles.adminRuleButton} type="button" onClick={() => void updateJailRule(rule.reference, { isActive: !rule.isActive }).then(load).catch(() => setError('Unable to update Jail Rule'))}>{rule.isActive ? 'Deactivate' : 'Activate'}</button>
+              <Link className={styles.adminRuleButton} href={`/admin/audit-logs?entityReference=${encodeURIComponent(rule.reference)}`}>Audit History</Link>
             </div>
           </article>)}
         </div>}

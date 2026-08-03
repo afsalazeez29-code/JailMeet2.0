@@ -3,6 +3,7 @@
 import { EmptyStateAlert } from '../../../components/common/StatusAlert';
 import Link from 'next/link';
 import { AdminPrisoner } from '@features/admin-users/types';
+import styles from './AdminLists.module.css';
 
 type Props = {
   prisoners: AdminPrisoner[];
@@ -15,13 +16,13 @@ const formatDate = (value: string) =>
 export default function AdminPrisonerTable({ onToggleStatus, prisoners }: Props) {
   if (prisoners.length === 0) return <EmptyStateAlert className="mb-0">No prisoners found.</EmptyStateAlert>;
   return (
-    <div className="table-responsive">
-      <table className="table table-hover">
+    <div className={styles.wrap}>
+      <table className={styles.table}>
         <thead><tr><th>Name</th><th>Public ID</th><th>Email</th><th>Assigned Officer</th><th>Age</th><th>Gender</th><th>Jail</th><th>Cell</th><th>Status</th><th>Created</th><th>Action</th></tr></thead>
         <tbody>
           {prisoners.map((prisoner) => (
             <tr key={prisoner.publicId ?? prisoner.user.email ?? prisoner.name}>
-              <td>{prisoner.name}</td><td>{prisoner.publicId || 'ID unavailable'}</td><td>{prisoner.user.email}</td><td>{prisoner.assignedOfficer ? `${prisoner.assignedOfficer.name} (${prisoner.assignedOfficer.publicId || 'ID unavailable'})` : 'Unassigned'}</td><td>{prisoner.age}</td><td>{prisoner.gender}</td><td>{prisoner.jailName || 'N/A'}</td><td>{prisoner.cellNumber || 'N/A'}</td>
+              <td><div className={styles.identity}><img alt="" className={styles.avatar} src={prisoner.profilePic || '/images/avatars/prisoner-default.PNG'}/><span>{prisoner.name}</span></div></td><td>{prisoner.publicId || 'ID unavailable'}</td><td>{prisoner.user.email}</td><td>{prisoner.assignedOfficer ? `${prisoner.assignedOfficer.name} (${prisoner.assignedOfficer.publicId || 'ID unavailable'})` : 'Unassigned'}</td><td>{prisoner.age}</td><td>{prisoner.gender}</td><td>{prisoner.jailName || 'N/A'}</td><td>{prisoner.cellNumber || 'N/A'}</td>
               <td><span className={`badge ${prisoner.user.isActive ? 'badge-success' : 'badge-danger'}`}>{prisoner.user.isActive ? 'Active' : 'Inactive'}</span></td>
               <td>{formatDate(prisoner.createdAt)}</td>
               <td>

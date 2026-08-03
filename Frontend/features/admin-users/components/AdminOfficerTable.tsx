@@ -3,6 +3,7 @@
 import { EmptyStateAlert } from '../../../components/common/StatusAlert';
 import Link from 'next/link';
 import { AdminOfficer } from '@features/admin-users/types';
+import styles from './AdminLists.module.css';
 
 type Props = {
   officers: AdminOfficer[];
@@ -15,13 +16,13 @@ const formatDate = (value: string) =>
 export default function AdminOfficerTable({ officers, onToggleStatus }: Props) {
   if (officers.length === 0) return <EmptyStateAlert className="mb-0">No officers found.</EmptyStateAlert>;
   return (
-    <div className="table-responsive">
-      <table className="table table-hover">
+    <div className={styles.wrap}>
+      <table className={styles.table}>
         <thead><tr><th>Name</th><th>Public ID</th><th>Email</th><th>Phone</th><th>Workload</th><th>Medical access</th><th>Status</th><th>Created</th><th>Action</th></tr></thead>
         <tbody>
           {officers.map((officer) => (
             <tr key={officer.publicId ?? officer.user.email ?? officer.name}>
-              <td>{officer.name}</td><td>{officer.publicId || 'ID unavailable'}</td><td>{officer.user.email}</td><td>{officer.phone || 'N/A'}</td><td>{officer._count.assignedPrisoners} Prisoners</td><td>{officer.medicalAccessLevel}</td>
+              <td><div className={styles.identity}><img alt="" className={styles.avatar} src={officer.profilePic || '/images/avatars/officer-default.PNG'}/><span>{officer.name}<small className="d-block text-muted">{officer.department || officer.designation || 'Officer'}</small></span></div></td><td>{officer.publicId || 'ID unavailable'}</td><td>{officer.user.email}</td><td>{officer.phone || 'N/A'}</td><td>{officer._count.assignedPrisoners} Prisoners</td><td>{officer.medicalAccessLevel}</td>
               <td><span className={`badge ${officer.user.isActive ? 'badge-success' : 'badge-danger'}`}>{officer.user.isActive ? 'Active' : 'Inactive'}</span></td>
               <td>{formatDate(officer.createdAt)}</td>
               <td>

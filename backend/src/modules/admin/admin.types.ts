@@ -32,6 +32,7 @@ export type PaginatedResult<T> = {
 export type SafeAdminUser = {
   accountReference: string;
   publicId: string | null;
+  profilePic: string | null;
   name: string;
   email: string | null;
   role: Role;

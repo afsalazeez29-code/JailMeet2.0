@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { LogOut, WalletCards } from 'lucide-react';
@@ -43,9 +42,9 @@ export default function PrisonerNavbar({
         id="layout-navbar"
         aria-label="Prisoner top navigation"
       >
-        <Link href="/" className="d-none d-xl-flex align-items-center me-3 ms-xl-0">
-          <img src="/images/logos/auth-logo.png" alt="JailMeet home" className="navbar-brand-logo" />
-        </Link>
+        <span className="d-none d-xl-flex align-items-center me-3 ms-xl-0">
+          <img src="/images/logos/auth-logo.png" alt="JailMeet" className="navbar-brand-logo" />
+        </span>
 
         <button
           className={`d-flex d-xl-none align-items-center border-0 bg-transparent p-0 ms-1 me-3 ${s.mobileLogoButton}`}
@@ -61,7 +60,7 @@ export default function PrisonerNavbar({
         <div className={`navbar-nav-right d-flex align-items-center ${s.navbarNavRight}`} id="navbar-collapse">
           <ul className="navbar-nav flex-row align-items-center ms-auto">
             <li className={`nav-item ${s.profileActions}`}>
-              <NotificationBell defaultHref="/prisoner/dashboard" />
+              <NotificationBell defaultHref="/prisoner/dashboard" variant="prisoner" />
               <PrisonerProfilePill
                 displayName={displayName}
                 avatarSrc={user?.profileImageUrl || fallbackPrisonerImage}

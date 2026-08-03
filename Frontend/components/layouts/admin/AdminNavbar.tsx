@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { LogOut } from 'lucide-react';
@@ -44,9 +43,9 @@ export default function AdminNavbar({
         id="layout-navbar"
         aria-label="Admin top navigation"
       >
-        <Link href="/" className="d-none d-xl-flex align-items-center me-3 ms-xl-0">
-          <img src="/images/logos/auth-logo.png" alt="JailMeet home" className="navbar-brand-logo" />
-        </Link>
+        <span className="d-none d-xl-flex align-items-center me-3 ms-xl-0">
+          <img src="/images/logos/auth-logo.png" alt="JailMeet" className="navbar-brand-logo" />
+        </span>
 
         <button
           className={`d-flex d-xl-none align-items-center border-0 bg-transparent p-0 ms-1 me-3 ${s.mobileLogoButton}`}
@@ -64,7 +63,7 @@ export default function AdminNavbar({
         <div className={`navbar-nav-right d-flex align-items-center ${s.navbarNavRight}`} id="navbar-collapse">
           <ul className="navbar-nav flex-row align-items-center ms-auto">
             <li className={`nav-item ${s.profileActions}`}>
-              <NotificationBell defaultHref="/admin/dashboard" />
+              <NotificationBell defaultHref="/admin/dashboard" variant="admin" />
               <AdminProfilePill displayName={displayName} avatarSrc={user?.profileImageUrl || fallbackAdminImage} />
               <button
                 className={s.logoutButton}

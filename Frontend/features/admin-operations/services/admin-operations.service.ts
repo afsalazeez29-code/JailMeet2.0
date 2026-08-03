@@ -7,7 +7,7 @@ const queryString = (values: Record<string, string | number | boolean | undefine
 };
 
 export type Page<T> = { items: T[]; pagination: { page: number; limit: number; totalItems: number; totalPages: number } };
-export type SearchItem = { type: string; reference: string; title: string; subtitle: string | null; href: string };
+export type SearchItem = { type: string; role?: string; reference: string; title: string; subtitle: string | null; imageUrl?: string | null; isActive?: boolean; href: string };
 export type SearchData = { groups: Array<{ type: string; items: SearchItem[] }>; pagination: Page<never>['pagination'] };
 export type IntegrityIssue = { key: string; type: string; severity: 'HIGH' | 'MEDIUM' | 'LOW'; identity: string; role?: string; summary: string; repairTypes: string[] };
 export type IntegrityData = { scannedAt: string; counts: { total: number; high: number; medium: number; low: number }; issues: IntegrityIssue[]; migration: { expected: string; deploymentRequired: boolean } };

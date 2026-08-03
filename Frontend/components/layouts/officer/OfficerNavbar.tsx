@@ -1,18 +1,17 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { LogOut } from 'lucide-react';
 
 import LogoutConfirmModal from '../../common/LogoutConfirmModal';
-import NavbarSearch from '../../common/NavbarSearch';
 import iconStyles from '../../common/LucideIcon.module.css';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
 import { clearAccessToken } from '@features/auth/services/token.service';
 import OfficerProfilePill from './OfficerProfilePill';
 import NotificationBell from '@features/visitor-services/components/NotificationBell';
+import OfficerNavbarSearch from '@features/officer-operations/OfficerNavbarSearch';
 import s from './OfficerTheme.module.css';
 
 type OfficerNavbarProps = {
@@ -28,7 +27,6 @@ export default function OfficerNavbar({
 }: OfficerNavbarProps) {
   const router = useRouter();
   const { user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState('');
   const [logoutOpen, setLogoutOpen] = useState(false);
 
   const handleLogout = () => {
@@ -36,10 +34,6 @@ export default function OfficerNavbar({
     navigateToLogin(router, 'push');
   };
 
-  const handleSearch = (value: string) => {
-    const query = value.trim();
-    if (query.length >= 2) router.push(`/officer/search?q=${encodeURIComponent(query)}`);
-  };
 
   return (
     <>
@@ -48,9 +42,9 @@ export default function OfficerNavbar({
         id="layout-navbar"
         aria-label="Officer top navigation"
       >
-        <Link href="/" className="d-none d-xl-flex align-items-center me-3 ms-xl-0">
-          <img src="/images/logos/auth-logo.png" alt="JailMeet home" className="navbar-brand-logo" />
-        </Link>
+        <span className="d-none d-xl-flex align-items-center me-3 ms-xl-0">
+          <img src="/images/logos/auth-logo.png" alt="JailMeet" className="navbar-brand-logo" />
+        </span>
 
         <button
           className={`d-flex d-xl-none align-items-center border-0 bg-transparent p-0 ms-1 me-3 ${s.mobileLogoButton}`}
@@ -63,17 +57,12 @@ export default function OfficerNavbar({
           <img src="/images/logos/auth-logo.png" alt="" className="navbar-brand-logo" aria-hidden="true" />
         </button>
 
-        <NavbarSearch
-          value={searchQuery}
-          onChange={setSearchQuery}
-          onSubmit={handleSearch}
-          placeholder="Search"
-        />
+        <OfficerNavbarSearch />
 
         <div className={`navbar-nav-right d-flex align-items-center ${s.navbarNavRight}`} id="navbar-collapse">
           <ul className="navbar-nav flex-row align-items-center ms-auto">
             <li className={`nav-item ${s.profileActions}`}>
-              <NotificationBell defaultHref="/officer/dashboard" />
+              <NotificationBell defaultHref="/officer/dashboard" variant="officer" />
               <OfficerProfilePill displayName={user?.name ?? 'Officer'} avatarSrc={user?.profileImageUrl || fallbackOfficerImage} />
               <button
                 className={s.logoutButton}

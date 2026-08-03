@@ -100,14 +100,14 @@ export default function OfficerSidebar({ onCloseSidebar }: OfficerSidebarProps) 
       aria-label="Officer navigation"
     >
       <div className="app-brand demo">
-        <Link href="/" className="app-brand-link" aria-label="JailMeet home">
+        <span className="app-brand-link">
           <img
             src="/images/logos/jmlogo.png"
             alt="JailMeet"
             className="app-brand-logo"
             style={{ maxWidth: '180px', height: 'auto' }}
           />
-        </Link>
+        </span>
         <button
           className="layout-menu-toggle menu-link text-large ms-auto d-xl-none border-0 bg-transparent p-0"
           type="button"

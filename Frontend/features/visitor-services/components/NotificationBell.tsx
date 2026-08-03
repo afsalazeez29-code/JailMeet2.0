@@ -26,7 +26,7 @@ const relativeTime = (value: string) => {
 const safeInternalHref = (value: string | null, fallback: string) =>
   value && /^\/(admin|officer|visitor|prisoner)(\/|$)/.test(value) ? value : fallback;
 
-export default function NotificationBell({ defaultHref = '/visitor/dashboard' }: { defaultHref?: string }) {
+export default function NotificationBell({ defaultHref = '/visitor/dashboard', variant = 'visitor' }: { defaultHref?: string; variant?: 'admin' | 'officer' | 'visitor' | 'prisoner' }) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -104,7 +104,7 @@ export default function NotificationBell({ defaultHref = '/visitor/dashboard' }:
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label={unreadCount ? `Notifications, ${unreadCount} unread` : 'Notifications'}
-        className={styles.button}
+        className={`${styles.button} ${styles[variant]}`}
         onClick={() => setOpen((value) => !value)}
         type="button"
       >

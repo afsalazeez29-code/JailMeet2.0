@@ -3,6 +3,11 @@
 .subheading { color: #697a8d; margin: 0 0 1.25rem; }
 .grid { display: grid; gap: 1rem; }
 .twoColumns { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ruleStack { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); }
+.adminRuleButton { display: inline-flex; align-items: center; justify-content: center; border: 1px solid #36255c; border-radius: 999px; background: #36255c; color: #fff; padding: .58rem .9rem; text-decoration: none; transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.adminRuleButton:hover, .adminRuleButton:focus-visible { background: #4b3777; color: #fff; box-shadow: 0 4px 12px rgba(54,37,92,.24); }
+.adminRuleButton:focus-visible { outline: 3px solid rgba(54,37,92,.25); outline-offset: 2px; }
+.adminRuleButton:disabled { opacity: .55; cursor: not-allowed; }
 .card { background: #fff; border: 1px solid #e7e7ea; border-radius: 14px; box-shadow: 0 4px 18px rgba(28,31,36,.06); padding: 1.1rem; min-width: 0; }
 .cardHeader { align-items: flex-start; display: flex; gap: 1rem; justify-content: space-between; margin-bottom: .9rem; }
 .identity { align-items: center; display: flex; gap: .85rem; min-width: 0; }
