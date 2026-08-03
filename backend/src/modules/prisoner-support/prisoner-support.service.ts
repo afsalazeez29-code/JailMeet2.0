@@ -1,4 +1,5 @@
 import {
+  ActionType,
   Prisma,
   PrisonerSupportCategory,
   SupportRequestStatus,
@@ -10,6 +11,8 @@ import {
   getPermanentAdminRecipient,
 } from '../../utils/permanent-admin';
 import { createNotification } from '../notifications';
+import { createPublicReference } from '../../utils/public-reference';
+import { recordAudit } from '../audit';
 
 export class PrisonerSupportError extends Error {
   constructor(public statusCode: number, message: string) {
@@ -19,7 +22,7 @@ export class PrisonerSupportError extends Error {
 }
 
 const prisonerSelect = {
-  id: true,
+  reference: true,
   category: true,
   subject: true,
   message: true,
@@ -33,10 +36,14 @@ const prisonerSelect = {
 const adminSelect = {
   ...prisonerSelect,
   prisoner: { select: { publicId: true, name: true } },
+  escalatedToOfficer: { select: { publicId: true, name: true } },
+  escalatedAt: true,
+  officerHandledAt: true,
+  officerResponse: true,
 } as const;
 
 const mapRequest = (item: {
-  id: string;
+  reference: string;
   category: PrisonerSupportCategory;
   subject: string;
   message: string;
@@ -46,11 +53,17 @@ const mapRequest = (item: {
   createdAt: Date;
   updatedAt: Date;
   prisoner?: { publicId: string | null; name: string };
+  escalatedToOfficer?: { publicId: string | null; name: string } | null;
+  escalatedAt?: Date | null;
+  officerHandledAt?: Date | null;
+  officerResponse?: string | null;
 }) => ({
   ...item,
   resolvedAt: item.resolvedAt?.toISOString() ?? null,
   createdAt: item.createdAt.toISOString(),
   updatedAt: item.updatedAt.toISOString(),
+  escalatedAt: item.escalatedAt?.toISOString() ?? null,
+  officerHandledAt: item.officerHandledAt?.toISOString() ?? null,
 });
 
 const pagination = (page: number, limit: number, totalItems: number) => ({
@@ -77,7 +90,7 @@ export const createPrisonerSupportRequest = async (
   if (!admin?.adminProfile) throw new PrisonerSupportError(503, 'Permanent Admin is unavailable');
 
   const request = await tx.prisonerSupportRequest.create({
-    data: { ...input, prisonerProfileId: prisoner.id },
+    data: { ...input, reference: createPublicReference('PSR'), prisonerProfileId: prisoner.id },
     select: prisonerSelect,
   });
 
@@ -128,7 +141,7 @@ export const getPrisonerSupportRequest = async (
   requestId: string,
 ) => {
   const item = await prisma.prisonerSupportRequest.findFirst({
-    where: { id: requestId, prisoner: { userId } },
+    where: { reference: requestId, prisoner: { userId } },
     select: prisonerSelect,
   });
   if (!item) throw new PrisonerSupportError(404, 'Support request not found');
@@ -175,7 +188,7 @@ export const getAdminPrisonerSupportRequest = async (
     throw new PrisonerSupportError(403, 'Permanent Admin access required');
   }
   const item = await prisma.prisonerSupportRequest.findUnique({
-    where: { id: requestId },
+    where: { reference: requestId },
     select: adminSelect,
   });
   if (!item) throw new PrisonerSupportError(404, 'Support request not found');
@@ -190,7 +203,7 @@ export const updateAdminPrisonerSupportRequest = async (
   const admin = await getPermanentAdminProfile(userId, tx);
   if (!admin) throw new PrisonerSupportError(403, 'Permanent Admin access required');
   const request = await tx.prisonerSupportRequest.findUnique({
-    where: { id: requestId },
+    where: { reference: requestId },
     select: {
       status: true,
       adminReply: true,
@@ -202,7 +215,7 @@ export const updateAdminPrisonerSupportRequest = async (
   const replyChanged = input.adminReply !== undefined && input.adminReply !== request.adminReply;
   const statusChanged = input.status !== request.status;
   const updated = await tx.prisonerSupportRequest.update({
-    where: { id: requestId },
+    where: { reference: requestId },
     data: {
       status: input.status,
       ...(input.adminReply !== undefined
@@ -226,6 +239,8 @@ export const updateAdminPrisonerSupportRequest = async (
       link: '/prisoner/support',
     }, tx);
   }
+
+  await recordAudit({ userId, action: ActionType.UPDATE, entity: 'PrisonerSupportRequest', entityReference: requestId, result: 'SUCCESS', summary: `Prisoner Support status changed to ${input.status}; reply changed: ${replyChanged ? 'yes' : 'no'}.` }, tx);
 
   return mapRequest(updated);
 });

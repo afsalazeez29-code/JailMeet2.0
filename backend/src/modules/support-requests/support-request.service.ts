@@ -1,8 +1,10 @@
-import { Prisma, SupportCategory, SupportRequestStatus } from '@prisma/client';
+import { ActionType, Prisma, SupportCategory, SupportRequestStatus } from '@prisma/client';
 
 import prisma from '../../config/prisma';
-import { getPermanentAdminProfile } from '../../utils/permanent-admin';
+import { getPermanentAdminProfile, getPermanentAdminRecipient } from '../../utils/permanent-admin';
 import { createNotification } from '../notifications';
+import { createPublicReference } from '../../utils/public-reference';
+import { recordAudit } from '../audit';
 
 export class SupportRequestError extends Error {
   constructor(public statusCode: number, message: string) {
@@ -12,7 +14,7 @@ export class SupportRequestError extends Error {
 }
 
 const visitorSelect = {
-  id: true,
+  reference: true,
   category: true,
   subject: true,
   message: true,
@@ -29,7 +31,7 @@ const adminSelect = {
 } as const;
 
 const mapRequest = (item: {
-  id: string; category: SupportCategory; subject: string; message: string;
+  reference: string; category: SupportCategory; subject: string; message: string;
   status: SupportRequestStatus; adminReply: string | null; resolvedAt: Date | null;
   createdAt: Date; updatedAt: Date; visitor?: { publicId: string | null; name: string };
 }) => ({
@@ -49,10 +51,13 @@ export const createVisitorSupportRequest = async (
 ) => {
   const visitor = await prisma.visitorProfile.findUnique({ where: { userId }, select: { id: true } });
   if (!visitor) throw new SupportRequestError(404, 'Visitor profile not found');
-  return mapRequest(await prisma.supportRequest.create({
-    data: { ...input, visitorId: visitor.id },
-    select: visitorSelect,
-  }));
+  return prisma.$transaction(async (tx) => {
+    const reference = createPublicReference('SUP');
+    const item = await tx.supportRequest.create({ data: { ...input, reference, visitorId: visitor.id }, select: visitorSelect });
+    const admin = await getPermanentAdminRecipient(tx);
+    if (admin) await createNotification({ userId: admin.id, type: 'VISITOR_SUPPORT_RECEIVED', title: 'New Visitor support request', message: `A new Visitor support request (${reference}) requires review.`, link: `/admin/support-requests?reference=${reference}`, dedupeKey: `VISITOR_SUPPORT_RECEIVED:${reference}` }, tx);
+    return mapRequest(item);
+  });
 };
 
 export const listVisitorSupportRequests = async (userId: string, page: number, limit: number) => {
@@ -65,7 +70,7 @@ export const listVisitorSupportRequests = async (userId: string, page: number, l
 };
 
 export const getVisitorSupportRequest = async (userId: string, requestId: string) => {
-  const item = await prisma.supportRequest.findFirst({ where: { id: requestId, visitor: { userId } }, select: visitorSelect });
+  const item = await prisma.supportRequest.findFirst({ where: { reference: requestId, visitor: { userId } }, select: visitorSelect });
   if (!item) throw new SupportRequestError(404, 'Support request not found');
   return mapRequest(item);
 };
@@ -88,7 +93,7 @@ export const listAdminSupportRequests = async (
 
 export const getAdminSupportRequest = async (userId: string, requestId: string) => {
   if (!(await getPermanentAdminProfile(userId))) throw new SupportRequestError(403, 'Permanent Admin access required');
-  const item = await prisma.supportRequest.findUnique({ where: { id: requestId }, select: adminSelect });
+  const item = await prisma.supportRequest.findUnique({ where: { reference: requestId }, select: adminSelect });
   if (!item) throw new SupportRequestError(404, 'Support request not found');
   return mapRequest(item);
 };
@@ -101,8 +106,8 @@ export const updateAdminSupportRequest = async (
   const [admin, request] = await Promise.all([
     getPermanentAdminProfile(userId, tx),
     tx.supportRequest.findUnique({
-      where: { id: requestId },
-      select: { id: true, status: true, adminReply: true, visitor: { select: { userId: true } } },
+      where: { reference: requestId },
+      select: { reference: true, status: true, adminReply: true, visitor: { select: { userId: true } } },
     }),
   ]);
   if (!admin) throw new SupportRequestError(403, 'Permanent Admin access required');
@@ -111,7 +116,7 @@ export const updateAdminSupportRequest = async (
   const replyChanged = input.adminReply !== undefined && input.adminReply !== request.adminReply;
   const statusChanged = input.status !== request.status;
   const updated = await tx.supportRequest.update({
-    where: { id: requestId },
+    where: { reference: requestId },
     data: {
       status: input.status,
       ...(input.adminReply !== undefined ? { adminReply: input.adminReply, repliedByAdminId: admin.id } : {}),
@@ -131,5 +136,6 @@ export const updateAdminSupportRequest = async (
       link: '/visitor/support',
     }, tx);
   }
+  await recordAudit({ userId, action: ActionType.UPDATE, entity: 'SupportRequest', entityReference: request.reference, result: 'SUCCESS', summary: `Visitor Support status changed to ${input.status}; reply changed: ${replyChanged ? 'yes' : 'no'}.` }, tx);
   return mapRequest(updated);
 });

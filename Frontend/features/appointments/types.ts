@@ -51,26 +51,32 @@ export type VisitorAppointment = {
   hasPendingChangeRequest: boolean;
 };
 
-export type OfficerAppointment = VisitorAppointment & {
+export type OfficerAppointment = Omit<VisitorAppointment, 'id'> & {
+  reference: string;
+  reviewedAt: string | null;
+  passStatus: string | null;
+  reviewer: { publicId: string | null; name: string } | null;
   visitor: {
     publicId: string | null;
     name: string;
-    phone: string;
   };
 };
 
 export type AdminAppointment = {
-  id: string;
+  reference: string;
   relationship: string;
   message: string | null;
   requestedDate: string;
   status: AppointmentStatus;
   replyMessage: string | null;
+  reviewedAt: string | null;
   createdAt: string;
   updatedAt: string;
-  visitor: { id: string; publicId: string | null; name: string; phone: string };
-  prisoner: { id: string; name: string };
-  officer: { id: string; name: string } | null;
+  visitor: { publicId: string | null; name: string };
+  prisoner: { publicId: string | null; name: string };
+  officer: { publicId: string | null; name: string } | null;
+  visitPass: { status: string; checkedInAt: string | null; checkedInByOfficer: { publicId: string | null; name: string } | null } | null;
+  changeRequests: Array<{ reference: string; status: string; reviewedAt: string | null }>;
 };
 
 export type ReviewAppointmentInput = {

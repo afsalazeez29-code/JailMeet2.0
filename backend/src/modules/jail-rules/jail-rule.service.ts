@@ -1,8 +1,10 @@
-import { JailRuleAudience, Prisma } from '@prisma/client';
+import { ActionType, JailRuleAudience, Prisma } from '@prisma/client';
 
 import prisma from '../../config/prisma';
 import { getPermanentAdminProfile } from '../../utils/permanent-admin';
 import { createNotifications } from '../notifications';
+import { createPublicReference } from '../../utils/public-reference';
+import { recordAudit } from '../audit';
 
 export class JailRuleError extends Error {
   constructor(public statusCode: number, message: string) {
@@ -12,7 +14,7 @@ export class JailRuleError extends Error {
 }
 
 const ruleSelect = {
-  id: true,
+  reference: true,
   title: true,
   content: true,
   category: true,
@@ -24,7 +26,7 @@ const ruleSelect = {
 } as const;
 
 const mapRule = (rule: {
-  id: string;
+  reference: string;
   title: string;
   content: string;
   category: string;
@@ -101,10 +103,11 @@ type RuleInput = {
 export const createJailRule = async (userId: string, input: RuleInput) => {
   await requirePermanentAdmin(userId);
   return prisma.$transaction(async (tx) => {
-    const rule = await tx.jailRule.create({ data: input, select: ruleSelect });
+    const rule = await tx.jailRule.create({ data: { ...input, reference: createPublicReference('RUL') }, select: ruleSelect });
     if (isPrisonerVisible(rule.audience, rule.isActive)) {
       await notifyPrisoners(rule.title, tx);
     }
+    await recordAudit({ userId, action: ActionType.CREATE, entity: 'JailRule', entityReference: rule.reference, result: 'SUCCESS', summary: `Jail Rule created for ${rule.audience}; publication state ${rule.isActive ? 'active' : 'inactive'}.` }, tx);
     return mapRule(rule);
   });
 };
@@ -117,13 +120,13 @@ export const updateJailRule = async (
   await requirePermanentAdmin(userId);
   return prisma.$transaction(async (tx) => {
     const existing = await tx.jailRule.findUnique({
-      where: { id: ruleId },
+      where: { reference: ruleId },
       select: { audience: true, isActive: true },
     });
     if (!existing) throw new JailRuleError(404, 'Jail rule not found');
 
     const updated = await tx.jailRule.update({
-      where: { id: ruleId },
+      where: { reference: ruleId },
       data: input,
       select: ruleSelect,
     });
@@ -133,6 +136,7 @@ export const updateJailRule = async (
     ) {
       await notifyPrisoners(updated.title, tx);
     }
+    await recordAudit({ userId, action: ActionType.UPDATE, entity: 'JailRule', entityReference: updated.reference, result: 'SUCCESS', summary: `Jail Rule updated; publication state ${updated.isActive ? 'active' : 'inactive'}.` }, tx);
     return mapRule(updated);
   });
 };

@@ -75,7 +75,8 @@ export default function ParoleReviewModal({
                   id="replyMessage"
                   maxLength={1000}
                   onChange={(event) => setReplyMessage(event.target.value)}
-                  placeholder="Optional reply visible to prisoner"
+                  placeholder={action === 'REJECTED' ? 'Required rejection reason visible to prisoner' : 'Optional reply visible to prisoner'}
+                  required={action === 'REJECTED'}
                   rows={4}
                   value={replyMessage}
                 ></textarea>

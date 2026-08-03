@@ -14,11 +14,11 @@ export default function AdminAppointmentTable({ appointments }: Props) {
   return (
     <div className="table-responsive">
       <table className="table table-hover">
-        <thead><tr><th>Visitor</th><th>Prisoner</th><th>Requested</th><th>Relationship</th><th>Message</th><th>Status</th><th>Officer</th><th>Reply</th><th>Created</th></tr></thead>
+        <thead><tr><th>Reference</th><th>Visitor</th><th>Prisoner</th><th>Requested</th><th>Purpose</th><th>Status</th><th>Reviewer</th><th>VisitPass</th><th>Change outcome</th><th>Reply</th></tr></thead>
         <tbody>
           {appointments.map((appointment) => (
-            <tr key={appointment.id}>
-              <td>{appointment.visitor.name}<small className="d-block text-muted">{formatVisitorPublicId(appointment.visitor.publicId)}</small></td><td>{appointment.prisoner.name}</td><td>{formatDateTime(appointment.requestedDate)}</td><td>{appointment.relationship}</td><td>{appointment.message || 'N/A'}</td><td>{appointment.status}</td><td>{appointment.officer?.name || 'Not reviewed'}</td><td>{appointment.replyMessage || 'N/A'}</td><td>{formatDateTime(appointment.createdAt)}</td>
+            <tr key={appointment.reference}>
+              <td>{appointment.reference}</td><td>{appointment.visitor.name}<small className="d-block text-muted">{formatVisitorPublicId(appointment.visitor.publicId)}</small></td><td>{appointment.prisoner.name}<small className="d-block text-muted">{appointment.prisoner.publicId||'ID unavailable'}</small></td><td>{formatDateTime(appointment.requestedDate)}</td><td>{appointment.message || appointment.relationship}</td><td>{appointment.status}</td><td>{appointment.officer ? `${appointment.officer.name} (${appointment.officer.publicId||'ID unavailable'})` : 'Not reviewed'}</td><td>{appointment.visitPass?.status||'Not issued'}{appointment.visitPass?.checkedInAt?<small className="d-block">Checked in {formatDateTime(appointment.visitPass.checkedInAt)}</small>:null}</td><td>{appointment.changeRequests[0]?`${appointment.changeRequests[0].reference}: ${appointment.changeRequests[0].status}`:'None'}</td><td>{appointment.replyMessage || 'N/A'}</td>
             </tr>
           ))}
         </tbody>

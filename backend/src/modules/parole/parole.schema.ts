@@ -27,23 +27,30 @@ export const createParoleRequestSchema = z
 
 export const paroleStatusFilterSchema = z
   .object({
-    status: z.nativeEnum(ParoleStatus).optional(),
+    status: z.union([z.nativeEnum(ParoleStatus), z.literal('ALL')]).default(ParoleStatus.PENDING),
+    search: z.string().trim().max(100).optional(),
+    dateFrom: z.string().datetime().optional(),
+    dateTo: z.string().datetime().optional(),
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(50).default(20),
   })
-  .strict();
+  .strict()
+  .refine((value) => !value.dateFrom || !value.dateTo || new Date(value.dateFrom) <= new Date(value.dateTo), { message: 'dateFrom must be before dateTo' });
 
 export const reviewParoleRequestSchema = z
   .object({
     status: z.enum([ParoleStatus.ACCEPTED, ParoleStatus.REJECTED]),
-    replyMessage: z
-      .string()
-      .trim()
-      .max(1000, 'Reply message is too long')
-      .optional(),
+    replyMessage: z.string().trim().max(1000, 'Reply message is too long').optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    if (value.status === ParoleStatus.REJECTED && !value.replyMessage) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['replyMessage'], message: 'A reply is required when rejecting parole' });
+    }
+  });
 
 export const paroleParamsSchema = z.object({
-  paroleRequestId: z.string().trim().min(1, 'Parole request ID is required'),
+  paroleReference: z.string().trim().regex(/^PAR-[A-F0-9]{24,32}$/i).transform((value) => value.toUpperCase()),
 });
 
 
@@ -64,9 +71,8 @@ const validate =
       return;
     }
 
-    if (source !== 'query') {
-      req[source] = parsed.data as never;
-    }
+    if (source === 'query') res.locals.validatedQuery = parsed.data;
+    else req[source] = parsed.data as never;
 
     next();
   };

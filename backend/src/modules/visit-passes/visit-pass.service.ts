@@ -1,7 +1,9 @@
 import { randomBytes } from 'crypto';
-import { AppointmentStatus, Prisma, VisitPassStatus } from '@prisma/client';
+import { ActionType, AppointmentStatus, Prisma, VisitPassStatus } from '@prisma/client';
 
 import prisma from '../../config/prisma';
+import { getPermanentAdminRecipient } from '../../utils/permanent-admin';
+import { recordAudit } from '../audit';
 import { createNotification } from '../notifications';
 
 export class VisitPassError extends Error {
@@ -21,6 +23,7 @@ const passSelect = {
   appointment: {
     select: {
       requestedDate: true,
+      reference: true,
       message: true,
       relationship: true,
       status: true,
@@ -40,6 +43,7 @@ const passSelect = {
           userId: true,
           profilePic: true,
           jailName: true,
+          assignedOfficerId: true,
         },
       },
     },
@@ -51,6 +55,22 @@ export const generatePassCode = (): string =>
 
 export const calculatePassExpiry = (appointmentAt: Date): Date =>
   new Date(appointmentAt.getTime() + 2 * 60 * 60 * 1000);
+
+const notifyAdminOfKnownPassWarning = async (
+  appointmentReference: string,
+  warning: string,
+) => {
+  const admin = await getPermanentAdminRecipient();
+  if (!admin) return;
+  await createNotification({
+    userId: admin.id,
+    type: 'VISIT_PASS_SECURITY_WARNING',
+    title: 'VisitPass security warning',
+    message: `A known pass for ${appointmentReference} produced a ${warning} warning.`,
+    link: `/admin/appointments?reference=${encodeURIComponent(appointmentReference)}`,
+    dedupeKey: `ADMIN_VISIT_PASS_WARNING:${appointmentReference}:${warning}`,
+  });
+};
 
 export const issueOrRotateVisitPass = async (
   tx: Prisma.TransactionClient,
@@ -70,6 +90,7 @@ export const issueOrRotateVisitPass = async (
     issuedAt: new Date(),
     expiresAt: calculatePassExpiry(appointmentAt),
     checkedInAt: null,
+    checkedInByOfficerId: null,
   },
   select: { passCode: true, expiresAt: true },
 });
@@ -85,7 +106,7 @@ const displayPassStatus = (
 const safePassDto = (pass: Awaited<ReturnType<typeof findPassByCode>>) => {
   if (!pass) return null;
   return {
-    appointmentReference: `APT-${pass.passCode.slice(-10).toUpperCase()}`,
+    appointmentReference: pass.appointment.reference,
     passCode: pass.passCode,
     passStatus: displayPassStatus(pass.status, pass.expiresAt),
     issuedAt: pass.issuedAt.toISOString(),
@@ -130,13 +151,39 @@ export const listVisitorPasses = async (userId: string) => {
   return passes.map((pass) => safePassDto(pass));
 };
 
-export const verifyVisitPass = async (passCode: string) => {
+const getOfficer = async (userId: string) => {
+  const officer = await prisma.officerProfile.findUnique({ where: { userId }, select: { id: true } });
+  if (!officer) throw new VisitPassError(404, 'Officer profile not found');
+  return officer;
+};
+
+export const verifyVisitPass = async (officerUserId: string, passCode: string) => {
+  const officer = await getOfficer(officerUserId);
   const pass = await findPassByCode(passCode);
-  if (!pass) throw new VisitPassError(404, 'Visit pass not found');
+  if (!pass) {
+    await recordAudit({ userId: officerUserId, action: ActionType.VERIFY, entity: 'VisitPass', entityReference: 'UNRESOLVED', result: 'NOT_FOUND', summary: 'Visit pass verification failed.' });
+    throw new VisitPassError(404, 'Visit pass not found');
+  }
+  if (pass.appointment.prisoner.assignedOfficerId !== officer.id) {
+    await Promise.all([
+      recordAudit({ userId: officerUserId, action: ActionType.VERIFY, entity: 'VisitPass', entityReference: pass.appointment.reference, result: 'FORBIDDEN', summary: 'Visit pass belongs to a prisoner outside Officer assignment.' }),
+      notifyAdminOfKnownPassWarning(pass.appointment.reference, 'cross-assignment'),
+    ]);
+    throw new VisitPassError(403, 'This visit is outside your assigned prisoners');
+  }
   if (pass.status !== VisitPassStatus.ACTIVE) {
+    await Promise.all([
+      recordAudit({ userId: officerUserId, action: ActionType.VERIFY, entity: 'VisitPass', entityReference: pass.appointment.reference, result: pass.status, summary: 'Visit pass was not active.' }),
+      createNotification({ userId: officerUserId, type: 'VISIT_PASS_INVALID_STATE', title: `Visit pass is ${pass.status.toLowerCase()}`, message: `The known pass for ${pass.appointment.reference} cannot be used.`, link: '/officer/visit-verification', dedupeKey: `VISIT_PASS_INVALID:${pass.appointment.reference}:${pass.status}:${officerUserId}` }),
+      notifyAdminOfKnownPassWarning(pass.appointment.reference, pass.status.toLowerCase()),
+    ]);
     throw new VisitPassError(409, `Visit pass is ${pass.status.toLowerCase()}`);
   }
   if (pass.appointment.status !== AppointmentStatus.ACCEPTED) {
+    await Promise.all([
+      recordAudit({ userId: officerUserId, action: ActionType.VERIFY, entity: 'VisitPass', entityReference: pass.appointment.reference, result: 'INVALID_APPOINTMENT', summary: 'Appointment was not approved.' }),
+      notifyAdminOfKnownPassWarning(pass.appointment.reference, 'invalid-appointment'),
+    ]);
     throw new VisitPassError(409, 'Appointment is not approved');
   }
   if (pass.expiresAt <= new Date()) {
@@ -144,27 +191,20 @@ export const verifyVisitPass = async (passCode: string) => {
       where: { passCode, status: VisitPassStatus.ACTIVE },
       data: { status: VisitPassStatus.EXPIRED },
     });
+    await Promise.all([
+      recordAudit({ userId: officerUserId, action: ActionType.VERIFY, entity: 'VisitPass', entityReference: pass.appointment.reference, result: 'EXPIRED', summary: 'Visit pass expired.' }),
+      createNotification({ userId: officerUserId, type: 'VISIT_PASS_INVALID_STATE', title: 'Visit pass expired', message: `The known pass for ${pass.appointment.reference} has expired.`, link: '/officer/visit-verification', dedupeKey: `VISIT_PASS_INVALID:${pass.appointment.reference}:EXPIRED:${officerUserId}` }),
+      notifyAdminOfKnownPassWarning(pass.appointment.reference, 'expired'),
+    ]);
     throw new VisitPassError(410, 'Visit pass has expired');
   }
+  await recordAudit({ userId: officerUserId, action: ActionType.VERIFY, entity: 'VisitPass', entityReference: pass.appointment.reference, result: 'VALID', summary: 'Visit pass verified successfully.' });
   return safePassDto(pass);
 };
 
-export const useVisitPass = async (passCode: string) => {
-  const preflight = await prisma.visitPass.findUnique({
-    where: { passCode },
-    select: { status: true, expiresAt: true },
-  });
-  if (!preflight) throw new VisitPassError(404, 'Visit pass not found');
-  if (preflight.status !== VisitPassStatus.ACTIVE) {
-    throw new VisitPassError(409, `Visit pass is ${preflight.status.toLowerCase()}`);
-  }
-  if (preflight.expiresAt <= new Date()) {
-    await prisma.visitPass.updateMany({
-      where: { passCode, status: VisitPassStatus.ACTIVE },
-      data: { status: VisitPassStatus.EXPIRED },
-    });
-    throw new VisitPassError(410, 'Visit pass has expired');
-  }
+export const useVisitPass = async (officerUserId: string, passCode: string) => {
+  const officer = await getOfficer(officerUserId);
+  await verifyVisitPass(officerUserId, passCode);
 
   return prisma.$transaction(async (tx) => {
   const pass = await tx.visitPass.findUnique({
@@ -172,6 +212,7 @@ export const useVisitPass = async (passCode: string) => {
     select: passSelect,
   });
   if (!pass) throw new VisitPassError(404, 'Visit pass not found');
+  if (pass.appointment.prisoner.assignedOfficerId !== officer.id) throw new VisitPassError(403, 'This visit is outside your assigned prisoners');
   if (pass.status !== VisitPassStatus.ACTIVE) {
     throw new VisitPassError(409, `Visit pass is ${pass.status.toLowerCase()}`);
   }
@@ -185,7 +226,7 @@ export const useVisitPass = async (passCode: string) => {
   const checkedInAt = new Date();
   const claimed = await tx.visitPass.updateMany({
     where: { passCode, status: VisitPassStatus.ACTIVE },
-    data: { status: VisitPassStatus.USED, checkedInAt },
+    data: { status: VisitPassStatus.USED, checkedInAt, checkedInByOfficerId: officer.id },
   });
   if (claimed.count !== 1) throw new VisitPassError(409, 'Visit pass has already been used');
 
@@ -199,6 +240,7 @@ export const useVisitPass = async (passCode: string) => {
     title: 'Visit completed',
     message: `Your visit with ${pass.appointment.prisoner.name} was checked in successfully.`,
     link: '/visitor/visit-history',
+    dedupeKey: `VISIT_PASS_USED:${pass.appointment.reference}`,
   }, tx);
   await createNotification({
     userId: pass.appointment.prisoner.userId,
@@ -206,7 +248,9 @@ export const useVisitPass = async (passCode: string) => {
     title: 'Visit completed',
     message: `The visit with ${pass.appointment.visitor.name} (${pass.appointment.visitor.publicId ?? 'Visitor ID unavailable'}) was completed.`,
     link: '/prisoner/visits/history',
+    dedupeKey: `PRISONER_VISIT_COMPLETED:${pass.appointment.reference}`,
   }, tx);
+  await recordAudit({ userId: officerUserId, action: ActionType.COMPLETE, entity: 'VisitPass', entityReference: pass.appointment.reference, result: 'SUCCESS', summary: 'Visit pass checked in and appointment completed.' }, tx);
 
   const usedPass = safePassDto({ ...pass, status: VisitPassStatus.USED, checkedInAt });
   if (!usedPass) throw new VisitPassError(500, 'Unable to return completed visit');
@@ -251,6 +295,7 @@ export const listVisitorHistory = async (
       skip: (query.page - 1) * query.limit,
       take: query.limit,
       select: {
+        reference: true,
         requestedDate: true,
         message: true,
         relationship: true,
@@ -272,7 +317,7 @@ export const listVisitorHistory = async (
   ]);
   return {
     items: items.map((item) => ({
-      appointmentReference: item.visitPass ? `APT-${item.visitPass.passCode.slice(-10).toUpperCase()}` : null,
+      appointmentReference: item.reference,
       appointmentAt: item.requestedDate.toISOString(),
       purpose: item.message ?? item.relationship,
       appointmentStatus: item.status,

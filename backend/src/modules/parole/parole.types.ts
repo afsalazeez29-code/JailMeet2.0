@@ -18,13 +18,15 @@ export type PrisonerParoleRequestResult = {
   toDate: string;
   status: ParoleStatus;
   officerReply: string | null;
+  reviewedAt: string | null;
+  reviewer: { publicId: string | null; name: string } | null;
   createdAt: string;
   updatedAt: string;
 };
 
-export type OfficerParoleRequestResult = PrisonerParoleRequestResult & {
+export type OfficerParoleRequestResult = Omit<PrisonerParoleRequestResult, 'id'> & {
   prisoner: {
-    id: string;
+    publicId: string;
     name: string;
   };
 };

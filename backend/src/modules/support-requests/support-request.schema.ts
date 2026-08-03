@@ -21,7 +21,7 @@ export const adminSupportQuerySchema = z.object({
   status: z.nativeEnum(SupportRequestStatus).optional(),
 }).strict();
 
-export const supportParamsSchema = z.object({ requestId: z.string().uuid() });
+export const supportParamsSchema = z.object({ requestId: z.string().regex(/^SUP-[A-Z0-9]+$/) });
 
 export const updateSupportRequestSchema = z.object({
   status: z.enum([
@@ -35,5 +35,5 @@ export const updateSupportRequestSchema = z.object({
 export const validateCreateSupportRequest = validateRequest(createSupportRequestSchema, 'body', 'Invalid support request');
 export const validateVisitorSupportQuery = validateRequest(visitorSupportQuerySchema, 'query', 'Invalid support filters');
 export const validateAdminSupportQuery = validateRequest(adminSupportQuerySchema, 'query', 'Invalid support filters');
-export const validateSupportParams = validateRequest(supportParamsSchema, 'params', 'Invalid support request ID');
+export const validateSupportParams = validateRequest(supportParamsSchema, 'params', 'Invalid support request reference');
 export const validateUpdateSupportRequest = validateRequest(updateSupportRequestSchema, 'body', 'Invalid support response');

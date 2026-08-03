@@ -83,7 +83,7 @@ export type ChangeRequest = {
 };
 
 export type JailRule = {
-  id: string;
+  reference: string;
   title: string;
   content: string;
   category: string;
@@ -98,7 +98,7 @@ export type SupportCategory = 'APPOINTMENT' | 'PROFILE' | 'VISIT_PASS' | 'TECHNI
 export type SupportStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
 
 export type SupportRequest = {
-  id: string;
+  reference: string;
   category: SupportCategory;
   subject: string;
   message: string;

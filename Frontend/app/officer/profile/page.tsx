@@ -1,65 +1,37 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
-import { LoadingAlert, ErrorAlert, ForbiddenAlert } from '@components/common/StatusAlert';
+import { officerGet } from '@features/officer-operations/service';
+import { ErrorAlert, LoadingAlert } from '@components/common/StatusAlert';
+import { isApiServiceError } from '@/types/api';
+
+type Profile = {
+  publicId: string; name: string; profilePic: string | null; email: string;
+  role: string; isActive: boolean; designation: string | null;
+  department: string | null; joiningDate: string | null; shift: string | null;
+  officeLocation: string | null; medicalAccessLevel: string;
+  assignedPrisonerCount: number; recentActionCount: number;
+};
 
 export default function OfficerProfilePage() {
-  const protectedPage = useProtectedPage();
-
-  if (
-    protectedPage.isLoading ||
-    (!protectedPage.isReady && !protectedPage.isForbidden && !protectedPage.error)
-  ) {
-    return (
-      <div className="container-xxl flex-grow-1 container-p-y">
-        <LoadingAlert>Loading profile...</LoadingAlert>
-      </div>
-    );
-  }
-
-  if (protectedPage.isForbidden) {
-    return (
-      <div className="container-xxl flex-grow-1 container-p-y">
-        <ForbiddenAlert>You do not have permission to view this page.</ForbiddenAlert>
-      </div>
-    );
-  }
-
-  if (protectedPage.error) {
-    return (
-      <div className="container-xxl flex-grow-1 container-p-y">
-        <ErrorAlert>{protectedPage.error}</ErrorAlert>
-      </div>
-    );
-  }
-
-  if (!protectedPage.isReady) {
-    return null;
-  }
-
-  const { user } = protectedPage;
-
-  return (
-    <div className="container-xxl flex-grow-1 container-p-y">
-      <h4 className="fw-bold py-3 mb-4">
-        <span className="text-muted fw-light">Account /</span> My Profile
-      </h4>
-      <div className="card">
-        <div className="card-body">
-          <p className="mb-1">
-            <span className="fw-semibold">Name:</span>{' '}
-            {user?.name ?? '—'}
-          </p>
-          <p className="mb-1">
-            <span className="fw-semibold">Email:</span>{' '}
-            {user?.email ?? '—'}
-          </p>
-          <p className="mb-0">
-            <span className="fw-semibold">Role:</span>{' '}
-            {user?.role ?? '—'}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+  const auth = useProtectedPage();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    if (auth.isReady) officerGet<Profile>('/officer/profile').then(setProfile).catch((e) => setError(isApiServiceError(e) ? e.message : 'Unable to load profile'));
+  }, [auth.isReady]);
+  if (auth.isLoading || (!profile && !error)) return <div className="pd-20"><LoadingAlert>Loading profile...</LoadingAlert></div>;
+  if (error) return <div className="pd-20"><ErrorAlert>{error}</ErrorAlert></div>;
+  if (!profile) return null;
+  const fields = {
+    Email: profile.email, Role: profile.role, Designation: profile.designation,
+    Department: profile.department, 'Joining date': profile.joiningDate,
+    Shift: profile.shift, 'Office location': profile.officeLocation,
+    'Account status': profile.isActive ? 'Active' : 'Inactive',
+    'Medical access': profile.medicalAccessLevel,
+    'Assigned prisoners': profile.assignedPrisonerCount,
+    'Actions in last 7 days': profile.recentActionCount,
+  };
+  return <div className="container-xxl flex-grow-1 container-p-y"><h1 className="h4 fw-bold py-3">Account / My Profile</h1><div className="card"><div className="card-body"><div className="d-flex flex-wrap align-items-center gap-3 mb-4"><img src={profile.profilePic || '/images/avatars/officer-default.PNG'} alt={`${profile.name} profile`} width={88} height={88} className="rounded-circle object-fit-cover" /><div><h2 className="h4 mb-1">{profile.name}</h2><p className="text-muted mb-0">{profile.publicId}</p></div></div><div className="row">{Object.entries(fields).map(([label, value]) => <div className="col-md-6 mb-3" key={label}><strong>{label}</strong><div>{value ?? 'â€”'}</div></div>)}</div></div></div></div>;
 }

@@ -34,7 +34,7 @@ export const registerOfficerAppointmentRoutes = (router: Router): void => {
     listOfficerAppointments,
   );
   router.patch(
-    '/appointments/:appointmentId/status',
+    '/appointments/:appointmentReference/status',
     validateAppointmentParams,
     validateReviewAppointment,
     reviewOfficerAppointment,

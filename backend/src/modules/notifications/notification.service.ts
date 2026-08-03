@@ -8,17 +8,26 @@ export type NotificationEvent = {
   title: string;
   message: string;
   link?: string | null;
+  dedupeKey?: string | null;
 };
 
 export const createNotification = async (
   event: NotificationEvent,
   db: Prisma.TransactionClient = prisma,
-) => db.notification.create({ data: event });
+) => event.dedupeKey
+  ? db.notification.upsert({
+      where: { dedupeKey: event.dedupeKey },
+      create: event,
+      update: {},
+    })
+  : db.notification.create({ data: event });
 
 export const createNotifications = async (
   events: NotificationEvent[],
   db: Prisma.TransactionClient = prisma,
-) => events.length ? db.notification.createMany({ data: events }) : { count: 0 };
+) => events.length
+  ? db.notification.createMany({ data: events, skipDuplicates: true })
+  : { count: 0 };
 
 export const listUserNotifications = async (
   userId: string,

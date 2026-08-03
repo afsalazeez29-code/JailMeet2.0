@@ -87,20 +87,22 @@ export default function AdminUsersPage() {
     };
   }, [protectedPage.isReady, protectedPage.redirectToLogin, search, role, status, page]);
 
-  const confirmStatusChange = async (user: AdminUser) => {
+  const confirmStatusChange = async (user: AdminUser, reason: string, confirmation: string) => {
     setProcessing(true);
     setError(null);
     setSuccess(null);
     try {
-      const updated = await updateAdminUserStatus(user.id, {
+      const updated = await updateAdminUserStatus(user.accountReference, {
         isActive: !user.isActive,
+        reason,
+        confirmation,
       });
       setData((current) =>
         current
           ? {
               ...current,
               items: current.items.map((item) =>
-                item.id === updated.id ? updated : item,
+                item.accountReference === updated.accountReference ? updated : item,
               ),
             }
           : current,

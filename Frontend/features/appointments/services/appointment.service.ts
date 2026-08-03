@@ -54,27 +54,33 @@ export const getVisitorAppointments = async (): Promise<
 > => requestWithAuth<VisitorAppointment[]>('/visitor/appointments');
 
 export const getOfficerAppointments = async (
-  status?: AppointmentStatus,
-): Promise<OfficerAppointment[]> => {
-  const query = status ? `?status=${encodeURIComponent(status)}` : '';
+  status: AppointmentStatus | 'ALL' = 'PENDING',
+): Promise<PaginatedResponse<OfficerAppointment>> => {
+  const query = `?status=${encodeURIComponent(status)}&page=1&limit=50`;
 
-  return requestWithAuth<OfficerAppointment[]>(
+  return requestWithAuth<PaginatedResponse<OfficerAppointment>>(
     `/officer/appointments${query}`,
   );
 };
 
 export const reviewAppointment = async (
-  appointmentId: string,
+  appointmentReference: string,
   payload: ReviewAppointmentInput,
-): Promise<OfficerAppointment> =>
-  requestWithAuth<OfficerAppointment>(
-    `/officer/appointments/${appointmentId}/status`,
+): Promise<OfficerAppointment> => {
+  const appointment = await requestWithAuth<OfficerAppointment>(
+    `/officer/appointments/${appointmentReference}/status`,
     undefined,
     {
       method: 'PATCH',
       body: JSON.stringify(payload),
     },
   );
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('jailmeet:notifications-refresh'));
+    window.dispatchEvent(new Event('jailmeet:officer-dashboard-refresh'));
+  }
+  return appointment;
+};
 
 export const getAdminAppointments = async (
   filters?: AppointmentListFilters,

@@ -26,7 +26,7 @@ export const adminPrisonerSupportQuerySchema = z.object({
 }).strict();
 
 export const prisonerSupportParamsSchema = z.object({
-  requestId: z.string().uuid(),
+  requestId: z.string().regex(/^PSR-[A-Z0-9]+$/),
 }).strict();
 
 export const updatePrisonerSupportSchema = z.object({
@@ -56,7 +56,7 @@ export const validateAdminPrisonerSupportQuery = validateRequest(
 export const validatePrisonerSupportParams = validateRequest(
   prisonerSupportParamsSchema,
   'params',
-  'Invalid support request ID',
+  'Invalid support request reference',
 );
 export const validateUpdatePrisonerSupport = validateRequest(
   updatePrisonerSupportSchema,

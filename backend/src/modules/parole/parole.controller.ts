@@ -92,9 +92,14 @@ export const listOfficerParoleRequests = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
+  if (!req.user) {
+    res.status(401).json({ success: false, message: 'Authentication required' });
+    return;
+  }
   try {
     const requests = await getOfficerParoleRequests(
-      req.query as ParoleStatusFilterInput,
+      req.user.id,
+      res.locals.validatedQuery as ParoleStatusFilterInput,
     );
 
     res.status(200).json({
@@ -120,10 +125,10 @@ export const reviewOfficerParoleRequest = async (
   }
 
   try {
-    const { paroleRequestId } = req.params as { paroleRequestId: string };
+    const { paroleReference } = req.params as { paroleReference: string };
     const request = await reviewParoleRequest(
       req.user.id,
-      paroleRequestId,
+      paroleReference,
       req.body as ReviewParoleRequestInput,
     );
 

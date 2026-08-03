@@ -51,7 +51,7 @@ export type PrisonerSupportCategory =
 export type SupportStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
 
 export type PrisonerSupportRequest = {
-  id: string;
+  reference: string;
   category: PrisonerSupportCategory;
   subject: string;
   message: string;
@@ -64,6 +64,10 @@ export type PrisonerSupportRequest = {
     publicId: string | null;
     name: string;
   };
+  escalatedToOfficer?: { publicId: string | null; name: string } | null;
+  escalatedAt?: string | null;
+  officerHandledAt?: string | null;
+  officerResponse?: string | null;
 };
 
 export type PrisonerSupportPage = {

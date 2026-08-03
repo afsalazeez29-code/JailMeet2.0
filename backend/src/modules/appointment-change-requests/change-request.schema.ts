@@ -24,7 +24,7 @@ export const appointmentParamsSchema = z.object({
 });
 
 export const requestParamsSchema = z.object({
-  requestId: z.string().uuid(),
+  requestReference: z.string().trim().regex(/^CHG-[A-F0-9]{24,32}$/i).transform((value) => value.toUpperCase()),
 });
 
 export const visitorRequestQuerySchema = z
@@ -35,10 +35,16 @@ export const visitorRequestQuerySchema = z
 
 export const officerRequestQuerySchema = z
   .object({
-    status: z.nativeEnum(AppointmentChangeRequestStatus).default(AppointmentChangeRequestStatus.PENDING),
+    status: z.union([z.nativeEnum(AppointmentChangeRequestStatus), z.literal('ALL')]).default(AppointmentChangeRequestStatus.PENDING),
     requestType: z.nativeEnum(AppointmentChangeRequestType).optional(),
+    search: z.string().trim().max(100).optional(),
+    dateFrom: z.string().datetime().optional(),
+    dateTo: z.string().datetime().optional(),
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(50).default(20),
   })
-  .strict();
+  .strict()
+  .refine((value) => !value.dateFrom || !value.dateTo || new Date(value.dateFrom) <= new Date(value.dateTo), { message: 'dateFrom must be before dateTo' });
 
 export const reviewRequestSchema = z
   .object({

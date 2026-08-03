@@ -23,6 +23,9 @@ const relativeTime = (value: string) => {
   return `${Math.floor(hours / 24)}d ago`;
 };
 
+const safeInternalHref = (value: string | null, fallback: string) =>
+  value && /^\/(admin|officer|visitor|prisoner)(\/|$)/.test(value) ? value : fallback;
+
 export default function NotificationBell({ defaultHref = '/visitor/dashboard' }: { defaultHref?: string }) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<NotificationItem[]>([]);
@@ -120,7 +123,7 @@ export default function NotificationBell({ defaultHref = '/visitor/dashboard' }:
           <ul className={styles.list} role="menu">
             {items.map((item) => (
               <li className={`${styles.item} ${item.isRead ? '' : styles.unread}`} key={item.id} role="none">
-                <Link className={styles.link} href={item.link || defaultHref} onClick={() => void readOne(item)} role="menuitem">
+                <Link className={styles.link} href={safeInternalHref(item.link, defaultHref)} onClick={() => void readOne(item)} role="menuitem">
                   <p className={styles.title}>{item.title}</p>
                   <p className={styles.message}>{item.message}</p>
                   <time className={styles.time} dateTime={item.createdAt}>{relativeTime(item.createdAt)}</time>

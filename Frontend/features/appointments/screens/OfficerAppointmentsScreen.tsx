@@ -18,7 +18,11 @@ import OfficerVisitorTools from '@features/visitor-services/components/OfficerVi
 export default function OfficerAppointmentsPage() {
   const protectedPage = useProtectedPage();
   const { isReady, redirectToLogin } = protectedPage;
-  const [filter, setFilter] = useState<AppointmentStatus | 'ALL'>('PENDING');
+  const [filter, setFilter] = useState<AppointmentStatus | 'ALL'>(() => {
+    if (typeof window === 'undefined') return 'PENDING';
+    const value = new URLSearchParams(window.location.search).get('status');
+    return ['ALL', 'PENDING', 'ACCEPTED', 'REJECTED', 'CANCELLED', 'COMPLETED'].includes(value || '') ? value as AppointmentStatus | 'ALL' : 'PENDING';
+  });
   const [appointments, setAppointments] = useState<OfficerAppointment[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,11 +32,9 @@ export default function OfficerAppointmentsPage() {
     setError(null);
 
     try {
-      const data = await getOfficerAppointments(
-        filter === 'ALL' ? undefined : filter,
-      );
+      const data = await getOfficerAppointments(filter);
 
-      setAppointments(data);
+      setAppointments(data.items);
     } catch (caughtError) {
       if (isApiServiceError(caughtError)) {
         if (caughtError.status === 401) {
@@ -67,7 +69,7 @@ export default function OfficerAppointmentsPage() {
     setAppointments((currentAppointments) =>
       currentAppointments
         .map((appointment) =>
-          appointment.id === updatedAppointment.id
+          appointment.reference === updatedAppointment.reference
             ? updatedAppointment
             : appointment,
         )
@@ -114,6 +116,7 @@ export default function OfficerAppointmentsPage() {
         filter={filter}
         onFilterChange={setFilter}
         onReviewed={handleReviewed}
+        onRefresh={() => void loadAppointments()}
       />
       <OfficerVisitorTools />
     </>

@@ -135,9 +135,14 @@ export const listOfficerAppointments = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
+  if (!req.user) {
+    res.status(401).json({ success: false, message: 'Authentication required' });
+    return;
+  }
   try {
     const appointments = await getOfficerAppointments(
-      req.query as AppointmentStatusFilterInput,
+      req.user.id,
+      res.locals.validatedQuery as AppointmentStatusFilterInput,
     );
 
     res.status(200).json({
@@ -167,10 +172,10 @@ export const reviewOfficerAppointment = async (
   }
 
   try {
-    const { appointmentId } = req.params as { appointmentId: string };
+    const { appointmentReference } = req.params as { appointmentReference: string };
     const appointment = await reviewAppointment(
       req.user.id,
-      appointmentId,
+      appointmentReference,
       req.body as ReviewAppointmentInput,
     );
 

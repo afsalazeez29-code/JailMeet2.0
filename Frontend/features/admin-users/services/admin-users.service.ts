@@ -42,16 +42,19 @@ export const getAdminUsers = async (
 export const getAdminUserById = async (
   userId: string,
 ): Promise<AdminUserDetail> =>
-  requestWithAuth<AdminUserDetail>(`/admin/users/${userId}`);
+  requestWithAuth<AdminUserDetail>(`/admin/users/${encodeURIComponent(userId)}`);
 
 export const updateAdminUserStatus = async (
   userId: string,
   payload: UpdateUserStatusInput,
 ): Promise<AdminUser> =>
-  requestWithAuth<AdminUser>(`/admin/users/${userId}/status`, undefined, {
+  requestWithAuth<AdminUser>(`/admin/users/${encodeURIComponent(userId)}/status`, undefined, {
     method: 'PATCH',
     body: JSON.stringify(payload),
   });
+
+export const getAdminUserDeactivationImpact = async (accountReference: string) =>
+  requestWithAuth<{ accountReference: string | null; role: string; isActive: boolean; effects: Record<string, number>; warning: string }>(`/admin/users/${encodeURIComponent(accountReference)}/deactivation-impact`);
 
 export const getAdminVisitors = async (
   filters?: AdminUserListFilters,
@@ -63,7 +66,7 @@ export const getAdminVisitors = async (
 export const getAdminVisitorById = async (
   visitorId: string,
 ): Promise<AdminVisitor> =>
-  requestWithAuth<AdminVisitor>(`/admin/visitors/${visitorId}`);
+  requestWithAuth<AdminVisitor>(`/admin/visitors/${encodeURIComponent(visitorId)}`);
 
 export const getAdminOfficers = async (
   filters?: AdminUserListFilters,
@@ -75,7 +78,7 @@ export const getAdminOfficers = async (
 export const getAdminOfficerById = async (
   officerId: string,
 ): Promise<AdminOfficerDetails> =>
-  requestWithAuth<AdminOfficerDetails>(`/admin/officers/${officerId}`);
+  requestWithAuth<AdminOfficerDetails>(`/admin/officers/${encodeURIComponent(officerId)}`);
 
 export const createAdminOfficer = async (
   payload: CreateOfficerInput,
@@ -90,7 +93,7 @@ export const updateAdminOfficer = async (
   payload: UpdateOfficerInput,
 ): Promise<AdminOfficerDetails> =>
   requestWithAuth<AdminOfficerDetails>(
-    `/admin/officers/${officerId}`,
+    `/admin/officers/${encodeURIComponent(officerId)}`,
     undefined,
     {
       method: 'PATCH',
@@ -108,7 +111,7 @@ export const getAdminPrisoners = async (
 export const getAdminPrisonerById = async (
   prisonerId: string,
 ): Promise<AdminPrisonerDetails> =>
-  requestWithAuth<AdminPrisonerDetails>(`/admin/prisoners/${prisonerId}`);
+  requestWithAuth<AdminPrisonerDetails>(`/admin/prisoners/${encodeURIComponent(prisonerId)}`);
 
 export const createAdminPrisoner = async (
   payload: CreatePrisonerInput,
@@ -123,7 +126,7 @@ export const updateAdminPrisoner = async (
   payload: UpdatePrisonerInput,
 ): Promise<AdminPrisonerDetails> =>
   requestWithAuth<AdminPrisonerDetails>(
-    `/admin/prisoners/${prisonerId}`,
+    `/admin/prisoners/${encodeURIComponent(prisonerId)}`,
     undefined,
     {
       method: 'PATCH',

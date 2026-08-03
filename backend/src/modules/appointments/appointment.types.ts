@@ -41,10 +41,13 @@ export type VisitorAppointmentResult = {
   hasPendingChangeRequest: boolean;
 };
 
-export type OfficerAppointmentResult = VisitorAppointmentResult & {
+export type OfficerAppointmentResult = Omit<VisitorAppointmentResult, 'id'> & {
+  reference: string;
+  reviewedAt: string | null;
+  passStatus: string | null;
+  reviewer: { publicId: string | null; name: string } | null;
   visitor: {
     publicId: string | null;
     name: string;
-    phone: string;
   };
 };

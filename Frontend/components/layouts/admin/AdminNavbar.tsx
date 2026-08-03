@@ -6,13 +6,14 @@ import { useState } from 'react';
 import { LogOut } from 'lucide-react';
 
 import LogoutConfirmModal from '../../common/LogoutConfirmModal';
-import NavbarSearch from '../../common/NavbarSearch';
 import iconStyles from '../../common/LucideIcon.module.css';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
 import { clearAccessToken } from '@features/auth/services/token.service';
 import AdminProfilePill from './AdminProfilePill';
 import s from './AdminTheme.module.css';
+import NotificationBell from '@features/visitor-services/components/NotificationBell';
+import AdminGlobalSearch from '@features/admin-operations/components/AdminGlobalSearch';
 
 type AdminNavbarProps = {
   onToggleSidebar: () => void;
@@ -58,12 +59,13 @@ export default function AdminNavbar({
           <img src="/images/logos/auth-logo.png" alt="" className="navbar-brand-logo" aria-hidden="true" />
         </button>
 
-        <NavbarSearch />
+        <AdminGlobalSearch />
 
         <div className={`navbar-nav-right d-flex align-items-center ${s.navbarNavRight}`} id="navbar-collapse">
           <ul className="navbar-nav flex-row align-items-center ms-auto">
             <li className={`nav-item ${s.profileActions}`}>
-              <AdminProfilePill displayName={displayName} avatarSrc={fallbackAdminImage} />
+              <NotificationBell defaultHref="/admin/dashboard" />
+              <AdminProfilePill displayName={displayName} avatarSrc={user?.profileImageUrl || fallbackAdminImage} />
               <button
                 className={s.logoutButton}
                 type="button"

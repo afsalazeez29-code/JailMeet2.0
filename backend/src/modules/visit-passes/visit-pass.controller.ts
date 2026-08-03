@@ -34,15 +34,17 @@ export const getVisitorHistory = async (req: Request, res: Response) => {
 };
 
 export const verifyOfficerPass = async (req: Request, res: Response) => {
+  if (!req.user) return void res.status(401).json({ success: false, message: 'Authentication required' });
   try {
-    const data = await verifyVisitPass(req.body.passCode);
+    const data = await verifyVisitPass(req.user.id, req.body.passCode);
     res.status(200).json({ success: true, message: 'Visit pass is valid', data });
   } catch (error) { handle(error, res, 'Failed to verify visit pass'); }
 };
 
 export const useOfficerPass = async (req: Request, res: Response) => {
+  if (!req.user) return void res.status(401).json({ success: false, message: 'Authentication required' });
   try {
-    const data = await useVisitPass(req.params.passCode);
+    const data = await useVisitPass(req.user.id, req.params.passCode);
     res.status(200).json({ success: true, message: 'Visit completed', data });
   } catch (error) { handle(error, res, 'Failed to complete visit'); }
 };

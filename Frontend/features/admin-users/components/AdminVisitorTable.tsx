@@ -3,6 +3,7 @@
 import { EmptyStateAlert } from '../../../components/common/StatusAlert';
 import { AdminVisitor } from '@features/admin-users/types';
 import { formatVisitorPublicId } from '@/lib/visitor-public-id';
+import Link from 'next/link';
 
 type Props = {
   visitors: AdminVisitor[];
@@ -20,11 +21,11 @@ export default function AdminVisitorTable({ onToggleStatus, visitors }: Props) {
         <thead><tr><th>Visitor ID</th><th>Name</th><th>Email</th><th>Phone</th><th>State</th><th>Status</th><th>Created</th><th>Action</th></tr></thead>
         <tbody>
           {visitors.map((visitor) => (
-            <tr key={visitor.id}>
+            <tr key={visitor.publicId ?? visitor.user.email ?? visitor.name}>
               <td>{formatVisitorPublicId(visitor.publicId)}</td><td>{visitor.name}</td><td>{visitor.user.email}</td><td>{visitor.phone}</td><td>{visitor.state || 'N/A'}</td>
               <td><span className={`badge ${visitor.user.isActive ? 'badge-success' : 'badge-danger'}`}>{visitor.user.isActive ? 'Active' : 'Inactive'}</span></td>
               <td>{formatDate(visitor.createdAt)}</td>
-              <td><button className="btn btn-warning btn-sm" onClick={() => onToggleStatus(visitor)} type="button">{visitor.user.isActive ? 'Deactivate' : 'Activate'}</button></td>
+              <td>{visitor.publicId?<Link className="btn btn-info btn-sm mr-2" href={`/admin/visitors/${visitor.publicId}`}>View</Link>:null}<button className="btn btn-warning btn-sm" onClick={() => onToggleStatus(visitor)} type="button">{visitor.user.isActive ? 'Deactivate' : 'Activate'}</button></td>
             </tr>
           ))}
         </tbody>

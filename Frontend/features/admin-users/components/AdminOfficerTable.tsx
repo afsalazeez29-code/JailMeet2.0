@@ -17,15 +17,15 @@ export default function AdminOfficerTable({ officers, onToggleStatus }: Props) {
   return (
     <div className="table-responsive">
       <table className="table table-hover">
-        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Status</th><th>Created</th><th>Action</th></tr></thead>
+        <thead><tr><th>Name</th><th>Public ID</th><th>Email</th><th>Phone</th><th>Workload</th><th>Medical access</th><th>Status</th><th>Created</th><th>Action</th></tr></thead>
         <tbody>
           {officers.map((officer) => (
-            <tr key={officer.id}>
-              <td>{officer.name}</td><td>{officer.user.email}</td><td>{officer.phone || 'N/A'}</td>
+            <tr key={officer.publicId ?? officer.user.email ?? officer.name}>
+              <td>{officer.name}</td><td>{officer.publicId || 'ID unavailable'}</td><td>{officer.user.email}</td><td>{officer.phone || 'N/A'}</td><td>{officer._count.assignedPrisoners} Prisoners</td><td>{officer.medicalAccessLevel}</td>
               <td><span className={`badge ${officer.user.isActive ? 'badge-success' : 'badge-danger'}`}>{officer.user.isActive ? 'Active' : 'Inactive'}</span></td>
               <td>{formatDate(officer.createdAt)}</td>
               <td>
-                <Link className="btn btn-info btn-sm mr-2" href={`/admin/officers/${officer.id}/edit`}>Edit</Link>
+                {officer.publicId ? <><Link className="btn btn-info btn-sm mr-2" href={`/admin/officers/${officer.publicId}`}>View</Link><Link className="btn btn-outline-info btn-sm mr-2" href={`/admin/officers/${officer.publicId}/edit`}>Edit</Link></> : null}
                 <button className="btn btn-warning btn-sm" onClick={() => onToggleStatus(officer)} type="button">{officer.user.isActive ? 'Deactivate' : 'Activate'}</button>
               </td>
             </tr>

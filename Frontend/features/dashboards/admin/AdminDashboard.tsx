@@ -1,215 +1,46 @@
 'use client';
 
 import Link from 'next/link';
-import { type ComponentType, type SVGProps } from 'react';
-import {
-  CalendarDays,
-  CircleCheck,
-  FileText,
-  UserCheck,
-  UserRound,
-  UsersRound,
-} from 'lucide-react';
+import { Activity, Bell, CalendarDays, FileHeart, FileText, LifeBuoy, ShieldAlert, ShieldCheck, UserCheck, UserRound, UsersRound } from 'lucide-react';
 
-import { ErrorAlert, ForbiddenAlert, LoadingAlert, StatusAlert } from '../../../components/common/StatusAlert';
-import iconStyles from '../../../components/common/LucideIcon.module.css';
-import s from '../../../components/layouts/admin/AdminTheme.module.css';
-import { useDashboard } from '@features/dashboards/services/useDashboard';
+import { ErrorAlert, ForbiddenAlert, LoadingAlert, StatusAlert } from '@components/common/StatusAlert';
+import s from '@components/layouts/admin/AdminTheme.module.css';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { getAdminDashboard } from '@features/dashboards/services/dashboard.service';
-import { AdminDashboardData } from '@features/dashboards/types';
-import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
+import { useDashboard } from '@features/dashboards/services/useDashboard';
+import type { AdminDashboardData } from '@features/dashboards/types';
 
-type CardIcon = ComponentType<SVGProps<SVGSVGElement>>;
-
-const statCards = [
-  {
-    label: 'Total Users',
-    field: 'totalUsers',
-    icon: UsersRound,
-    iconClass: s.iconPrimary,
-    href: '/admin/users',
-  },
-  {
-    label: 'Visitors',
-    field: 'totalVisitors',
-    icon: UserCheck,
-    iconClass: s.iconInfo,
-    href: '/admin/visitors',
-  },
-  {
-    label: 'Officers',
-    field: 'totalOfficers',
-    icon: UserRound,
-    iconClass: s.iconSuccess,
-    href: '/admin/officers',
-  },
-  {
-    label: 'Prisoners',
-    field: 'totalPrisoners',
-    icon: UserRound,
-    iconClass: s.iconPrimary,
-    href: '/admin/prisoners',
-  },
-  {
-    label: 'Appointments',
-    field: 'totalAppointments',
-    icon: CalendarDays,
-    iconClass: s.iconPrimary,
-    href: '/admin/appointments',
-  },
-  {
-    label: 'Pending Appointments',
-    field: 'pendingAppointments',
-    icon: CircleCheck,
-    iconClass: s.iconWarning,
-    href: '/admin/appointments?status=PENDING',
-  },
-  {
-    label: 'Pending Parole Requests',
-    field: 'pendingParoleRequests',
-    icon: FileText,
-    iconClass: s.iconWarning,
-    href: '/admin/parole?status=PENDING',
-  },
-] satisfies ReadonlyArray<{
-  label: string;
-  field: keyof AdminDashboardData;
-  icon: CardIcon;
-  iconClass: string;
-  href: string;
-}>;
-
-function AdminStatCard({
-  data,
-  field,
-  icon: Icon,
-  iconClass,
-  label,
-  href,
-}: {
-  data: AdminDashboardData;
-  field: keyof AdminDashboardData;
-  icon: CardIcon;
-  iconClass: string;
-  label: string;
-  href: string;
-}) {
-  return (
-    <div className="col-sm-6 col-md-3">
-      <Link href={href} className="text-decoration-none">
-        <div className={`${s.statCard} ${s.statCardInteractive}`}>
-          <div className={s.statCardBody}>
-            <div className={`${s.statIconBox} ${iconClass}`}>
-              <Icon
-                aria-hidden="true"
-                className={`${iconStyles.icon} ${iconStyles.card}`}
-              />
-            </div>
-            <span className={s.statTitle}>{label}</span>
-            <h3 className={s.statValue}>{data[field] ?? 0}</h3>
-          </div>
-        </div>
-      </Link>
-    </div>
-  );
-}
+const cards: Array<{ label: string; field: keyof AdminDashboardData; href: string; icon: typeof UsersRound }> = [
+  { label: 'Active valid accounts', field: 'totalActiveValidAccounts', href: '/admin/users?status=ACTIVE', icon: UsersRound },
+  { label: 'Active Visitors with profiles', field: 'activeVisitorsWithProfiles', href: '/admin/visitors', icon: UserCheck },
+  { label: 'Active Officers with profiles', field: 'activeOfficersWithProfiles', href: '/admin/officers', icon: UserRound },
+  { label: 'Active Prisoners with profiles', field: 'activePrisonersWithProfiles', href: '/admin/prisoners', icon: UserRound },
+  { label: 'Unassigned Prisoners', field: 'unassignedPrisoners', href: '/admin/officer-operations?assignment=UNASSIGNED', icon: ShieldAlert },
+  { label: 'Pending appointments', field: 'pendingAppointments', href: '/admin/appointments?status=PENDING', icon: CalendarDays },
+  { label: 'Pending parole requests', field: 'pendingParoleRequests', href: '/admin/parole?status=PENDING', icon: FileText },
+  { label: 'Pending change requests', field: 'pendingChangeRequests', href: '/admin/appointments?section=change-requests&status=PENDING', icon: Activity },
+  { label: 'Open Visitor Support', field: 'openVisitorSupport', href: '/admin/support-requests?status=OPEN', icon: LifeBuoy },
+  { label: 'Open Prisoner Support', field: 'openPrisonerSupport', href: '/admin/prisoner-support-requests?status=OPEN', icon: LifeBuoy },
+  { label: 'Escalated support', field: 'escalatedSupport', href: '/admin/support-escalations', icon: ShieldAlert },
+  { label: 'Active Jail Rules', field: 'activeJailRules', href: '/admin/jail-rules?status=ACTIVE', icon: ShieldCheck },
+  { label: 'FIR requiring attention', field: 'firRequiringAttention', href: '/admin/fir-records?requiresAttention=true', icon: FileText },
+  { label: 'Medical requiring attention', field: 'medicalRequiringAttention', href: '/admin/health-records?requiresAttention=true', icon: FileHeart },
+  { label: 'Unread Admin notifications', field: 'unreadAdminNotifications', href: '/admin/dashboard#notifications', icon: Bell },
+  { label: 'Data-integrity warnings', field: 'integrityWarnings', href: '/admin/system-integrity', icon: ShieldAlert },
+];
 
 export default function AdminDashboardPage() {
   const protectedPage = useProtectedPage();
-  const dashboard = useDashboard(getAdminDashboard, {
-    enabled: protectedPage.isReady,
-    onUnauthenticated: protectedPage.redirectToLogin,
-  });
-
-  if (
-    protectedPage.isLoading ||
-    dashboard.isLoading ||
-    (!protectedPage.isReady &&
-      !protectedPage.isForbidden &&
-      !protectedPage.error)
-  ) {
-    return (
-      <div className="admin-dashboard-page">
-        <div className="page-inner">
-          <LoadingAlert>Loading admin dashboard...</LoadingAlert>
-        </div>
-      </div>
-    );
-  }
-
-  if (protectedPage.isForbidden || dashboard.isForbidden) {
-    return (
-      <div className="admin-dashboard-page">
-        <div className="page-inner">
-          <ForbiddenAlert />
-        </div>
-      </div>
-    );
-  }
-
-  const errorMessage =
-    protectedPage.error || dashboard.error || 'Unable to load dashboard';
-
-  if (protectedPage.error || dashboard.error) {
-    return (
-      <div className="admin-dashboard-page">
-        <div className="page-inner">
-          <ErrorAlert>{errorMessage}</ErrorAlert>
-        </div>
-      </div>
-    );
-  }
-
+  const dashboard = useDashboard(getAdminDashboard, { enabled: protectedPage.isReady, onUnauthenticated: protectedPage.redirectToLogin });
+  if (protectedPage.isLoading || dashboard.isLoading) return <LoadingAlert>Loading Admin dashboard…</LoadingAlert>;
+  if (protectedPage.isForbidden || dashboard.isForbidden) return <ForbiddenAlert />;
+  if (protectedPage.error || dashboard.error) return <ErrorAlert>{protectedPage.error || dashboard.error || 'Unable to load dashboard'}</ErrorAlert>;
   const data = dashboard.data;
-  const user = protectedPage.user;
-
-  if (!data) {
-    return null;
-  }
-
-  return (
-    <div className="admin-dashboard-page">
-      <div className="page-inner">
-        <div className="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-          <div>
-            <h3 className="fw-bold mb-3">Dashboard</h3>
-            <h6 className="op-7 mb-2">Admin Dashboard</h6>
-          </div>
-          <div className="ms-md-auto py-2 py-md-0">
-            <Link
-              href="/admin/officers"
-              className="btn btn-label-info btn-round me-2"
-              data-legacy-href="officersdetails.php"
-            >
-              Add Officer
-            </Link>
-            <Link
-              href="/admin/visitors"
-              className="btn btn-primary btn-round"
-              data-legacy-href="userdetails.php"
-            >
-              <AnimatedButtonText>Add Visitor</AnimatedButtonText>
-            </Link>
-          </div>
-        </div>
-
-        <StatusAlert variant="info">Welcome, Admin ID: <strong>{user?.id ?? ''}</strong></StatusAlert>
-
-        <div className="row">
-          {statCards.map((card) => (
-            <AdminStatCard
-              data={data}
-              field={card.field}
-              icon={card.icon}
-              iconClass={card.iconClass}
-              href={card.href}
-              key={card.field}
-              label={card.label}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+  if (!data) return null;
+  return <div className="admin-dashboard-page"><div className="page-inner">
+    <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 pt-2 pb-4"><div><h3 className="fw-bold mb-2">Dashboard</h3><p className="text-muted mb-0">Operational oversight and integrity</p></div><button className="btn btn-outline-primary" onClick={dashboard.reload} type="button">Refresh</button></div>
+    <StatusAlert variant="info">Welcome, <strong>{protectedPage.user?.name ?? 'Admin'}</strong>. Counts exclude orphan logins from complete-profile totals.</StatusAlert>
+    <div className="row g-3 mt-1">{cards.map(({ field, href, icon: Icon, label }) => <div className="col-12 col-sm-6 col-lg-3" key={String(field)}><Link className="text-decoration-none" href={href}><article className={`${s.statCard} ${s.statCardInteractive}`}><div className={s.statCardBody}><Icon aria-hidden="true" size={22}/><span className={s.statTitle}>{label}</span><h3 className={s.statValue}>{typeof data[field] === 'number' ? data[field] : 0}</h3></div></article></Link></div>)}</div>
+    <section className="card mt-4"><div className="card-body"><h4 className="card-title">Operational summary</h4><div className="row g-3"><div className="col-md-4"><strong>Support requiring response</strong><div>{data.operationalSummary.supportRequiringResponse}</div></div><div className="col-md-4"><strong>Overdue medical follow-ups</strong><div>{data.operationalSummary.overdueMedicalFollowUps}</div></div><div className="col-md-4"><strong>Recent security warnings</strong><div>{data.operationalSummary.recentSecurityWarnings}</div></div></div><h5 className="mt-4">Officer workload</h5><div className="table-responsive"><table className="table"><thead><tr><th>Officer</th><th>Public ID</th><th>Assigned Prisoners</th></tr></thead><tbody>{data.operationalSummary.officerWorkload.map((item) => <tr key={item.publicId ?? item.name}><td>{item.name}</td><td>{item.publicId ?? 'ID unavailable'}</td><td>{item.assignedPrisoners}</td></tr>)}</tbody></table></div></div></section>
+  </div></div>;
 }

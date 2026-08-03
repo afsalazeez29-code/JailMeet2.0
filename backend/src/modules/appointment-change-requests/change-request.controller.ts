@@ -39,9 +39,10 @@ export const getVisitorRequests = async (req: Request, res: Response) => {
   } catch (error) { handle(error, res, 'Failed to fetch change requests'); }
 };
 
-export const getOfficerRequests = async (_req: Request, res: Response) => {
+export const getOfficerRequests = async (req: Request, res: Response) => {
+  if (!req.user) return void res.status(401).json({ success: false, message: 'Authentication required' });
   try {
-    const data = await listOfficerChangeRequests(res.locals.validatedQuery.status, res.locals.validatedQuery.requestType);
+    const data = await listOfficerChangeRequests(req.user.id, res.locals.validatedQuery);
     res.status(200).json({ success: true, message: 'Change requests fetched', data });
   } catch (error) { handle(error, res, 'Failed to fetch change requests'); }
 };
@@ -49,7 +50,7 @@ export const getOfficerRequests = async (_req: Request, res: Response) => {
 export const reviewOfficerRequest = async (req: Request, res: Response) => {
   if (!req.user) return void res.status(401).json({ success: false, message: 'Authentication required' });
   try {
-    const data = await reviewChangeRequest(req.user.id, req.params.requestId, req.body.status, req.body.officerReply);
+    const data = await reviewChangeRequest(req.user.id, req.params.requestReference, req.body.status, req.body.officerReply);
     res.status(200).json({ success: true, message: 'Change request reviewed', data });
   } catch (error) { handle(error, res, 'Failed to review change request'); }
 };

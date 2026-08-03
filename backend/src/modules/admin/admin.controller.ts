@@ -81,6 +81,13 @@ export const updateUserStatus = async (
   }
 };
 
+export const getDeactivationImpact = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const data = await adminService.getDeactivationImpact(req.params.userId);
+    res.status(200).json({ success: true, message: 'Deactivation impact retrieved', data });
+  } catch (error) { handleAdminError(error, res, 'Failed to inspect account impact'); }
+};
+
 export const listVisitors = async (_req: Request, res: Response): Promise<void> => {
   try {
     const data = await adminService.listVisitors(query<ProfileListQuery>(res));
@@ -123,8 +130,10 @@ export const createOfficer = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
+  if (!req.user) return void res.status(401).json({ success: false, message: 'Authentication required' });
   try {
     const data = await adminService.createOfficer(
+      req.user.id,
       req.body as CreateOfficerInput,
     );
     res.status(201).json({ success: true, message: 'Officer created successfully', data });
@@ -172,8 +181,10 @@ export const createPrisoner = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
+  if (!req.user) return void res.status(401).json({ success: false, message: 'Authentication required' });
   try {
     const data = await adminService.createPrisoner(
+      req.user.id,
       req.body as CreatePrisonerInput,
     );
     res.status(201).json({ success: true, message: 'Prisoner created successfully', data });

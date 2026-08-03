@@ -30,7 +30,7 @@ export type PaginatedResult<T> = {
 };
 
 export type SafeAdminUser = {
-  id: string;
+  accountReference: string;
   publicId: string | null;
   name: string;
   email: string | null;
@@ -46,26 +46,27 @@ export type AdminUserDetail = {
 };
 
 export type AdminAppointmentOverview = {
-  id: string;
+  reference: string;
   relationship: string;
   message: string | null;
   requestedDate: string;
   status: AppointmentStatus;
   replyMessage: string | null;
+  reviewedAt: string | null;
   createdAt: string;
   updatedAt: string;
   visitor: {
-    id: string;
     publicId: string | null;
     name: string;
-    phone: string;
   };
-  prisoner: { id: string; name: string };
-  officer: { id: string; name: string } | null;
+  prisoner: { publicId: string | null; name: string };
+  officer: { publicId: string | null; name: string } | null;
+  visitPass: { status: string; checkedInAt: string | null; checkedInByOfficer: { publicId: string | null; name: string } | null } | null;
+  changeRequests: Array<{ reference: string; status: string; reviewedAt: string | null }>;
 };
 
 export type AdminParoleOverview = {
-  id: string;
+  reference: string;
   relativeName: string;
   relationship: string;
   purpose: string;
@@ -74,10 +75,11 @@ export type AdminParoleOverview = {
   toDate: string;
   status: ParoleStatus;
   officerReply: string | null;
+  reviewedAt: string | null;
   createdAt: string;
   updatedAt: string;
-  prisoner: { id: string; name: string };
-  officer: { id: string; name: string } | null;
+  prisoner: { publicId: string | null; name: string; assignedOfficer: { publicId: string | null; name: string } | null };
+  officer: { publicId: string | null; name: string } | null;
 };
 
 export type UserListQuery = z.infer<typeof userListQuerySchema>;

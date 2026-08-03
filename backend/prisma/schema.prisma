@@ -45,6 +45,34 @@ enum ActionType {
   LOGIN
   APPROVE
   REJECT
+  VIEW
+  ARCHIVE
+  VERIFY
+  ASSIGN
+  COMPLETE
+  CONFLICT
+  ESCALATE
+}
+
+enum MedicalAccessLevel {
+  NONE
+  SUMMARY
+  MANAGE
+}
+
+enum FirStatus {
+  OPEN
+  UNDER_REVIEW
+  CLOSED
+  ARCHIVED
+}
+
+enum MedicalTreatmentStatus {
+  OBSERVATION
+  ACTIVE_TREATMENT
+  FOLLOW_UP_REQUIRED
+  COMPLETED
+  ARCHIVED
 }
 
 enum VisitPassStatus {
@@ -107,6 +135,7 @@ model User {
   password  String
   role      Role
   isActive  Boolean  @default(true)
+  passwordChangedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -119,6 +148,8 @@ model User {
   // Utility Relations
   notifications Notification[]
   auditLogs     AuditLog[]
+
+  @@index([role, isActive])
 }
 
 // =======================
@@ -156,6 +187,7 @@ model OfficerProfile {
   officeLocation       String?
   profilePic           String?
   profileImagePublicId String?
+  medicalAccessLevel   MedicalAccessLevel @default(SUMMARY)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -164,7 +196,14 @@ model OfficerProfile {
   reviewedAppointments Appointment[]     @relation("OfficerReviewedAppointments")
   reviewedParoleReqs   ParoleRequest[]   @relation("OfficerReviewedParoles")
   createdPrisoners     PrisonerProfile[] @relation("OfficerCreatedPrisoners")
+  assignedPrisoners    PrisonerProfile[] @relation("OfficerAssignedPrisoners")
   reviewedChangeRequests AppointmentChangeRequest[] @relation("OfficerReviewedChangeRequests")
+  checkedInPasses      VisitPass[]        @relation("OfficerCheckedInPasses")
+  createdFirRecords    FirRecord[]        @relation("OfficerCreatedFirRecords")
+  updatedFirRecords    FirRecord[]        @relation("OfficerUpdatedFirRecords")
+  createdMedicalRecords MedicalRecord[]   @relation("OfficerCreatedMedicalRecords")
+  updatedMedicalRecords MedicalRecord[]   @relation("OfficerUpdatedMedicalRecords")
+  escalatedSupportRequests PrisonerSupportRequest[] @relation("OfficerEscalatedSupportRequests")
 }
 
 model VisitorProfile {
@@ -218,6 +257,10 @@ model PrisonerProfile {
   createdByOfficerId String?
   createdByOfficer   OfficerProfile? @relation("OfficerCreatedPrisoners", fields: [createdByOfficerId], references: [id], onDelete: SetNull)
 
+  // Current operational assignment; creation provenance remains separate above.
+  assignedOfficerId String?
+  assignedOfficer   OfficerProfile? @relation("OfficerAssignedPrisoners", fields: [assignedOfficerId], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -227,6 +270,8 @@ model PrisonerProfile {
   firRecords     FirRecord[]
   medicalRecords MedicalRecord[]
   supportRequests PrisonerSupportRequest[]
+
+  @@index([assignedOfficerId])
 }
 
 // =======================
@@ -235,6 +280,7 @@ model PrisonerProfile {
 
 model Appointment {
   id        String         @id @default(uuid())
+  reference String         @unique
   visitorId String
   visitor   VisitorProfile @relation(fields: [visitorId], references: [id], onDelete: Cascade)
 
@@ -250,12 +296,18 @@ model Appointment {
   requestedDate DateTime
   status        AppointmentStatus @default(PENDING)
   replyMessage  String?
+  pendingKey    String? @unique
+  reviewedAt    DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   visitPass      VisitPass?
   changeRequests AppointmentChangeRequest[]
+
+  @@index([status, requestedDate])
+  @@index([prisonerId, status, requestedDate])
+  @@index([visitorId, requestedDate])
 }
 
 model VisitPass {
@@ -267,14 +319,18 @@ model VisitPass {
   issuedAt      DateTime        @default(now())
   expiresAt     DateTime
   checkedInAt   DateTime?
+  checkedInByOfficerId String?
+  checkedInByOfficer   OfficerProfile? @relation("OfficerCheckedInPasses", fields: [checkedInByOfficerId], references: [id], onDelete: SetNull)
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
   @@index([status, expiresAt])
+  @@index([checkedInByOfficerId, checkedInAt])
 }
 
 model AppointmentChangeRequest {
   id                  String                         @id @default(uuid())
+  reference           String                         @unique
   appointmentId       String
   appointment         Appointment                    @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
   visitorId           String
@@ -293,10 +349,12 @@ model AppointmentChangeRequest {
 
   @@index([visitorId, createdAt])
   @@index([status, createdAt])
+  @@index([appointmentId, status])
 }
 
 model JailRule {
   id        String           @id @default(uuid())
+  reference String           @unique
   title     String
   content   String
   category  String
@@ -312,6 +370,7 @@ model JailRule {
 
 model SupportRequest {
   id               String               @id @default(uuid())
+  reference        String               @unique
   visitorId        String
   visitor          VisitorProfile       @relation(fields: [visitorId], references: [id], onDelete: Cascade)
   category         SupportCategory
@@ -331,6 +390,7 @@ model SupportRequest {
 
 model PrisonerSupportRequest {
   id                  String                    @id @default(uuid())
+  reference           String                    @unique
   prisonerProfileId   String
   prisoner            PrisonerProfile           @relation(fields: [prisonerProfileId], references: [id], onDelete: Cascade)
   category            PrisonerSupportCategory
@@ -341,6 +401,11 @@ model PrisonerSupportRequest {
   repliedByAdminId    String?
   repliedByAdmin      AdminProfile?              @relation("AdminPrisonerSupportReplies", fields: [repliedByAdminId], references: [id], onDelete: SetNull)
   resolvedAt          DateTime?
+  escalatedToOfficerId String?
+  escalatedToOfficer   OfficerProfile? @relation("OfficerEscalatedSupportRequests", fields: [escalatedToOfficerId], references: [id], onDelete: SetNull)
+  escalatedAt           DateTime?
+  officerResponse       String?
+  officerHandledAt      DateTime?
   createdAt           DateTime                  @default(now())
   updatedAt           DateTime                  @updatedAt
 
@@ -348,10 +413,12 @@ model PrisonerSupportRequest {
   @@index([status])
   @@index([category])
   @@index([createdAt])
+  @@index([escalatedToOfficerId, officerHandledAt])
 }
 
 model ParoleRequest {
   id         String          @id @default(uuid())
+  reference  String          @unique
   prisonerId String
   prisoner   PrisonerProfile @relation(fields: [prisonerId], references: [id], onDelete: Cascade)
 
@@ -367,9 +434,14 @@ model ParoleRequest {
   toDate       DateTime
   status       ParoleStatus @default(PENDING)
   officerReply String?
+  pendingKey   String? @unique
+  reviewedAt   DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([prisonerId, status, fromDate])
 }
 
 model FirRecord {
@@ -380,9 +452,20 @@ model FirRecord {
   firNumber   String
   description String?
   dateFiled   DateTime
+  reference   String    @unique
+  status      FirStatus @default(OPEN)
+  createdByOfficerId String?
+  createdByOfficer   OfficerProfile? @relation("OfficerCreatedFirRecords", fields: [createdByOfficerId], references: [id], onDelete: SetNull)
+  updatedByOfficerId String?
+  updatedByOfficer   OfficerProfile? @relation("OfficerUpdatedFirRecords", fields: [updatedByOfficerId], references: [id], onDelete: SetNull)
+  lastChangeReason String?
+  archivedAt      DateTime?
+  archiveReason   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([prisonerId, status, dateFiled])
 }
 
 model MedicalRecord {
@@ -393,9 +476,26 @@ model MedicalRecord {
   bloodGroup     String?
   allergies      String?
   checkupDetails String?
+  reference      String                 @unique
+  checkupDate    DateTime?
+  medicalProfessional String?
+  diagnosis      String?
+  medication     String?
+  treatmentStatus MedicalTreatmentStatus @default(OBSERVATION)
+  followUpDate   DateTime?
+  operationalInstructions String?
+  restrictedNotes String?
+  createdByOfficerId String?
+  createdByOfficer OfficerProfile? @relation("OfficerCreatedMedicalRecords", fields: [createdByOfficerId], references: [id], onDelete: SetNull)
+  updatedByOfficerId String?
+  updatedByOfficer OfficerProfile? @relation("OfficerUpdatedMedicalRecords", fields: [updatedByOfficerId], references: [id], onDelete: SetNull)
+  archivedAt      DateTime?
+  archiveReason   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([prisonerId, treatmentStatus, checkupDate])
 }
 
 // =======================
@@ -412,10 +512,12 @@ model Notification {
   message String
   link    String?
   isRead  Boolean @default(false)
+  dedupeKey String? @unique
 
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt])
+  @@index([userId, isRead, createdAt])
 }
 
 model AuditLog {
@@ -427,6 +529,28 @@ model AuditLog {
   entity   String
   entityId String?
   details  String?
+  entityReference String?
+  result   String?
 
   createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([entity, createdAt])
+}
+
+model Announcement {
+  id         String   @id @default(uuid())
+  reference  String   @unique
+  targetRole Role
+  title      String
+  message    String
+  priority   String   @default("NORMAL")
+  link       String?
+  activeFrom DateTime @default(now())
+  expiresAt  DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([targetRole, activeFrom, expiresAt])
+  @@index([createdAt])
 }

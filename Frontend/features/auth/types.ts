@@ -4,7 +4,6 @@ import type { UserRole } from '@/types/user';
 export type Role = UserRole;
 
 export type AuthUser = {
-  id: string;
   publicId: string | null;
   name: string;
   email: string;

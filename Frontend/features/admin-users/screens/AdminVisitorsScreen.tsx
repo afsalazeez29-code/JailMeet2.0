@@ -44,14 +44,14 @@ export default function AdminVisitorsPage() {
   }, [protectedPage.isReady, protectedPage.redirectToLogin, search, page]);
 
   const toUser = (visitor: AdminVisitor): AdminUser => ({
-    id: visitor.user.id, name: visitor.name, email: visitor.user.email, role: 'VISITOR', isActive: visitor.user.isActive, createdAt: visitor.createdAt, updatedAt: visitor.updatedAt,
+    accountReference: visitor.publicId ?? visitor.user.email ?? '', publicId: visitor.publicId, name: visitor.name, email: visitor.user.email, role: 'VISITOR', isActive: visitor.user.isActive, createdAt: visitor.createdAt, updatedAt: visitor.updatedAt,
   });
 
-  const confirm = async (user: AdminUser) => {
+  const confirm = async (user: AdminUser, reason: string, confirmation: string) => {
     setProcessing(true);
     try {
-      const updated = await updateAdminUserStatus(user.id, { isActive: !user.isActive });
-      setData((current) => current ? { ...current, items: current.items.map((item) => item.user.id === updated.id ? { ...item, user: { ...item.user, isActive: updated.isActive } } : item) } : current);
+      const updated = await updateAdminUserStatus(user.accountReference, { isActive: !user.isActive, reason, confirmation });
+      setData((current) => current ? { ...current, items: current.items.map((item) => (item.publicId ?? item.user.email) === updated.accountReference ? { ...item, user: { ...item.user, isActive: updated.isActive } } : item) } : current);
       setModalUser(null);
     } catch (caughtError) {
       setError(isApiServiceError(caughtError) ? caughtError.message : 'Unable to update status');

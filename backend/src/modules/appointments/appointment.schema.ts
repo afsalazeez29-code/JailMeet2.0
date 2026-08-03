@@ -20,9 +20,19 @@ export const createAppointmentSchema = z
 
 export const appointmentStatusFilterSchema = z
   .object({
-    status: z.nativeEnum(AppointmentStatus).optional(),
+    status: z.union([z.nativeEnum(AppointmentStatus), z.literal('ALL')]).default(AppointmentStatus.PENDING),
+    search: z.string().trim().max(100).optional(),
+    prisonerPublicId: z.string().trim().regex(/^PRN-\d{3}$/i).transform((value) => value.toUpperCase()).optional(),
+    visitorPublicId: z.string().trim().regex(/^VIS-\d{3}$/i).transform((value) => value.toUpperCase()).optional(),
+    dateFrom: z.string().datetime().optional(),
+    dateTo: z.string().datetime().optional(),
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(50).default(20),
   })
-  .strict();
+  .strict()
+  .refine((value) => !value.dateFrom || !value.dateTo || new Date(value.dateFrom) <= new Date(value.dateTo), {
+    message: 'dateFrom must be before dateTo',
+  });
 
 export const reviewAppointmentSchema = z
   .object({
@@ -32,7 +42,7 @@ export const reviewAppointmentSchema = z
   .strict();
 
 export const appointmentParamsSchema = z.object({
-  appointmentId: z.string().trim().min(1, 'Appointment ID is required'),
+  appointmentReference: z.string().trim().regex(/^APT-[A-F0-9]{24,32}$/i, 'Valid appointment reference is required').transform((value) => value.toUpperCase()),
 });
 
 export const prisonerPublicIdParamsSchema = z.object({
@@ -63,6 +73,8 @@ const validate =
 
     if (source !== 'query') {
       req[source] = parsed.data as never;
+    } else {
+      res.locals.validatedQuery = parsed.data;
     }
 
     next();

@@ -17,6 +17,7 @@ import ParoleReviewModal from './ParoleReviewModal';
 type OfficerParoleListProps = {
   requests: OfficerParoleRequest[];
   onReviewed: (request: OfficerParoleRequest) => void;
+  onRefresh: () => void;
 };
 
 const formatDate = (value: string): string =>
@@ -33,6 +34,7 @@ const formatDateTime = (value: string): string =>
 export default function OfficerParoleList({
   onReviewed,
   requests,
+  onRefresh,
 }: OfficerParoleListProps) {
   const router = useRouter();
   const [selectedRequest, setSelectedRequest] =
@@ -71,7 +73,7 @@ export default function OfficerParoleList({
     setSuccess(null);
 
     try {
-      const updatedRequest = await reviewParoleRequest(request.id, payload);
+      const updatedRequest = await reviewParoleRequest(request.reference, payload);
 
       onReviewed(updatedRequest);
       setSuccess('Parole request reviewed successfully.');
@@ -87,6 +89,11 @@ export default function OfficerParoleList({
 
         if (caughtError.status === 403) {
           setError('Access denied');
+          return;
+        }
+        if (caughtError.status === 409) {
+          setError('Another Officer already processed this parole request. The queue was refreshed.');
+          onRefresh();
           return;
         }
 
@@ -124,27 +131,31 @@ export default function OfficerParoleList({
               <table className="data-table table stripe hover nowrap">
                 <thead>
                   <tr>
+                    <th>Reference</th>
                     <th>Prisoner</th>
                     <th>Prisoner ID</th>
                     <th>Purpose</th>
                     <th>Dates</th>
                     <th>Submitted</th>
+                    <th>Status / Review</th>
                     <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {requests.map((request) => (
-                    <tr key={request.id}>
+                    <tr key={request.reference}>
+                      <td>{request.reference}</td>
                       <td>{request.prisoner.name}</td>
-                      <td>{request.prisoner.id}</td>
+                      <td>{request.prisoner.publicId}</td>
                       <td>{request.purpose}</td>
                       <td>
                         {formatDate(request.fromDate)} to{' '}
                         {formatDate(request.toDate)}
                       </td>
                       <td>{formatDateTime(request.createdAt)}</td>
+                      <td>{request.status === 'ACCEPTED' ? 'Approved' : request.status}<small className="d-block text-muted">{request.reviewer ? `${request.reviewer.name} (${request.reviewer.publicId || 'ID unavailable'})` : 'Not reviewed'}{request.reviewedAt ? ` â€” ${formatDateTime(request.reviewedAt)}` : ''}</small>{request.officerReply ? <small className="d-block">{request.officerReply}</small> : null}</td>
                       <td>
-                        <div className="d-flex flex-wrap" style={{ gap: '8px' }}>
+                        {request.status === 'PENDING' ? <div className="d-flex flex-wrap" style={{ gap: '8px' }}>
                           <button
                             className="btn btn-success btn-sm"
                             onClick={() => openReview(request, 'ACCEPTED')}
@@ -159,7 +170,7 @@ export default function OfficerParoleList({
                           >
                             Reject
                           </button>
-                        </div>
+                        </div> : 'Reviewed'}
                       </td>
                     </tr>
                   ))}

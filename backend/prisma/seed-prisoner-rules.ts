@@ -44,6 +44,7 @@ const run = async () => {
   await prisma.$transaction(
     missingRules.map(([title, content]) => prisma.jailRule.create({
       data: {
+        reference: `RUL-PRN-${String(rules.findIndex(([knownTitle]) => knownTitle === title) + 1).padStart(3, '0')}`,
         title,
         content,
         category: title,

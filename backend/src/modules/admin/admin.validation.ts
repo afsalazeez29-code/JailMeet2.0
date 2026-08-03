@@ -22,31 +22,33 @@ export const profileListQuerySchema = z.object(paginationFields).strict();
 
 export const userIdParamSchema = z
   .object({
-    userId: z.string().uuid('Valid user ID is required'),
+    userId: z.string().trim().min(3).max(254),
   })
   .strict();
 
 export const visitorIdParamSchema = z
   .object({
-    visitorId: z.string().uuid('Valid visitor ID is required'),
+    visitorId: z.string().regex(/^VIS-\d+$/, 'Valid Visitor public ID is required'),
   })
   .strict();
 
 export const officerIdParamSchema = z
   .object({
-    officerId: z.string().uuid('Valid officer ID is required'),
+    officerId: z.string().regex(/^OFR-\d+$/, 'Valid Officer public ID is required'),
   })
   .strict();
 
 export const prisonerIdParamSchema = z
   .object({
-    prisonerId: z.string().uuid('Valid prisoner ID is required'),
+    prisonerId: z.string().regex(/^PRN-\d+$/, 'Valid Prisoner public ID is required'),
   })
   .strict();
 
 export const updateUserStatusSchema = z
   .object({
     isActive: z.boolean(),
+    reason: z.string().trim().min(10).max(500),
+    confirmation: z.string().trim().min(3).max(100),
   })
   .strict();
 

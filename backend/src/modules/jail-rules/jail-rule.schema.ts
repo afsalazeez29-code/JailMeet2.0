@@ -27,12 +27,12 @@ export const updateRuleSchema = z.object({
   isActive: ruleFields.isActive.optional(),
 }).strict().refine((value) => Object.keys(value).length > 0, 'At least one field is required');
 
-export const ruleParamsSchema = z.object({ ruleId: z.string().uuid() });
+export const ruleParamsSchema = z.object({ ruleId: z.string().regex(/^RUL-[A-Z0-9]+$/) });
 export const adminRuleQuerySchema = z.object({
   audience: z.nativeEnum(JailRuleAudience).optional(),
 }).strict();
 
 export const validateCreateRule = validateRequest(createRuleSchema, 'body', 'Invalid jail rule');
 export const validateUpdateRule = validateRequest(updateRuleSchema, 'body', 'Invalid jail rule');
-export const validateRuleParams = validateRequest(ruleParamsSchema, 'params', 'Invalid jail rule ID');
+export const validateRuleParams = validateRequest(ruleParamsSchema, 'params', 'Invalid jail rule reference');
 export const validateAdminRuleQuery = validateRequest(adminRuleQuerySchema, 'query', 'Invalid jail rule filters');

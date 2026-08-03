@@ -2,174 +2,33 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Fragment, type ComponentType, type SVGProps } from 'react';
-import {
-  CalendarDays,
-  Ellipsis,
-  FileText,
-  House,
-  LockKeyhole,
-  LifeBuoy,
-  ShieldCheck,
-  UserCheck,
-  UserRound,
-  UsersRound,
-  X,
-} from 'lucide-react';
+import { Activity, BellRing, CalendarDays, ClipboardList, FileHeart, FileText, House, LifeBuoy, LockKeyhole, Megaphone, SearchCheck, ShieldAlert, ShieldCheck, UserCheck, UserRound, UsersRound, X } from 'lucide-react';
+import type { ComponentType, SVGProps } from 'react';
 
 import iconStyles from '../../common/LucideIcon.module.css';
 import s from './AdminTheme.module.css';
 
-type SidebarIcon = ComponentType<SVGProps<SVGSVGElement>>;
+type Icon = ComponentType<SVGProps<SVGSVGElement>>;
+type Item = { href: string; label: string; icon: Icon; children?: Array<{ href: string; label: string }> };
+const items: Item[] = [
+  { href:'/admin/dashboard',label:'Dashboard',icon:House },
+  { href:'/admin/users',label:'Users',icon:UsersRound },
+  { href:'/admin/visitors',label:'Visitors',icon:UserCheck },
+  { href:'/admin/officers',label:'Officers',icon:UserRound },
+  { href:'/admin/prisoners',label:'Prisoners',icon:UserRound },
+  { href:'/admin/officer-operations',label:'Officer Assignments',icon:ShieldCheck },
+  { href:'/admin/appointments',label:'Appointments',icon:CalendarDays },
+  { href:'/admin/parole',label:'Parole Requests',icon:FileText },
+  { href:'/admin/support-requests',label:'Support',icon:LifeBuoy,children:[{href:'/admin/support-requests',label:'Visitor Support'},{href:'/admin/prisoner-support-requests',label:'Prisoner Support'},{href:'/admin/support-escalations',label:'Escalations'}] },
+  { href:'/admin/jail-rules',label:'Jail Rules',icon:ClipboardList },
+  { href:'/admin/fir-records',label:'FIR Records',icon:FileText },
+  { href:'/admin/health-records',label:'Health Records',icon:FileHeart },
+  { href:'/admin/audit-logs',label:'Audit Logs',icon:Activity },
+  { href:'/admin/reports',label:'Reports',icon:SearchCheck },
+  { href:'/admin/system-integrity',label:'System Integrity',icon:ShieldAlert },
+  { href:'/admin/announcements',label:'Announcements',icon:Megaphone },
+  { href:'/admin/profile',label:'My Profile',icon:BellRing },
+  { href:'/admin/change-password',label:'Change Password',icon:LockKeyhole },
+];
 
-const navItems = [
-  {
-    href: '/admin/dashboard',
-    legacyHref: 'adindex.php',
-    icon: House,
-    label: 'Dashboard',
-  },
-  {
-    href: '/admin/users',
-    legacyHref: 'users.php',
-    icon: UsersRound,
-    label: 'Users',
-  },
-  {
-    href: '/admin/visitors',
-    legacyHref: 'userdetails.php',
-    icon: UserCheck,
-    label: 'Visitors',
-  },
-  {
-    href: '/admin/officers',
-    legacyHref: 'officersdetails.php',
-    icon: UserRound,
-    label: 'Officers',
-  },
-  {
-    href: '/admin/prisoners',
-    legacyHref: 'prisonerdetails.php',
-    icon: UserRound,
-    label: 'Prisoners',
-  },
-  {
-    href: '/admin/appointments',
-    legacyHref: 'appointments.php',
-    icon: CalendarDays,
-    label: 'Appointments',
-  },
-  {
-    href: '/admin/parole',
-    legacyHref: 'parolerequests.php',
-    icon: FileText,
-    label: 'Parole Requests',
-  },
-  {
-    href: '/admin/support-requests',
-    legacyHref: 'support-requests',
-    icon: LifeBuoy,
-    label: 'Support Requests',
-  },
-  {
-    href: '/admin/prisoner-support-requests',
-    legacyHref: 'prisoner-support-requests',
-    icon: LifeBuoy,
-    label: 'Prisoner Support',
-  },
-  {
-    href: '/admin/jail-rules',
-    legacyHref: 'jail-rules',
-    icon: ShieldCheck,
-    label: 'Jail Rules',
-  },
-  {
-    href: '/admin/change-password',
-    legacyHref: 'changepassword.php',
-    icon: LockKeyhole,
-    label: 'Change Password',
-  },
-] satisfies ReadonlyArray<{
-  href: string;
-  legacyHref: string;
-  icon: SidebarIcon;
-  label: string;
-}>;
-
-type AdminSidebarProps = {
-  onCloseSidebar: () => void;
-};
-
-export default function AdminSidebar({ onCloseSidebar }: AdminSidebarProps) {
-  const pathname = usePathname();
-
-  return (
-    <aside
-      id="layout-menu"
-      className="layout-menu menu-vertical menu bg-menu-theme"
-      aria-label="Admin navigation"
-    >
-      <div className="app-brand demo">
-        <Link href="/" className="app-brand-link" aria-label="JailMeet home">
-          <img
-            src="/images/logos/jmlogo.png"
-            alt="JailMeet home"
-            className="app-brand-logo"
-            style={{ maxWidth: '180px', height: 'auto' }}
-          />
-        </Link>
-        <button
-          className="layout-menu-toggle menu-link text-large ms-auto d-xl-none border-0 bg-transparent p-0"
-          type="button"
-          aria-label="Close sidebar"
-          onClick={onCloseSidebar}
-        >
-          <X
-            aria-hidden="true"
-            className={`${iconStyles.icon} ${iconStyles.navbar}`}
-          />
-        </button>
-      </div>
-
-      <div className="menu-inner-shadow"></div>
-
-      <nav>
-          <ul className="menu-inner py-1">
-            {navItems.map((item, index) => {
-              const Icon = item.icon;
-
-              return (
-                <Fragment key={item.href}>
-                  {index === 1 ? (
-                    <li className={`menu-item ${s.navSection}`}>
-                      <span>
-                        <Ellipsis
-                          aria-hidden="true"
-                          className={`menu-icon tf-icons ${iconStyles.icon} ${iconStyles.sidebar}`}
-                        />
-                      </span>
-                      <h4 className={s.navSectionText}>Components</h4>
-                    </li>
-                  ) : null}
-                  <li className={`menu-item${pathname === item.href ? ' active' : ''}`}>
-                    <Link
-                      href={item.href}
-                      data-legacy-href={item.legacyHref}
-                      className={`menu-link ${s.sidebarItem} ${pathname === item.href ? s.sidebarItemActive : ''}`}
-                      onClick={onCloseSidebar}
-                    >
-                      <Icon
-                        aria-hidden="true"
-                        className={`menu-icon tf-icons ${iconStyles.icon} ${iconStyles.sidebar}`}
-                      />
-                      <div>{item.label}</div>
-                    </Link>
-                  </li>
-                </Fragment>
-              );
-            })}
-          </ul>
-      </nav>
-    </aside>
-  );
-}
+export default function AdminSidebar({onCloseSidebar}:{onCloseSidebar:()=>void}){const pathname=usePathname();const active=(item:Item)=>pathname===item.href||pathname.startsWith(`${item.href}/`)||Boolean(item.children?.some((child)=>pathname===child.href||pathname.startsWith(`${child.href}/`)));return <aside id="layout-menu" className="layout-menu menu-vertical menu bg-menu-theme" aria-label="Admin navigation"><div className="app-brand demo"><Link href="/" className="app-brand-link" aria-label="JailMeet home"><img src="/images/logos/jmlogo.png" alt="JailMeet home" className="app-brand-logo" style={{maxWidth:'180px',height:'auto'}}/></Link><button className="layout-menu-toggle menu-link text-large ms-auto d-xl-none border-0 bg-transparent p-0" type="button" aria-label="Close sidebar" onClick={onCloseSidebar}><X aria-hidden="true" className={`${iconStyles.icon} ${iconStyles.navbar}`}/></button></div><div className="menu-inner-shadow"/><nav><ul className="menu-inner py-1">{items.map((item)=>{const ItemIcon=item.icon;const isActive=active(item);return <li className={`menu-item${isActive?' active':''}`} key={item.label}><Link href={item.href} className={`menu-link ${s.sidebarItem} ${isActive?s.sidebarItemActive:''}`} onClick={onCloseSidebar}><ItemIcon aria-hidden="true" className={`menu-icon tf-icons ${iconStyles.icon} ${iconStyles.sidebar}`}/><div>{item.label}</div></Link>{item.children?<ul className="list-unstyled ms-4 mb-2">{item.children.map((child)=><li key={child.href}><Link className={`d-block px-3 py-2 text-decoration-none ${pathname===child.href?'text-primary fw-semibold':'text-dark'}`} href={child.href} onClick={onCloseSidebar}>{child.label}</Link></li>)}</ul>:null}</li>})}</ul></nav></aside>}

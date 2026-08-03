@@ -2,6 +2,7 @@
 
 import { EmptyStateAlert } from '../../../components/common/StatusAlert';
 import { AdminUser } from '@features/admin-users/types';
+import Link from 'next/link';
 
 type AdminUserTableProps = {
   users: AdminUser[];
@@ -38,7 +39,7 @@ export default function AdminUserTable({
         </thead>
         <tbody>
           {users.map((user) => (
-            <tr key={user.id}>
+            <tr key={user.accountReference}>
               <td>{user.name || 'Not provided'}</td>
               <td>{user.email || 'No email'}</td>
               <td>{user.role}</td>
@@ -49,9 +50,7 @@ export default function AdminUserTable({
               </td>
               <td>{formatDate(user.createdAt)}</td>
               <td>
-                <button className="btn btn-info btn-sm mr-2" onClick={() => onSelectUser(user)} type="button">
-                  View
-                </button>
+                <Link className="btn btn-info btn-sm mr-2" href={`/admin/users/${encodeURIComponent(user.accountReference)}`} onClick={() => onSelectUser(user)}>View</Link>
                 <button className="btn btn-warning btn-sm" onClick={() => onToggleStatus(user)} type="button">
                   {user.isActive ? 'Deactivate' : 'Activate'}
                 </button>

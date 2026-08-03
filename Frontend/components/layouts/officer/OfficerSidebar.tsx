@@ -7,8 +7,13 @@ import {
   CalendarDays,
   ChevronDown,
   FileText,
+  HeartPulse,
   House,
+  ListChecks,
   LockKeyhole,
+  QrCode,
+  Search,
+  ShieldCheck,
   UsersRound,
   X,
 } from 'lucide-react';
@@ -24,22 +29,22 @@ type OfficerSidebarProps = {
 
 const bookingItems = [
   {
-    href: '/officer/appointments',
+    href: '/officer/appointments?status=PENDING',
     legacyHref: 'newappointment.php',
     label: 'New Appointment',
   },
   {
-    href: '/officer/appointments',
+    href: '/officer/appointments?status=ACCEPTED',
     legacyHref: 'accepted.php',
     label: 'Accepted',
   },
   {
-    href: '/officer/appointments',
+    href: '/officer/appointments?status=REJECTED',
     legacyHref: 'rejected.php',
     label: 'Rejected',
   },
   {
-    href: '/officer/appointments',
+    href: '/officer/appointments?status=ALL',
     legacyHref: 'all.php',
     label: 'All',
   },
@@ -47,22 +52,22 @@ const bookingItems = [
 
 const paroleItems = [
   {
-    href: '/officer/parole',
+    href: '/officer/parole?status=ALL',
     legacyHref: 'requests.php',
     label: 'Parole Requests',
   },
   {
-    href: '/officer/parole',
+    href: '/officer/parole?status=PENDING',
     legacyHref: 'pendingparole.php',
     label: 'Pending',
   },
   {
-    href: '/officer/parole',
+    href: '/officer/parole?status=ACCEPTED',
     legacyHref: 'acceptedparole.php',
     label: 'Accepted',
   },
   {
-    href: '/officer/parole',
+    href: '/officer/parole?status=REJECTED',
     legacyHref: 'rejectedparole.php',
     label: 'Rejected',
   },
@@ -175,28 +180,33 @@ export default function OfficerSidebar({ onCloseSidebar }: OfficerSidebarProps) 
           </ul>
         </li>
 
-        <li className="menu-item">
-          <span
-            className={`menu-link ${s.sidebarItem} ${s.sidebarItemDisabled}`}
-            aria-disabled="true"
-            data-legacy-href="prisoners.php"
-            title="Prisoner management is not implemented for officers yet"
-          >
+        <li className={`menu-item${isSectionActive('/officer/prisoners') ? ' active' : ''}`}>
+          <Link href="/officer/prisoners" className={`menu-link ${s.sidebarItem} ${isSectionActive('/officer/prisoners') ? s.sidebarItemActive : ''}`} onClick={onCloseSidebar}>
             {renderIcon(UsersRound)}
-            <div>Prisoners</div>
-          </span>
+            <div>Assigned Prisoners</div>
+          </Link>
         </li>
 
-        <li className="menu-item">
-          <span
-            className={`menu-link ${s.sidebarItem} ${s.sidebarItemDisabled}`}
-            aria-disabled="true"
-            data-legacy-href="fir.php"
-            title="FIR management is not implemented yet"
-          >
+        <li className={`menu-item${isSectionActive('/officer/visit-verification') ? ' active' : ''}`}>
+          <Link href="/officer/visit-verification" className={`menu-link ${s.sidebarItem} ${isSectionActive('/officer/visit-verification') ? s.sidebarItemActive : ''}`} onClick={onCloseSidebar}>
+            {renderIcon(QrCode)}<div>Visit Verification</div>
+          </Link>
+        </li>
+        <li className={`menu-item${isSectionActive('/officer/change-requests') ? ' active' : ''}`}>
+          <Link href="/officer/change-requests" className={`menu-link ${s.sidebarItem} ${isSectionActive('/officer/change-requests') ? s.sidebarItemActive : ''}`} onClick={onCloseSidebar}>
+            {renderIcon(ListChecks)}<div>Change Requests</div>
+          </Link>
+        </li>
+        <li className={`menu-item${isSectionActive('/officer/fir-records') ? ' active' : ''}`}>
+          <Link href="/officer/fir-records" className={`menu-link ${s.sidebarItem} ${isSectionActive('/officer/fir-records') ? s.sidebarItemActive : ''}`} onClick={onCloseSidebar}>
             {renderIcon(FileText)}
-            <div>FIR</div>
-          </span>
+            <div>FIR Records</div>
+          </Link>
+        </li>
+        <li className={`menu-item${isSectionActive('/officer/health-records') ? ' active' : ''}`}>
+          <Link href="/officer/health-records" className={`menu-link ${s.sidebarItem} ${isSectionActive('/officer/health-records') ? s.sidebarItemActive : ''}`} onClick={onCloseSidebar}>
+            {renderIcon(HeartPulse)}<div>Health Records</div>
+          </Link>
         </li>
 
         <li className={`menu-item${isSectionActive('/officer/parole') ? ' active' : ''}`}>
@@ -245,6 +255,19 @@ export default function OfficerSidebar({ onCloseSidebar }: OfficerSidebarProps) 
 
         <li className="menu-item">
           <hr className={s.navDivider} />
+        </li>
+
+        <li className={`menu-item${isSectionActive('/officer/support-escalations') ? ' active' : ''}`}>
+          <Link href="/officer/support-escalations" className={`menu-link ${s.sidebarItem} ${isSectionActive('/officer/support-escalations') ? s.sidebarItemActive : ''}`} onClick={onCloseSidebar}>{renderIcon(ShieldCheck)}<div>Support Actions</div></Link>
+        </li>
+        <li className={`menu-item${isSectionActive('/officer/activity') ? ' active' : ''}`}>
+          <Link href="/officer/activity" className={`menu-link ${s.sidebarItem} ${isSectionActive('/officer/activity') ? s.sidebarItemActive : ''}`} onClick={onCloseSidebar}>{renderIcon(ListChecks)}<div>My Activity</div></Link>
+        </li>
+        <li className={`menu-item${isSectionActive('/officer/reports') ? ' active' : ''}`}>
+          <Link href="/officer/reports" className={`menu-link ${s.sidebarItem} ${isSectionActive('/officer/reports') ? s.sidebarItemActive : ''}`} onClick={onCloseSidebar}>{renderIcon(FileText)}<div>Reports</div></Link>
+        </li>
+        <li className={`menu-item${isSectionActive('/officer/search') ? ' active' : ''}`}>
+          <Link href="/officer/search" className={`menu-link ${s.sidebarItem} ${isSectionActive('/officer/search') ? s.sidebarItemActive : ''}`} onClick={onCloseSidebar}>{renderIcon(Search)}<div>Search</div></Link>
         </li>
 
         <li className={`menu-item${isActive('/officer/change-password') ? ' active' : ''}`}>

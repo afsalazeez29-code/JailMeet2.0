@@ -32,19 +32,21 @@ export type PrisonerParoleRequest = {
   toDate: string;
   status: ParoleStatus;
   officerReply: string | null;
+  reviewedAt: string | null;
+  reviewer: { publicId: string | null; name: string } | null;
   createdAt: string;
   updatedAt: string;
 };
 
-export type OfficerParoleRequest = PrisonerParoleRequest & {
+export type OfficerParoleRequest = Omit<PrisonerParoleRequest, 'id'> & {
   prisoner: {
-    id: string;
+    publicId: string;
     name: string;
   };
 };
 
 export type AdminParoleRequest = {
-  id: string;
+  reference: string;
   relativeName: string;
   relationship: string;
   purpose: string;
@@ -53,10 +55,11 @@ export type AdminParoleRequest = {
   toDate: string;
   status: ParoleStatus;
   officerReply: string | null;
+  reviewedAt: string | null;
   createdAt: string;
   updatedAt: string;
-  prisoner: { id: string; name: string };
-  officer: { id: string; name: string } | null;
+  prisoner: { publicId: string | null; name: string; assignedOfficer: { publicId: string | null; name: string } | null };
+  officer: { publicId: string | null; name: string } | null;
 };
 
 export type ReviewParoleRequestInput = {

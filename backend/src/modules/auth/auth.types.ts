@@ -12,7 +12,6 @@ export type RegisterVisitorInput = z.infer<typeof registerVisitorSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 
 export type AuthUser = {
-  id: string;
   publicId: string | null;
   name: string;
   email: string;

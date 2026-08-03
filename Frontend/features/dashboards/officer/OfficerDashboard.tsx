@@ -1,7 +1,8 @@
 ﻿'use client';
 
-import { type ComponentType, type SVGProps } from 'react';
-import { CircleX, Clock3, ThumbsUp, UsersRound } from 'lucide-react';
+import { type ComponentType, type SVGProps, useEffect } from 'react';
+import Link from 'next/link';
+import { Bell, CalendarCheck, Clock3, FileText, HeartPulse, ListChecks, QrCode, ThumbsUp, UsersRound } from 'lucide-react';
 
 import { ErrorAlert, ForbiddenAlert, LoadingAlert, SuccessAlert } from '../../../components/common/StatusAlert';
 import iconStyles from '../../../components/common/LucideIcon.module.css';
@@ -12,43 +13,43 @@ import { getOfficerDashboard } from '@features/dashboards/services/dashboard.ser
 import { OfficerDashboardData } from '@features/dashboards/types';
 
 type CardIcon = ComponentType<SVGProps<SVGSVGElement>>;
+type OfficerCountField = Exclude<keyof OfficerDashboardData, 'officer' | 'todaySchedule'>;
 
 const statCards = [
   {
-    label: 'Total Prisoners',
-    field: 'totalPrisoners',
+    label: 'Assigned Prisoners', field: 'assignedPrisoners', href: '/officer/prisoners',
     icon: UsersRound,
     colorClass: s.iconPrimary,
   },
   {
-    label: 'Pending Appointments',
-    field: 'pendingAppointments',
+    label: 'Pending Appointments', field: 'pendingAppointments', href: '/officer/appointments?status=PENDING',
     icon: Clock3,
     colorClass: s.iconWarning,
   },
   {
-    label: 'Approved Appointments',
-    field: 'approvedAppointments',
+    label: 'Approved Upcoming Visits', field: 'approvedAppointments', href: '/officer/appointments?status=ACCEPTED',
     icon: ThumbsUp,
     colorClass: s.iconSuccess,
   },
   {
-    label: 'Rejected Appointments',
-    field: 'rejectedAppointments',
-    icon: CircleX,
-    colorClass: s.iconDanger,
+    label: 'Pending Change Requests', field: 'pendingChangeRequests', href: '/officer/change-requests?status=PENDING', icon: ListChecks, colorClass: s.iconWarning,
   },
   {
-    label: 'Pending Parole Requests',
-    field: 'pendingParoleRequests',
+    label: 'Pending Parole Requests', field: 'pendingParoleRequests', href: '/officer/parole?status=PENDING',
     icon: Clock3,
     colorClass: s.iconWarning,
   },
+  { label: 'Visits Scheduled Today', field: 'visitsToday', href: '/officer/appointments', icon: CalendarCheck, colorClass: s.iconInfo },
+  { label: 'Passes Awaiting Verification', field: 'passesAwaitingVerification', href: '/officer/visit-verification', icon: QrCode, colorClass: s.iconInfo },
+  { label: 'Open FIR Tasks', field: 'openFirTasks', href: '/officer/fir-records', icon: FileText, colorClass: s.iconDanger },
+  { label: 'Medical Actions', field: 'medicalRequestsRequiringAction', href: '/officer/health-records', icon: HeartPulse, colorClass: s.iconDanger },
+  { label: 'Unread Notifications', field: 'unreadNotifications', href: '/officer/dashboard', icon: Bell, colorClass: s.iconPrimary },
 ] satisfies ReadonlyArray<{
   label: string;
-  field: keyof OfficerDashboardData;
+  field: OfficerCountField;
   icon: CardIcon;
   colorClass: string;
+  href: string;
 }>;
 
 function OfficerStatCard({
@@ -57,16 +58,18 @@ function OfficerStatCard({
   field,
   icon: Icon,
   label,
+  href,
 }: {
   colorClass: string;
   data: OfficerDashboardData;
-  field: keyof OfficerDashboardData;
+  field: OfficerCountField;
   icon: CardIcon;
   label: string;
+  href: string;
 }) {
   return (
     <div className="col-lg-3 col-md-6 col-12 mb-4">
-      <div className={s.statCard}>
+      <Link className={`${s.statCard} ${s.statCardInteractive} d-block`} href={href}>
         <div className={s.statCardBody}>
           <div className={`${s.statIconBox} ${colorClass}`}>
             <Icon
@@ -77,7 +80,7 @@ function OfficerStatCard({
           <span className={s.statTitle}>{label}</span>
           <h3 className={s.statValue}>{data[field] ?? 0}</h3>
         </div>
-      </div>
+      </Link>
     </div>
   );
 }
@@ -88,6 +91,11 @@ export default function OfficerDashboardPage() {
     enabled: protectedPage.isReady,
     onUnauthenticated: protectedPage.redirectToLogin,
   });
+  useEffect(() => {
+    const refresh = () => dashboard.reload();
+    window.addEventListener('jailmeet:officer-dashboard-refresh', refresh);
+    return () => window.removeEventListener('jailmeet:officer-dashboard-refresh', refresh);
+  }, [dashboard.reload]);
 
   if (
     protectedPage.isLoading ||
@@ -137,7 +145,7 @@ export default function OfficerDashboardPage() {
           <br />
           Email: {user?.email ?? ''}
           <br />
-          Officer ID: {user?.id ?? ''}
+          Officer ID: {data.officer.publicId}
         </SuccessAlert>
       </div>
 
@@ -150,9 +158,11 @@ export default function OfficerDashboardPage() {
             icon={card.icon}
             key={card.field}
             label={card.label}
+            href={card.href}
           />
         ))}
       </div>
+      <section className="card-box mb-30"><div className="pd-20"><h2 className="h4 text-blue">Today&apos;s schedule</h2>{data.todaySchedule.length === 0 ? <p className="mb-0">No approved visits scheduled today.</p> : <div className="table-responsive"><table className="table table-striped"><thead><tr><th>Time</th><th>Prisoner</th><th>Visitor</th><th>Pass</th><th>Action</th></tr></thead><tbody>{data.todaySchedule.map((item) => <tr key={item.reference}><td>{new Date(item.requestedDate).toLocaleString()}</td><td>{item.prisoner.name} ({item.prisoner.publicId})</td><td>{item.visitor.name} ({item.visitor.publicId || 'ID unavailable'})</td><td>{item.passStatus || 'Not issued'} {item.expiringSoon ? 'â€” expiring soon' : ''}</td><td><Link className="btn btn-sm btn-outline-primary" href="/officer/visit-verification">Check in</Link></td></tr>)}</tbody></table></div>}</div></section>
     </>
   );
 }

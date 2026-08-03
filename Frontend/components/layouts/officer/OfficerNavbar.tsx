@@ -12,6 +12,7 @@ import { useAuth } from '@features/auth/hooks/useAuth';
 import { navigateToLogin } from '@features/auth/services/navigation.service';
 import { clearAccessToken } from '@features/auth/services/token.service';
 import OfficerProfilePill from './OfficerProfilePill';
+import NotificationBell from '@features/visitor-services/components/NotificationBell';
 import s from './OfficerTheme.module.css';
 
 type OfficerNavbarProps = {
@@ -19,7 +20,7 @@ type OfficerNavbarProps = {
   sidebarOpen?: boolean;
 };
 
-const fallbackOfficerImage = '/images/avatars/officer-default.png';
+const fallbackOfficerImage = '/images/avatars/officer-default.PNG';
 
 export default function OfficerNavbar({
   onToggleSidebar,
@@ -36,8 +37,8 @@ export default function OfficerNavbar({
   };
 
   const handleSearch = (value: string) => {
-    // UI-only: no backend search connected yet
-    void value;
+    const query = value.trim();
+    if (query.length >= 2) router.push(`/officer/search?q=${encodeURIComponent(query)}`);
   };
 
   return (
@@ -72,7 +73,8 @@ export default function OfficerNavbar({
         <div className={`navbar-nav-right d-flex align-items-center ${s.navbarNavRight}`} id="navbar-collapse">
           <ul className="navbar-nav flex-row align-items-center ms-auto">
             <li className={`nav-item ${s.profileActions}`}>
-              <OfficerProfilePill displayName={user?.name ?? 'Officer'} avatarSrc={fallbackOfficerImage} />
+              <NotificationBell defaultHref="/officer/dashboard" />
+              <OfficerProfilePill displayName={user?.name ?? 'Officer'} avatarSrc={user?.profileImageUrl || fallbackOfficerImage} />
               <button
                 className={s.logoutButton}
                 type="button"

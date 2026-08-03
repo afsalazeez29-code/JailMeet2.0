@@ -22,12 +22,15 @@ type OfficerAppointmentListProps = {
   filter: AppointmentStatus | 'ALL';
   onFilterChange: (status: AppointmentStatus | 'ALL') => void;
   onReviewed: (appointment: OfficerAppointment) => void;
+  onRefresh: () => void;
 };
 
 const filters: Array<{ label: string; value: AppointmentStatus | 'ALL' }> = [
   { label: 'Pending', value: 'PENDING' },
   { label: 'Approved', value: 'ACCEPTED' },
   { label: 'Rejected', value: 'REJECTED' },
+  { label: 'Cancelled', value: 'CANCELLED' },
+  { label: 'Completed', value: 'COMPLETED' },
   { label: 'All', value: 'ALL' },
 ];
 
@@ -58,6 +61,7 @@ export default function OfficerAppointmentList({
   filter,
   onFilterChange,
   onReviewed,
+  onRefresh,
 }: OfficerAppointmentListProps) {
   const router = useRouter();
   const [reviewingId, setReviewingId] = useState<string | null>(null);
@@ -88,6 +92,11 @@ export default function OfficerAppointmentList({
 
         if (caughtError.status === 403) {
           setError('Access denied');
+          return;
+        }
+        if (caughtError.status === 409) {
+          setError('Another Officer already processed this appointment. The queue was refreshed.');
+          onRefresh();
           return;
         }
 
@@ -137,7 +146,7 @@ export default function OfficerAppointmentList({
                 <thead>
                   <tr>
                     <th>Visitor</th>
-                    <th>Phone</th>
+                    <th>Reference</th>
                     <th>Prisoner</th>
                     <th>Date & Time</th>
                     <th>Reason</th>
@@ -149,14 +158,14 @@ export default function OfficerAppointmentList({
                 </thead>
                 <tbody>
                   {appointments.map((appointment) => (
-                    <tr key={appointment.id}>
+                    <tr key={appointment.reference}>
                       <td>
                         {appointment.visitor.name}
                         <small className="d-block text-muted">
                           {formatVisitorPublicId(appointment.visitor.publicId)}
                         </small>
                       </td>
-                      <td>{appointment.visitor.phone}</td>
+                      <td>{appointment.reference}</td>
                       <td>{appointment.prisoner.name}</td>
                       <td>{formatDateTime(appointment.appointmentAt)}</td>
                       <td>{appointment.reason}</td>
@@ -171,17 +180,17 @@ export default function OfficerAppointmentList({
                         {appointment.status === 'PENDING' ? (
                           <input
                             className={`form-control ${styles.noteField}`}
-                            disabled={reviewingId === appointment.id}
+                            disabled={reviewingId === appointment.reference}
                             maxLength={500}
                             onChange={(event) =>
                               setNotes((currentNotes) => ({
                                 ...currentNotes,
-                                [appointment.id]: event.target.value,
+                                [appointment.reference]: event.target.value,
                               }))
                             }
                             placeholder="Optional note"
                             type="text"
-                            value={notes[appointment.id] ?? ''}
+                            value={notes[appointment.reference] ?? ''}
                           />
                         ) : (
                           appointment.officerNote || 'No note'
@@ -193,25 +202,25 @@ export default function OfficerAppointmentList({
                           <div className={styles.actions}>
                             <button
                               className="btn btn-success btn-sm"
-                              disabled={reviewingId === appointment.id}
+                              disabled={reviewingId === appointment.reference}
                               onClick={() =>
-                                void handleReview(appointment.id, 'ACCEPTED')
+                                void handleReview(appointment.reference, 'ACCEPTED')
                               }
                               type="button"
                             >
-                              {reviewingId === appointment.id
+                              {reviewingId === appointment.reference
                                 ? 'Processing...'
                                 : 'Approve'}
                             </button>
                             <button
                               className="btn btn-danger btn-sm"
-                              disabled={reviewingId === appointment.id}
+                              disabled={reviewingId === appointment.reference}
                               onClick={() =>
-                                void handleReview(appointment.id, 'REJECTED')
+                                void handleReview(appointment.reference, 'REJECTED')
                               }
                               type="button"
                             >
-                              {reviewingId === appointment.id
+                              {reviewingId === appointment.reference
                                 ? 'Processing...'
                                 : 'Reject'}
                             </button>

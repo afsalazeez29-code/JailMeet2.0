@@ -68,3 +68,6 @@ export const updateAdminPrisonerSupportRequest = (
   undefined,
   { method: 'PATCH', body: JSON.stringify(payload) },
 );
+
+export const escalateAdminPrisonerSupportRequest = (reference: string, officerPublicId: string) =>
+  requestWithAuth<void>(`/admin/prisoner-support/${encodeURIComponent(reference)}/escalate`, undefined, { method: 'PATCH', body: JSON.stringify({ officerPublicId }) });

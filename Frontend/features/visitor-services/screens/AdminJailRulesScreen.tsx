@@ -1,7 +1,7 @@
 'use client';
 
-import { FormEvent, useCallback, useEffect, useState } from 'react';
-
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { EmptyStateAlert, ErrorAlert, ForbiddenAlert, LoadingAlert, SuccessAlert } from '@components/common/StatusAlert';
 import { useProtectedPage } from '@features/auth/hooks/useProtectedPage';
 import { isApiServiceError } from '@/types/api';
@@ -10,75 +10,143 @@ import type { JailRule } from '../types';
 import styles from '../components/VisitorServices.module.css';
 
 type RuleForm = Pick<JailRule, 'title' | 'category' | 'content' | 'sortOrder' | 'isActive' | 'audience'>;
-const emptyForm: RuleForm = { title: '', category: '', content: '', sortOrder: 0, isActive: true, audience: 'VISITOR' };
+
+const empty: RuleForm = {
+  title: '',
+  category: '',
+  content: '',
+  sortOrder: 0,
+  isActive: true,
+  audience: 'VISITOR',
+};
 
 export default function AdminJailRulesScreen() {
   const auth = useProtectedPage();
   const [rules, setRules] = useState<JailRule[]>([]);
-  const [form, setForm] = useState<RuleForm>(emptyForm);
-  const [audienceFilter, setAudienceFilter] = useState<'ANY' | JailRule['audience']>('ANY');
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState<RuleForm>(empty);
+  const [filter, setFilter] = useState<'ANY' | JailRule['audience']>('ANY');
+  const [activeFilter, setActiveFilter] = useState<'ANY' | 'ACTIVE' | 'INACTIVE'>('ANY');
+  const [search, setSearch] = useState('');
+  const [previewAudience, setPreviewAudience] = useState<'VISITOR' | 'PRISONER' | null>(null);
+  const [editing, setEditing] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    setError(null);
-    try { setRules(await getAdminJailRules(audienceFilter === 'ANY' ? undefined : audienceFilter)); }
-    catch (caught) { setError(isApiServiceError(caught) ? caught.message : 'Unable to load jail rules'); }
-    finally { setLoading(false); }
-  }, [audienceFilter]);
+    try {
+      setRules(await getAdminJailRules(filter === 'ANY' ? undefined : filter));
+      setError(null);
+    } catch (caught) {
+      setError(isApiServiceError(caught) ? caught.message : 'Unable to load jail rules');
+    } finally {
+      setLoading(false);
+    }
+  }, [filter]);
 
-  useEffect(() => { if (auth.isReady) void load(); }, [auth.isReady, load]);
+  useEffect(() => {
+    if (auth.isReady) void load();
+  }, [auth.isReady, load]);
+
+  const filteredRules = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+    return rules.filter((rule) => {
+      const statusMatches = activeFilter === 'ANY'
+        || (activeFilter === 'ACTIVE' ? rule.isActive : !rule.isActive);
+      const searchMatches = !normalizedSearch || [rule.reference, rule.title, rule.category, rule.content]
+        .some((value) => value.toLowerCase().includes(normalizedSearch));
+      return statusMatches && searchMatches;
+    });
+  }, [activeFilter, rules, search]);
+
+  const previewRules = useMemo(() => previewAudience
+    ? rules.filter((rule) => rule.isActive && (rule.audience === previewAudience || rule.audience === 'ALL'))
+    : [], [previewAudience, rules]);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    setSaving(true); setError(null); setSuccess(null);
     try {
-      if (editingId) await updateJailRule(editingId, form);
+      if (editing) await updateJailRule(editing, form);
       else await createJailRule(form);
-      setSuccess(editingId ? 'Jail rule updated.' : 'Jail rule created.');
-      setForm(emptyForm); setEditingId(null); await load();
-    } catch (caught) { setError(isApiServiceError(caught) ? caught.message : 'Unable to save jail rule'); }
-    finally { setSaving(false); }
+      setSuccess(editing ? 'Jail Rule updated.' : 'Jail Rule created.');
+      setEditing(null);
+      setForm(empty);
+      window.dispatchEvent(new Event('jailmeet:notifications-refresh'));
+      await load();
+    } catch (caught) {
+      setError(isApiServiceError(caught) ? caught.message : 'Unable to save Jail Rule');
+    }
   };
 
-  if (auth.isLoading || (loading && !rules.length)) return <div className={styles.page}><LoadingAlert>Loading jail rules…</LoadingAlert></div>;
+  if (auth.isLoading || (loading && !rules.length)) {
+    return <div className={styles.page}><LoadingAlert>Loading Jail Rules…</LoadingAlert></div>;
+  }
   if (auth.isForbidden) return <div className={styles.page}><ForbiddenAlert /></div>;
 
-  return (
-    <div className={styles.page}>
-      <h1 className={styles.heading}>Jail Rules Management</h1>
-      <p className={styles.subheading}>Create and manage Visitor, Prisoner, or shared instructions.</p>
-      {auth.error || error ? <ErrorAlert>{auth.error || error}</ErrorAlert> : null}
-      {success ? <SuccessAlert>{success}</SuccessAlert> : null}
-      <div className={styles.filters}>
-        <label className={styles.field}>Audience filter
-          <select value={audienceFilter} onChange={(event) => setAudienceFilter(event.target.value as 'ANY' | JailRule['audience'])}>
-            <option value="ANY">All audiences</option><option value="VISITOR">Visitor</option><option value="PRISONER">Prisoner</option><option value="ALL">Shared</option>
-          </select>
-        </label>
-      </div>
-      <div className={styles.twoColumns}>
-        <section className={styles.card}>
-          <h2>{editingId ? 'Edit Rule' : 'Create Rule'}</h2>
-          <form className={styles.form} onSubmit={submit}>
-            <div className={styles.field}><label htmlFor="rule-title">Title</label><input id="rule-title" maxLength={120} minLength={3} onChange={(event) => setForm({ ...form, title: event.target.value })} required value={form.title} /></div>
-            <div className={styles.field}><label htmlFor="rule-category">Category</label><input id="rule-category" maxLength={80} minLength={2} onChange={(event) => setForm({ ...form, category: event.target.value })} required value={form.category} /></div>
-            <div className={styles.field}><label htmlFor="rule-audience">Audience</label><select id="rule-audience" value={form.audience} onChange={(event) => setForm({ ...form, audience: event.target.value as JailRule['audience'] })}><option value="VISITOR">Visitor</option><option value="PRISONER">Prisoner</option><option value="ALL">All</option></select></div>
-            <div className={styles.field}><label htmlFor="rule-content">Content</label><textarea id="rule-content" maxLength={3000} minLength={10} onChange={(event) => setForm({ ...form, content: event.target.value })} required value={form.content} /></div>
-            <div className={styles.field}><label htmlFor="rule-order">Display order</label><input id="rule-order" min={0} onChange={(event) => setForm({ ...form, sortOrder: Number(event.target.value) })} type="number" value={form.sortOrder} /></div>
-            <label><input checked={form.isActive} onChange={(event) => setForm({ ...form, isActive: event.target.checked })} type="checkbox" /> Active</label>
-            <div className={styles.actions}><button className="btn btn-primary" disabled={saving} type="submit">{saving ? 'Saving…' : 'Save Rule'}</button>{editingId ? <button className="btn btn-outline-secondary" onClick={() => { setEditingId(null); setForm(emptyForm); }} type="button">Cancel</button> : null}</div>
-          </form>
-        </section>
-        <section>
-          <h2 className={styles.heading}>Rules</h2>
-          {!rules.length ? <EmptyStateAlert>No jail rules match this filter.</EmptyStateAlert> : <div className={styles.grid}>{rules.map((rule) => <article className={styles.card} key={rule.id}><div className={styles.cardHeader}><div><p className={styles.ruleCategory}>{rule.audience} · {rule.category} · Order {rule.sortOrder}</p><h2>{rule.title}</h2></div><span className={`${styles.status} ${rule.isActive ? styles.active : styles.closed}`}>{rule.isActive ? 'Active' : 'Inactive'}</span></div><p className={styles.ruleContent}>{rule.content}</p><div className={styles.actions}><button className="btn btn-outline-primary btn-sm" onClick={() => { setEditingId(rule.id); setForm({ title: rule.title, category: rule.category, content: rule.content, sortOrder: rule.sortOrder, isActive: rule.isActive, audience: rule.audience }); }} type="button">Edit</button><button className="btn btn-outline-secondary btn-sm" onClick={() => void updateJailRule(rule.id, { isActive: !rule.isActive }).then(load)} type="button">{rule.isActive ? 'Deactivate' : 'Activate'}</button></div></article>)}</div>}
-        </section>
+  return <div className={styles.page}>
+    <h1 className={styles.heading}>Jail Rules Management</h1>
+    <p className={styles.subheading}>Search, audience filtering and audited publication controls.</p>
+    {auth.error || error ? <ErrorAlert>{auth.error || error}</ErrorAlert> : null}
+    {success ? <SuccessAlert>{success}</SuccessAlert> : null}
+    <div className={styles.filters}>
+      <label className={styles.field}>Search
+        <input
+          maxLength={120}
+          placeholder="Reference, title, category or content"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+      </label>
+      <label className={styles.field}>Audience
+        <select value={filter} onChange={(event) => setFilter(event.target.value as typeof filter)}>
+          <option value="ANY">All audiences</option><option>VISITOR</option><option>PRISONER</option><option>ALL</option>
+        </select>
+      </label>
+      <label className={styles.field}>Publication status
+        <select value={activeFilter} onChange={(event) => setActiveFilter(event.target.value as typeof activeFilter)}>
+          <option value="ANY">All statuses</option><option value="ACTIVE">Active</option><option value="INACTIVE">Inactive</option>
+        </select>
+      </label>
+      <div className={styles.actions}>
+        <button className="btn btn-outline-primary" type="button" onClick={() => setPreviewAudience('VISITOR')}>Preview as Visitor</button>
+        <button className="btn btn-outline-primary" type="button" onClick={() => setPreviewAudience('PRISONER')}>Preview as Prisoner</button>
       </div>
     </div>
-  );
+    {previewAudience ? <section className={styles.card} aria-label={`${previewAudience} rule preview`}>
+      <div className={styles.actions}><h2>{previewAudience === 'VISITOR' ? 'Visitor' : 'Prisoner'} preview</h2><button className="btn btn-outline-secondary btn-sm" type="button" onClick={() => setPreviewAudience(null)}>Close preview</button></div>
+      {!previewRules.length ? <p>No active rules are visible to this audience.</p> : previewRules.map((rule) => <article key={rule.reference}><strong>{rule.title}</strong><p>{rule.content}</p></article>)}
+    </section> : null}
+    <div className={styles.twoColumns}>
+      <section className={styles.card}>
+        <h2>{editing ? 'Edit Rule' : 'Create Rule'}</h2>
+        <form className={styles.form} onSubmit={submit}>
+          <label className={styles.field}>Title<input minLength={3} maxLength={120} required value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} /></label>
+          <label className={styles.field}>Category<input minLength={2} maxLength={80} required value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} /></label>
+          <label className={styles.field}>Audience<select value={form.audience} onChange={(event) => setForm({ ...form, audience: event.target.value as JailRule['audience'] })}><option>VISITOR</option><option>PRISONER</option><option>ALL</option></select></label>
+          <label className={styles.field}>Content<textarea minLength={10} maxLength={3000} required value={form.content} onChange={(event) => setForm({ ...form, content: event.target.value })} /></label>
+          <label className={styles.field}>Display order<input min={0} type="number" value={form.sortOrder} onChange={(event) => setForm({ ...form, sortOrder: Number(event.target.value) })} /></label>
+          <label><input checked={form.isActive} type="checkbox" onChange={(event) => setForm({ ...form, isActive: event.target.checked })} /> Active</label>
+          <div className={styles.actions}>
+            <button className="btn btn-primary" type="submit">Save Rule</button>
+            {editing ? <button className="btn btn-outline-secondary" type="button" onClick={() => { setEditing(null); setForm(empty); }}>Cancel</button> : null}
+          </div>
+        </form>
+      </section>
+      <section>
+        <h2>Rules</h2>
+        {!filteredRules.length ? <EmptyStateAlert>No matching rules.</EmptyStateAlert> : <div className={styles.grid}>
+          {filteredRules.map((rule) => <article className={styles.card} key={rule.reference}>
+            <p className={styles.ruleCategory}>{rule.reference} · {rule.audience} · {rule.category}</p>
+            <h2>{rule.title}</h2><p>{rule.content}</p><p>Status: {rule.isActive ? 'Active' : 'Inactive'}</p>
+            <div className={styles.actions}>
+              <button className="btn btn-outline-primary btn-sm" type="button" onClick={() => { setEditing(rule.reference); setForm({ title: rule.title, category: rule.category, content: rule.content, sortOrder: rule.sortOrder, isActive: rule.isActive, audience: rule.audience }); }}>Edit</button>
+              <button className="btn btn-outline-secondary btn-sm" type="button" onClick={() => void updateJailRule(rule.reference, { isActive: !rule.isActive }).then(load).catch(() => setError('Unable to update Jail Rule'))}>{rule.isActive ? 'Deactivate' : 'Activate'}</button>
+              <Link className="btn btn-outline-secondary btn-sm" href={`/admin/audit-logs?entityReference=${encodeURIComponent(rule.reference)}`}>Audit history</Link>
+            </div>
+          </article>)}
+        </div>}
+      </section>
+    </div>
+  </div>;
 }

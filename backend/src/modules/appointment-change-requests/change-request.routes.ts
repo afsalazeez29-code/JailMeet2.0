@@ -25,5 +25,5 @@ export const registerVisitorChangeRequestRoutes = (router: Router): void => {
 
 export const registerOfficerChangeRequestRoutes = (router: Router): void => {
   router.get('/appointment-change-requests', validateOfficerRequestQuery, getOfficerRequests);
-  router.patch('/appointment-change-requests/:requestId', validateRequestParams, validateReviewRequest, reviewOfficerRequest);
+  router.patch('/appointment-change-requests/:requestReference', validateRequestParams, validateReviewRequest, reviewOfficerRequest);
 };

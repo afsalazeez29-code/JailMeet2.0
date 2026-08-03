@@ -8,10 +8,11 @@ import {
 } from './dashboard.service';
 
 export const adminDashboard = async (
-  _req: Request,
+  req: Request,
   res: Response,
 ): Promise<void> => {
-  const data = await getAdminDashboard();
+  if (!req.user) return void res.status(401).json({ success: false, message: 'Authentication required' });
+  const data = await getAdminDashboard(req.user.id);
 
   res.status(200).json({
     success: true,
@@ -21,10 +22,11 @@ export const adminDashboard = async (
 };
 
 export const officerDashboard = async (
-  _req: Request,
+  req: Request,
   res: Response,
 ): Promise<void> => {
-  const data = await getOfficerDashboard();
+  if (!req.user) return void res.status(401).json({ success: false, message: 'Authentication required' });
+  const data = await getOfficerDashboard(req.user.id);
 
   res.status(200).json({
     success: true,

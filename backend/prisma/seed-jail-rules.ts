@@ -33,7 +33,14 @@ const run = async () => {
   }
   await prisma.$transaction(
     rules.map(([title, content], index) => prisma.jailRule.create({
-      data: { title, content, category: title, sortOrder: index + 1, isActive: true },
+      data: {
+        reference: `RUL-VIS-${String(index + 1).padStart(3, '0')}`,
+        title,
+        content,
+        category: title,
+        sortOrder: index + 1,
+        isActive: true,
+      },
     })),
   );
   console.log(`Created ${rules.length} default Jail Rules.`);

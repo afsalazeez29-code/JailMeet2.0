@@ -30,7 +30,7 @@ paroleRoutes.get(
 );
 
 paroleRoutes.patch(
-  '/officer/parole/:paroleRequestId/status',
+  '/officer/parole/:paroleReference/status',
   authenticate,
   authorizeRoles([Role.OFFICER]),
   validateParoleParams,

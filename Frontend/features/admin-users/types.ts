@@ -17,7 +17,7 @@ export type AdminUserListFilters = {
 };
 
 export type AdminUser = {
-  id: string;
+  accountReference: string;
   publicId?: string | null;
   name: string;
   email: string | null;
@@ -34,10 +34,11 @@ export type AdminUserDetail = {
 
 export type UpdateUserStatusInput = {
   isActive: boolean;
+  reason: string;
+  confirmation: string;
 };
 
 export type AdminVisitor = {
-  id: string;
   publicId: string | null;
   name: string;
   phone: string;
@@ -47,21 +48,22 @@ export type AdminVisitor = {
   profilePic: string | null;
   createdAt: string;
   updatedAt: string;
-  user: { id: string; email: string | null; isActive: boolean };
+  user: { email: string | null; isActive: boolean };
 };
 
 export type AdminOfficer = {
-  id: string;
+  publicId: string | null;
+  medicalAccessLevel: 'NONE' | 'SUMMARY' | 'MANAGE';
   name: string;
   phone: string | null;
   createdAt: string;
   updatedAt: string;
-  user: { id: string; email: string | null; isActive: boolean };
+  user: { email: string | null; isActive: boolean };
+  _count: { assignedPrisoners: number };
 };
 
 export type AdminOfficerDetails = AdminOfficer & {
   user: {
-    id: string;
     email: string | null;
     role: AdminUserRole;
     isActive: boolean;
@@ -82,7 +84,8 @@ export type UpdateOfficerInput = {
 
 export type CreateOfficerResponse = {
   user: {
-    id: string;
+    accountReference: string;
+    publicId: string;
     email: string | null;
     role: 'OFFICER';
     isActive: boolean;
@@ -90,7 +93,7 @@ export type CreateOfficerResponse = {
     updatedAt: string;
   };
   officerProfile: {
-    id: string;
+    publicId: string;
     name: string;
     phone: string | null;
     createdAt: string;
@@ -99,7 +102,7 @@ export type CreateOfficerResponse = {
 };
 
 export type AdminPrisoner = {
-  id: string;
+  publicId: string | null;
   name: string;
   age: number;
   gender: string;
@@ -112,12 +115,12 @@ export type AdminPrisoner = {
   profilePic: string | null;
   createdAt: string;
   updatedAt: string;
-  user: { id: string; email: string | null; isActive: boolean };
+  user: { email: string | null; isActive: boolean };
+  assignedOfficer: { publicId: string | null; name: string } | null;
 };
 
 export type AdminPrisonerDetails = AdminPrisoner & {
   user: {
-    id: string;
     email: string | null;
     role: AdminUserRole;
     isActive: boolean;
@@ -145,7 +148,8 @@ export type UpdatePrisonerInput = Partial<
 
 export type CreatePrisonerResponse = {
   user: {
-    id: string;
+    accountReference: string;
+    publicId: string;
     email: string | null;
     role: 'PRISONER';
     isActive: boolean;

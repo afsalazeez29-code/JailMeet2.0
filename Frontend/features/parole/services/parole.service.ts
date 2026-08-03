@@ -37,25 +37,31 @@ export const getPrisonerParoleRequests = async (): Promise<
 > => requestWithAuth<PrisonerParoleRequest[]>('/prisoner/parole');
 
 export const getOfficerParoleRequests = async (
-  status?: ParoleStatus,
-): Promise<OfficerParoleRequest[]> => {
-  const query = status ? `?status=${encodeURIComponent(status)}` : '';
+  status: ParoleStatus | 'ALL' = 'PENDING',
+): Promise<PaginatedResponse<OfficerParoleRequest>> => {
+  const query = `?status=${encodeURIComponent(status)}&page=1&limit=50`;
 
-  return requestWithAuth<OfficerParoleRequest[]>(`/officer/parole${query}`);
+  return requestWithAuth<PaginatedResponse<OfficerParoleRequest>>(`/officer/parole${query}`);
 };
 
 export const reviewParoleRequest = async (
-  paroleRequestId: string,
+  paroleReference: string,
   payload: ReviewParoleRequestInput,
-): Promise<OfficerParoleRequest> =>
-  requestWithAuth<OfficerParoleRequest>(
-    `/officer/parole/${paroleRequestId}/status`,
+): Promise<OfficerParoleRequest> => {
+  const request = await requestWithAuth<OfficerParoleRequest>(
+    `/officer/parole/${paroleReference}/status`,
     undefined,
     {
       method: 'PATCH',
       body: JSON.stringify(payload),
     },
   );
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('jailmeet:notifications-refresh'));
+    window.dispatchEvent(new Event('jailmeet:officer-dashboard-refresh'));
+  }
+  return request;
+};
 
 export const getAdminParoleRequests = async (
   filters?: ParoleListFilters,

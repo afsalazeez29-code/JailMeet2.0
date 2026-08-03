@@ -17,15 +17,15 @@ export default function AdminPrisonerTable({ onToggleStatus, prisoners }: Props)
   return (
     <div className="table-responsive">
       <table className="table table-hover">
-        <thead><tr><th>Name</th><th>Email</th><th>Age</th><th>Gender</th><th>Jail</th><th>Cell</th><th>Status</th><th>Created</th><th>Action</th></tr></thead>
+        <thead><tr><th>Name</th><th>Public ID</th><th>Email</th><th>Assigned Officer</th><th>Age</th><th>Gender</th><th>Jail</th><th>Cell</th><th>Status</th><th>Created</th><th>Action</th></tr></thead>
         <tbody>
           {prisoners.map((prisoner) => (
-            <tr key={prisoner.id}>
-              <td>{prisoner.name}</td><td>{prisoner.user.email}</td><td>{prisoner.age}</td><td>{prisoner.gender}</td><td>{prisoner.jailName || 'N/A'}</td><td>{prisoner.cellNumber || 'N/A'}</td>
+            <tr key={prisoner.publicId ?? prisoner.user.email ?? prisoner.name}>
+              <td>{prisoner.name}</td><td>{prisoner.publicId || 'ID unavailable'}</td><td>{prisoner.user.email}</td><td>{prisoner.assignedOfficer ? `${prisoner.assignedOfficer.name} (${prisoner.assignedOfficer.publicId || 'ID unavailable'})` : 'Unassigned'}</td><td>{prisoner.age}</td><td>{prisoner.gender}</td><td>{prisoner.jailName || 'N/A'}</td><td>{prisoner.cellNumber || 'N/A'}</td>
               <td><span className={`badge ${prisoner.user.isActive ? 'badge-success' : 'badge-danger'}`}>{prisoner.user.isActive ? 'Active' : 'Inactive'}</span></td>
               <td>{formatDate(prisoner.createdAt)}</td>
               <td>
-                <Link className="btn btn-info btn-sm mr-2" href={`/admin/prisoners/${prisoner.id}/edit`}>Edit</Link>
+                {prisoner.publicId ? <><Link className="btn btn-info btn-sm mr-2" href={`/admin/prisoners/${prisoner.publicId}`}>View</Link><Link className="btn btn-outline-info btn-sm mr-2" href={`/admin/prisoners/${prisoner.publicId}/edit`}>Edit</Link></> : null}
                 <button className="btn btn-warning btn-sm" onClick={() => onToggleStatus(prisoner)} type="button">{prisoner.user.isActive ? 'Deactivate' : 'Activate'}</button>
               </td>
             </tr>

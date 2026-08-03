@@ -1,15 +1,10 @@
 import bcrypt from 'bcrypt';
 import jwt, { SignOptions } from 'jsonwebtoken';
-import { Role } from '@prisma/client';
+import { ActionType, Role } from '@prisma/client';
 
 import config from '../../config';
 import prisma from '../../config/prisma';
-import {
-  generateUniqueVisitorPublicId,
-  isVisitorPublicIdCollision,
-  VISITOR_PUBLIC_ID_MAX_ATTEMPTS,
-  VisitorPublicIdGenerationError,
-} from '../../utils/visitor-public-id';
+import { allocateRolePublicId } from '../../utils/role-public-id';
 import {
   AuthUser,
   AuthUserPayload,
@@ -18,6 +13,7 @@ import {
   RegisterVisitorInput,
   VisitorRegistrationResult,
 } from './auth.types';
+import { recordAudit } from '../audit';
 
 const userSelect = {
   id: true,
@@ -25,8 +21,8 @@ const userSelect = {
   password: true,
   role: true,
   isActive: true,
-  adminProfile: { select: { name: true } },
-  officerProfile: { select: { name: true } },
+  adminProfile: { select: { name: true, profilePic: true } },
+  officerProfile: { select: { name: true, publicId: true, profilePic: true } },
   visitorProfile: {
     select: { name: true, publicId: true, profilePic: true },
   },
@@ -36,8 +32,8 @@ const userSelect = {
 };
 
 const getProfileName = (user: {
-  adminProfile?: { name: string } | null;
-  officerProfile?: { name: string } | null;
+  adminProfile?: { name: string; profilePic: string | null } | null;
+  officerProfile?: { name: string; publicId: string | null; profilePic: string | null } | null;
   visitorProfile?: {
     name: string;
     publicId: string | null;
@@ -59,8 +55,8 @@ const toAuthUser = (user: {
   id: string;
   email: string | null;
   role: Role;
-  adminProfile?: { name: string } | null;
-  officerProfile?: { name: string } | null;
+  adminProfile?: { name: string; profilePic: string | null } | null;
+  officerProfile?: { name: string; publicId: string | null; profilePic: string | null } | null;
   visitorProfile?: {
     name: string;
     publicId: string | null;
@@ -72,19 +68,25 @@ const toAuthUser = (user: {
     profilePic: string | null;
   } | null;
 }): AuthUser => ({
-  id: user.id,
   publicId:
-    user.visitorProfile?.publicId ?? user.prisonerProfile?.publicId ?? null,
+    user.officerProfile?.publicId ??
+    user.visitorProfile?.publicId ??
+    user.prisonerProfile?.publicId ??
+    null,
   name: getProfileName(user),
   email: user.email ?? '',
   role: user.role,
   profileImageUrl:
-    user.visitorProfile?.profilePic ?? user.prisonerProfile?.profilePic ?? null,
+    user.adminProfile?.profilePic ??
+    user.officerProfile?.profilePic ??
+    user.visitorProfile?.profilePic ??
+    user.prisonerProfile?.profilePic ??
+    null,
 });
 
-const createAccessToken = (user: AuthUser): string => {
+const createAccessToken = (userId: string, user: AuthUser): string => {
   const payload: AuthUserPayload = {
-    id: user.id,
+    id: userId,
     email: user.email,
     role: user.role,
   };
@@ -117,7 +119,7 @@ export const loginUser = async (
   }
 
   const authUser = toAuthUser(user);
-  const accessToken = createAccessToken(authUser);
+  const accessToken = createAccessToken(user.id, authUser);
 
   return { user: authUser, accessToken };
 };
@@ -157,17 +159,8 @@ export const registerVisitor = async (
 
   const hashedPassword = await bcrypt.hash(input.password, 12);
 
-  let registration: Omit<VisitorRegistrationResult, 'accessToken'> | null =
-    null;
-
-  for (
-    let attempt = 0;
-    attempt < VISITOR_PUBLIC_ID_MAX_ATTEMPTS;
-    attempt += 1
-  ) {
-    try {
-      registration = await prisma.$transaction(async (tx) => {
-        const publicId = await generateUniqueVisitorPublicId(tx);
+  const registration = await prisma.$transaction(async (tx) => {
+        const publicId = await allocateRolePublicId(tx, Role.VISITOR);
         const user = await tx.user.create({
           data: {
             email: input.email,
@@ -207,31 +200,22 @@ export const registerVisitor = async (
           publicId,
         };
 
-        return {
-          user: {
-            id: user.id,
+        const authUser: AuthUser = {
             publicId: visitorProfile.publicId,
             name: visitorProfile.name,
             email: user.email ?? '',
             role: user.role,
             profileImageUrl: null,
-          },
+        };
+
+        return {
+          user: authUser,
+          accessToken: createAccessToken(user.id, authUser),
           visitorProfile,
         };
       });
-      break;
-    } catch (error) {
-      if (isVisitorPublicIdCollision(error)) continue;
-      throw error;
-    }
-  }
 
-  if (!registration) throw new VisitorPublicIdGenerationError();
-
-  return {
-    ...registration,
-    accessToken: createAccessToken(registration.user),
-  };
+  return registration;
 };
 
 export class AuthServiceError extends Error {
@@ -288,8 +272,11 @@ export const changePassword = async (
 
   const hashedPassword = await bcrypt.hash(input.newPassword, 12);
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { password: hashedPassword },
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword, passwordChangedAt: new Date() },
+    });
+    await recordAudit({ userId: user.id, action: ActionType.UPDATE, entity: 'UserPassword', entityReference: 'SELF', result: 'SUCCESS', summary: 'Password changed successfully.' }, tx);
   });
 };
