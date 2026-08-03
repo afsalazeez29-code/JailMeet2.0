@@ -1,10 +1,12 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect } from 'react';
 
 import PrisonerFooter from './PrisonerFooter';
 import PrisonerNavbar from './PrisonerNavbar';
 import PrisonerSidebar from './PrisonerSidebar';
+import overlayStyles from '../shared/MobileSidebarOverlay.module.css';
+import { useMobileSidebar } from '../shared/useMobileSidebar';
 import s from './PrisonerTheme.module.css';
 
 type PrisonerLayoutProps = {
@@ -12,7 +14,8 @@ type PrisonerLayoutProps = {
 };
 
 export default function PrisonerLayout({ children }: PrisonerLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { close: closeSidebar, isOpen: sidebarOpen, toggle: toggleSidebar } =
+    useMobileSidebar();
 
   useEffect(() => {
     document.body.classList.remove(
@@ -37,12 +40,12 @@ export default function PrisonerLayout({ children }: PrisonerLayoutProps) {
     >
       <div className={`layout-container ${s.dashboardBody}`}>
         <PrisonerSidebar
-          onCloseSidebar={() => setSidebarOpen(false)}
+          onCloseSidebar={closeSidebar}
         />
 
         <div className="layout-page">
           <PrisonerNavbar
-            onToggleSidebar={() => setSidebarOpen((current) => !current)}
+            onToggleSidebar={toggleSidebar}
             sidebarOpen={sidebarOpen}
           />
           <div className="content-wrapper">
@@ -57,9 +60,8 @@ export default function PrisonerLayout({ children }: PrisonerLayoutProps) {
         <button
           aria-controls="layout-menu"
           aria-label="Close navigation menu overlay"
-          className="layout-overlay layout-menu-toggle border-0"
-          onClick={() => setSidebarOpen(false)}
-          style={{ display: 'block' }}
+          className={`layout-overlay layout-menu-toggle border-0 ${overlayStyles.overlay}`}
+          onClick={closeSidebar}
           type="button"
         />
       ) : null}

@@ -1,10 +1,12 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect } from 'react';
 
 import AdminFooter from './AdminFooter';
 import AdminNavbar from './AdminNavbar';
 import AdminSidebar from './AdminSidebar';
+import overlayStyles from '../shared/MobileSidebarOverlay.module.css';
+import { useMobileSidebar } from '../shared/useMobileSidebar';
 import s from './AdminTheme.module.css';
 
 type AdminLayoutProps = {
@@ -243,7 +245,8 @@ const adminFontOverrides = `
 `;
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { close: closeSidebar, isOpen: sidebarOpen, toggle: toggleSidebar } =
+    useMobileSidebar();
 
   useEffect(() => {
     document.body.classList.remove(
@@ -273,11 +276,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         }`}
       >
         <div className={`layout-container ${s.dashboardBody}`}>
-          <AdminSidebar onCloseSidebar={() => setSidebarOpen(false)} />
+          <AdminSidebar onCloseSidebar={closeSidebar} />
 
           <div className="layout-page">
             <AdminNavbar
-              onToggleSidebar={() => setSidebarOpen((current) => !current)}
+              onToggleSidebar={toggleSidebar}
               sidebarOpen={sidebarOpen}
             />
             <div className="content-wrapper">
@@ -292,9 +295,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <button
             aria-controls="layout-menu"
             aria-label="Close navigation menu overlay"
-            className="layout-overlay layout-menu-toggle border-0"
-            onClick={() => setSidebarOpen(false)}
-            style={{ display: 'block' }}
+            className={`layout-overlay layout-menu-toggle border-0 ${overlayStyles.overlay}`}
+            onClick={closeSidebar}
             type="button"
           />
         ) : null}

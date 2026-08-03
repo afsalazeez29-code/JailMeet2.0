@@ -1,11 +1,13 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect } from 'react';
 
 import VisitorFooter from './VisitorFooter';
 import VisitorNavbar from './VisitorNavbar';
 import VisitorSidebar from './VisitorSidebar';
 import { useAuth } from '@features/auth/hooks/useAuth';
+import overlayStyles from '../shared/MobileSidebarOverlay.module.css';
+import { useMobileSidebar } from '../shared/useMobileSidebar';
 import styles from './VisitorLayout.module.css';
 
 type VisitorLayoutProps = {
@@ -13,7 +15,8 @@ type VisitorLayoutProps = {
 };
 
 export default function VisitorLayout({ children }: VisitorLayoutProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { close: closeMenu, isOpen: menuOpen, toggle: toggleMenu } =
+    useMobileSidebar();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -37,11 +40,11 @@ export default function VisitorLayout({ children }: VisitorLayoutProps) {
       }`}
     >
       <div className={`layout-container ${styles.dashboardBody}`}>
-        <VisitorSidebar onCloseMenu={() => setMenuOpen(false)} />
+        <VisitorSidebar onCloseMenu={closeMenu} />
         <div className="layout-page">
           <VisitorNavbar
             user={user}
-            onToggleMenu={() => setMenuOpen((current) => !current)}
+            onToggleMenu={toggleMenu}
             menuOpen={menuOpen}
           />
           <div className="content-wrapper">
@@ -55,9 +58,8 @@ export default function VisitorLayout({ children }: VisitorLayoutProps) {
       {menuOpen && (
         <button
           aria-label="Close navigation menu overlay"
-          className="layout-overlay layout-menu-toggle border-0"
-          onClick={() => setMenuOpen(false)}
-          style={{ display: 'block' }}
+          className={`layout-overlay layout-menu-toggle border-0 ${overlayStyles.overlay}`}
+          onClick={closeMenu}
           type="button"
         />
       )}

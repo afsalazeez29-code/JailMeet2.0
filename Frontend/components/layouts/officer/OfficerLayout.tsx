@@ -1,10 +1,12 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect } from 'react';
 
 import OfficerFooter from './OfficerFooter';
 import OfficerNavbar from './OfficerNavbar';
 import OfficerSidebar from './OfficerSidebar';
+import overlayStyles from '../shared/MobileSidebarOverlay.module.css';
+import { useMobileSidebar } from '../shared/useMobileSidebar';
 import s from './OfficerTheme.module.css';
 
 type OfficerLayoutProps = {
@@ -12,7 +14,8 @@ type OfficerLayoutProps = {
 };
 
 export default function OfficerLayout({ children }: OfficerLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { close: closeSidebar, isOpen: sidebarOpen, toggle: toggleSidebar } =
+    useMobileSidebar();
 
   useEffect(() => {
     document.body.classList.remove(
@@ -37,12 +40,12 @@ export default function OfficerLayout({ children }: OfficerLayoutProps) {
     >
       <div className={`layout-container ${s.dashboardBody}`}>
         <OfficerSidebar
-          onCloseSidebar={() => setSidebarOpen(false)}
+          onCloseSidebar={closeSidebar}
         />
 
         <div className="layout-page">
           <OfficerNavbar
-            onToggleSidebar={() => setSidebarOpen((current) => !current)}
+            onToggleSidebar={toggleSidebar}
             sidebarOpen={sidebarOpen}
           />
           <div className="content-wrapper">
@@ -57,9 +60,8 @@ export default function OfficerLayout({ children }: OfficerLayoutProps) {
         <button
           aria-controls="layout-menu"
           aria-label="Close navigation menu overlay"
-          className="layout-overlay layout-menu-toggle border-0"
-          onClick={() => setSidebarOpen(false)}
-          style={{ display: 'block' }}
+          className={`layout-overlay layout-menu-toggle border-0 ${overlayStyles.overlay}`}
+          onClick={closeSidebar}
           type="button"
         />
       ) : null}
