@@ -1,0 +1,295 @@
+.page {
+  box-sizing: border-box;
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  padding:
+    max(5.5rem, env(safe-area-inset-top))
+    max(4rem, calc(env(safe-area-inset-right) + 2rem))
+    max(5rem, calc(env(safe-area-inset-bottom) + 2rem))
+    max(6vw, calc(env(safe-area-inset-left) + 2rem));
+  overflow-x: hidden;
+  color: #15131a;
+  background-color: #08090b;
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(3, 4, 6, 0.7) 0%,
+      rgba(3, 4, 6, 0.32) 35%,
+      rgba(3, 4, 6, 0.02) 70%
+    ),
+    url("/images/landing/GlobalErrorPage.PNG");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  font-family: var(--font-montserrat, "Montserrat", Arial, sans-serif);
+}
+
+.page *,
+.page *::before,
+.page *::after {
+  box-sizing: border-box;
+}
+
+.card {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 29rem);
+  padding: clamp(2.25rem, 4vw, 3.5rem);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(255, 74, 23, 0.38);
+  border-top: 5px solid #ff4a17;
+  border-radius: 1.25rem;
+  box-shadow:
+    0 1.75rem 4.5rem rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(255, 255, 255, 0.12);
+  text-align: center;
+}
+
+.code {
+  margin: 0;
+  color: #f04a16;
+  font-family: var(--font-raleway, "Raleway", Arial, sans-serif);
+  font-size: clamp(4.75rem, 8vw, 7rem);
+  font-weight: 800;
+  letter-spacing: -0.055em;
+  line-height: 0.82;
+}
+
+.card h1 {
+  margin: 1.45rem 0 0.8rem;
+  color: #17141d;
+  font-family: var(--font-raleway, "Raleway", Arial, sans-serif);
+  font-size: clamp(1.75rem, 3vw, 2.35rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+}
+
+.message {
+  max-width: 22rem;
+  margin: 0 auto;
+  color: #595563;
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+.actions {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.primaryAction,
+.secondaryAction {
+  min-height: 3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0.78rem 1.1rem;
+  border-radius: 0.65rem;
+  font: inherit;
+  font-size: 0.94rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.primaryAction {
+  color: #ffffff;
+  background: var(--accent-color, #ff4a17);
+  border: 1px solid var(--accent-color, #ff4a17);
+  box-shadow: none;
+  transform: none;
+  transition: 0.3s;
+}
+
+.secondaryAction {
+  color: #211e26;
+  background: #ffffff;
+  border: 1px solid #77717e;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.primaryAction:hover {
+  background: color-mix(
+    in srgb,
+    var(--accent-color, #ff4a17),
+    transparent 20%
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--accent-color, #ff4a17),
+    transparent 20%
+  );
+  box-shadow: none;
+  transform: none;
+}
+
+.secondaryAction:hover {
+  color: #f04a16;
+  background: #fff8f5;
+  border-color: #f04a16;
+  transform: translateY(-1px);
+}
+
+.primaryAction:focus-visible,
+.secondaryAction:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 4px;
+  box-shadow: 0 0 0 6px rgba(240, 74, 22, 0.72);
+}
+
+.assurance {
+  position: absolute;
+  left: 50%;
+  bottom: max(1.35rem, env(safe-area-inset-bottom));
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.78rem;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.assurance strong {
+  color: #ff5a1f;
+}
+
+@media (max-width: 900px) {
+  .page {
+    justify-content: flex-start;
+    padding-right: max(2rem, calc(env(safe-area-inset-right) + 1.5rem));
+    padding-left: max(2rem, calc(env(safe-area-inset-left) + 1.5rem));
+    background-image:
+      linear-gradient(
+        90deg,
+        rgba(3, 4, 6, 0.58) 0%,
+        rgba(3, 4, 6, 0.12) 70%
+      ),
+      url("/images/landing/GlobalErrorPage.PNG");
+    background-position: center;
+  }
+
+  .card {
+    width: min(54vw, 27rem);
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    min-height: 100dvh;
+    align-items: flex-start;
+    justify-content: center;
+    padding:
+      max(13.75rem, 33dvh)
+      max(1rem, calc(env(safe-area-inset-right) + 1rem))
+      max(4.75rem, calc(env(safe-area-inset-bottom) + 3.5rem))
+      max(1rem, calc(env(safe-area-inset-left) + 1rem));
+    overflow-y: auto;
+    background-image:
+      linear-gradient(
+        180deg,
+        rgba(3, 4, 6, 0.02) 0%,
+        rgba(3, 4, 6, 0.06) 36%,
+        rgba(3, 4, 6, 0.82) 64%,
+        #08090b 100%
+      ),
+      url("/images/landing/GlobalErrorPage.PNG");
+    background-position: center top;
+    background-size: auto clamp(21rem, 55dvh, 29rem);
+  }
+
+  .card {
+    width: 100%;
+    padding: clamp(1.6rem, 7vw, 2.15rem);
+    border-top-width: 4px;
+    border-radius: 1rem;
+  }
+
+  .code {
+    font-size: clamp(4rem, 22vw, 5.4rem);
+  }
+
+  .card h1 {
+    margin-top: 1.1rem;
+    font-size: clamp(1.55rem, 7vw, 1.95rem);
+  }
+
+  .message {
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .actions {
+    margin-top: 1.5rem;
+  }
+
+  .primaryAction,
+  .secondaryAction {
+    width: 100%;
+    min-height: 3.1rem;
+  }
+
+  .assurance {
+    position: absolute;
+    bottom: max(1.1rem, env(safe-area-inset-bottom));
+    font-size: 0.67rem;
+  }
+}
+
+@media (max-width: 370px) {
+  .page {
+    padding-top: max(13rem, 34dvh);
+  }
+
+  .card {
+    padding: 1.35rem;
+  }
+
+  .code {
+    font-size: 3.75rem;
+  }
+
+  .card h1 {
+    margin-top: 0.9rem;
+    font-size: 1.45rem;
+  }
+
+  .actions {
+    gap: 0.6rem;
+    margin-top: 1.2rem;
+  }
+}
+
+@media (max-height: 580px) and (max-width: 640px) {
+  .page {
+    padding-top: 11.5rem;
+  }
+
+  .assurance {
+    position: static;
+    margin: 1.5rem auto 0;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primaryAction,
+  .secondaryAction {
+    transition: none;
+  }
+}

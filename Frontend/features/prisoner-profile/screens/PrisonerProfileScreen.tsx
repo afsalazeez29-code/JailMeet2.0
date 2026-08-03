@@ -14,7 +14,7 @@ import { getPrisonerProfile } from '@features/prisoner-profile/services/prisoner
 import type { PrisonerProfileData } from '@features/prisoner-profile/types';
 import styles from './PrisonerProfileScreen.module.css';
 
-const fallbackPrisonerImage = '/images/avatars/prisoner-default.png';
+const fallbackPrisonerImage = '/images/avatars/prisoner-default.PNG';
 const notProvided = 'Not provided';
 
 const displayValue = (value: string | number | null | undefined): string =>
@@ -35,17 +35,21 @@ const formatDate = (value: string | null): string => {
 };
 
 function ProfileImage({ name, src }: { name: string; src: string | null }) {
-  const [imageSrc, setImageSrc] = useState(src || fallbackPrisonerImage);
+  const [imageSrc, setImageSrc] = useState(src?.trim() || fallbackPrisonerImage);
 
   useEffect(() => {
-    setImageSrc(src || fallbackPrisonerImage);
+    setImageSrc(src?.trim() || fallbackPrisonerImage);
   }, [src]);
 
   return (
     <img
       alt={`${name} profile`}
       className={styles.profileImage}
-      onError={() => setImageSrc(fallbackPrisonerImage)}
+      onError={(event) => {
+        if (event.currentTarget.dataset.fallbackApplied === 'true') return;
+        event.currentTarget.dataset.fallbackApplied = 'true';
+        setImageSrc(fallbackPrisonerImage);
+      }}
       src={imageSrc}
     />
   );

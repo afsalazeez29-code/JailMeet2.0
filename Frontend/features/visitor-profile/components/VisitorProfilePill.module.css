@@ -10,7 +10,7 @@
   align-items: center;
   gap: 10px;
   max-width: 230px;
-  padding: 4px 16px 4px 4px;
+  padding: 1px 16px 1px 1px;
   border: 1px solid #e5e7eb;
   border-radius: 999px;
   background: #ffffff;
@@ -48,8 +48,8 @@
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: block;
   object-fit: cover;
   border: 2px solid #f3f4f6;
@@ -95,6 +95,7 @@
     border-color 0.18s ease,
     box-shadow 0.18s ease;
   cursor: pointer;
+  flex: 0 0 auto;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -120,10 +121,14 @@
   width: auto;
   max-width: 100%;
   box-shadow: 0 1px 10px rgba(0, 0, 0, 0.04);
+  position: sticky !important;
+  top: 0.8rem;
+  z-index: 1050;
   overflow: visible;
 }
 
 .mobileLogoButton {
+  flex: 0 0 auto;
   border-radius: 999px;
   cursor: pointer;
   touch-action: manipulation;
@@ -167,14 +172,14 @@
   }
 
   .profilePill {
-    padding: 3px;
+    padding: 1px;
     gap: 0;
     max-width: none;
   }
 
   .avatar {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
   }
 
   .profileName {

@@ -1,35 +1,86 @@
 .dashboardRoot {
-  height: 100dvh;
-  min-height: 100dvh !important;
-  display: grid !important;
-  grid-template-rows: minmax(0, 1fr) auto;
-  overflow: hidden;
+  min-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .dashboardBody {
-  flex: 1 1 auto;
+  flex: 1 0 auto;
   min-width: 0;
-  min-height: 0 !important;
-  overflow: hidden;
+  width: 100%;
+  min-height: 0;
+  display: flex !important;
+  align-items: stretch;
+  overflow: visible;
 }
 
 .mainContent {
   flex: 1 1 auto;
   min-width: 0;
+  width: 100%;
   min-height: 0;
   overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  overflow-y: visible;
+  overscroll-behavior: auto;
 }
 
+.dashboardRoot :global(.layout-menu) {
+  position: static !important;
+  inset: auto !important;
+  z-index: auto !important;
+  flex: 0 0 16.25rem !important;
+  width: 16.25rem !important;
+  min-width: 16.25rem !important;
+  max-width: 16.25rem !important;
+  height: auto !important;
+  min-height: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  transform: translateX(0) !important;
+}
+
+
 .dashboardRoot :global(.layout-page) {
-  height: 100%;
+  height: auto;
   min-height: 0 !important;
-  overflow: hidden !important;
+  min-width: 0 !important;
+  width: calc(100% - 16.25rem) !important;
+  flex: 1 1 auto !important;
+  overflow: visible !important;
 }
 
 .dashboardRoot :global(.content-wrapper) {
   height: auto;
   min-height: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
+
+@media (max-width: 1199.98px) {
+  .dashboardRoot :global(.layout-menu) {
+    position: fixed !important;
+    inset: 0 auto 0 0 !important;
+    z-index: 1040 !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important;
+    transform: translateX(-100%) !important;
+  }
+
+  .dashboardRoot :global(.layout-menu-expanded .layout-menu),
+  .dashboardRoot:global(.layout-menu-expanded) :global(.layout-menu) {
+    transform: translateX(0) !important;
+  }
+
+  .dashboardRoot :global(.layout-page) {
+    width: 100% !important;
+  }
+}
+
+
+
+
+
+
+

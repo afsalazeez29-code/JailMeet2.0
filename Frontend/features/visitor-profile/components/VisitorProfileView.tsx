@@ -54,7 +54,7 @@ export default function VisitorProfileView({ profileData }: { profileData: Visit
         {success ? <SuccessAlert role="status">{success}</SuccessAlert> : null}
         <section className={styles.hero}>
           <button className={styles.avatarButton} onClick={() => setPictureOpen(true)} type="button" aria-label="Change profile picture">
-            <img src={user.profileImageUrl || DEFAULT_AVATAR} alt={`${display(user.name)} profile picture`} />
+            <img src={user.profileImageUrl?.trim() || DEFAULT_AVATAR} alt={`${display(user.name)} profile picture`} onLoad={(event) => { delete event.currentTarget.dataset.fallbackApplied; }} onError={(event) => { if (event.currentTarget.dataset.fallbackApplied === 'true') return; event.currentTarget.dataset.fallbackApplied = 'true'; event.currentTarget.src = DEFAULT_AVATAR; }} />
             <span><Pencil aria-hidden="true" /></span>
           </button>
           <div className={styles.identity}>

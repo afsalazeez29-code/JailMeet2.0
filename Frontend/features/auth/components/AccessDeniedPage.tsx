@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -10,7 +9,8 @@ import {
   navigateToLogin,
 } from '@features/auth/services/navigation.service';
 
-import styles from './AccessDeniedPage.module.css';
+import ErrorPage from './ErrorPage';
+import styles from './RoleGuard.module.css';
 
 export default function AccessDeniedPage() {
   const auth = useAuth();
@@ -32,36 +32,27 @@ export default function AccessDeniedPage() {
 
   if (auth.error || !auth.user) {
     return (
-      <main className={styles.page}>
-        <section className={styles.card} role="alert">
-          <h1>Unable to verify your session</h1>
-          <p>{auth.error ?? 'Please sign in again.'}</p>
-          <button type="button" onClick={auth.reload}>
-            Try Again
-          </button>
-        </section>
-      </main>
+      <ErrorPage
+        code="500"
+        title="Unable to Verify Your Session"
+        message="We could not verify your session. Please try again."
+        onRetry={auth.reload}
+        secondaryAction={{ href: '/', label: 'Return to Home', kind: 'home' }}
+      />
     );
   }
 
   return (
-    <main className={styles.page}>
-      <section className={styles.card}>
-        <span className={styles.code}>403</span>
-        <h1>Access Denied</h1>
-        <p>You do not have permission to access this page.</p>
-        <div className={styles.actions}>
-          <Link
-            className={styles.primaryAction}
-            href={getRoleDashboardRoute(auth.user.role)}
-          >
-            Go to My Dashboard
-          </Link>
-          <Link className={styles.secondaryAction} href="/">
-            Return to Home
-          </Link>
-        </div>
-      </section>
-    </main>
+    <ErrorPage
+      code="403"
+      title="Access Denied"
+      message="You do not have permission to access this page."
+      primaryAction={{
+        href: getRoleDashboardRoute(auth.user.role),
+        label: 'Go to My Dashboard',
+        kind: 'dashboard',
+      }}
+      secondaryAction={{ href: '/', label: 'Return to Home', kind: 'home' }}
+    />
   );
 }

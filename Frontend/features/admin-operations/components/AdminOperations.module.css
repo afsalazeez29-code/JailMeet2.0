@@ -10,7 +10,7 @@
 .muted { color: #697a8d; font-size: .88rem; }
 .tableWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .actions { display: flex; flex-wrap: wrap; gap: .5rem; }
-.globalSearch { position: relative; flex: 1 1 360px; max-width: 460px; min-width: 130px; margin-inline: auto; }
+.globalSearch { position: relative; flex: 1 1 360px; width: 100%; max-width: 460px; min-width: 0; margin-inline: auto; }
 .globalSearchForm { min-height: 40px; display: flex; align-items: center; gap: .55rem; border: 1px solid #e5e7eb; border-radius: 999px; background: #fff; color: #5f6677; padding: .35rem .9rem; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
 .globalSearchForm input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: #111; }
 .searchDropdown { position: absolute; z-index: 1100; top: calc(100% + .55rem); left: 0; right: 0; max-height: min(420px, calc(100dvh - 90px)); overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 14px; background: #fff; box-shadow: 0 14px 34px rgba(28,31,36,.16); padding: .45rem; }
@@ -41,7 +41,7 @@
 .healthTable td { vertical-align: middle; word-break: normal; overflow-wrap: break-word; }
 .profileCard { display: grid; grid-template-columns: minmax(180px, 260px) 1fr; gap: 1.5rem; align-items: center; border: 1px solid #e5e7eb; border-radius: 14px; background: #fff; box-shadow: 0 3px 14px rgba(0,0,0,.07); padding: 1.5rem; }
 .profileImageColumn { display: grid; justify-items: center; gap: .7rem; }
-.profileImageColumn img { width: min(180px, 100%); aspect-ratio: 1; border: 1px solid #e5e7eb; border-radius: 28px; object-fit: cover; background: #f3f4f6; }
+.profileImageColumn img { display: block; width: min(196px, 100%); aspect-ratio: 1; border: 1px solid #e5e7eb; border-radius: 22px; object-fit: cover; object-position: center; background: #f3f4f6; }
 .profileGrid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .85rem; margin: 0; }
 .profileGrid div { border-bottom: 1px solid #eceef1; padding: .65rem 0; min-width: 0; }
 .profileGrid dt { color: #697a8d; font-size: .8rem; }
@@ -50,6 +50,10 @@
 .activityList article { display: grid; gap: .15rem; border-bottom: 1px solid #eceef1; padding: .65rem 0; }
 .activityList span, .activityList time { color: #697a8d; font-size: .82rem; }
 @media (max-width: 640px) { .profileCard { grid-template-columns: 1fr; } .profileGrid { grid-template-columns: 1fr; width: 100%; } }
+@media (max-width: 640px) { .profileImageColumn img { width: min(132px, 100%); } }
 @media (max-width: 640px) { .healthTable { min-width: 0; display: block; } .healthTable thead { display: none; } .healthTable tbody { display: grid; gap: .85rem; } .healthTable tr { display: grid; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; padding: .75rem; } .healthTable td { display: grid; grid-template-columns: minmax(115px, 40%) 1fr; gap: .6rem; border: 0; border-bottom: 1px solid #f0f1f3; padding: .5rem 0; } .healthTable td:last-child { border-bottom: 0; } .healthTable td::before { color: #697a8d; font-weight: 600; } .healthTable td:nth-child(1)::before { content: 'Reference'; } .healthTable td:nth-child(2)::before { content: 'Prisoner'; } .healthTable td:nth-child(3)::before { content: 'Status'; } .healthTable td:nth-child(4)::before { content: 'Last Check-up'; } .healthTable td:nth-child(5)::before { content: 'Follow-up'; } .healthTable td:nth-child(6)::before { content: 'Responsible Officer'; } .healthTable td:nth-child(7)::before { content: 'Attention'; } .healthTable td:nth-child(8)::before { content: 'Action'; } }
-@media (max-width: 575px) { .globalSearch { flex-basis: 120px; } .searchDropdown { position: fixed; top: 70px; left: 10px; right: 10px; } }
+@media (max-width: 1024px) { .globalSearch { max-width: 360px; } }
+@media (max-width: 767px) { .globalSearch { max-width: 190px; } }
+@media (max-width: 575px) { .globalSearch { flex-basis: 120px; } .globalSearchForm { gap: .4rem; padding-inline: .65rem; } .globalSearchForm input { font-size: .75rem; } .searchDropdown { position: fixed; top: 70px; left: 10px; right: 10px; } }
+@media (max-width: 430px) { .globalSearch { flex: 1 1 auto; max-width: clamp(96px, 28vw, 120px); } }
 @media (max-width: 575px) { .page { padding: 1rem .75rem; } .filters > * { flex-basis: 100%; } }

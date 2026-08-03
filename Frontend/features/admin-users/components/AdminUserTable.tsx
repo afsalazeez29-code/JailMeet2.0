@@ -16,6 +16,16 @@ const formatDate = (value: string): string =>
     new Date(value),
   );
 
+const fallbackProfileImages: Record<AdminUser['role'], string> = {
+  ADMIN: '/images/avatars/admin-default.PNG',
+  OFFICER: '/images/avatars/officer-default.PNG',
+  PRISONER: '/images/avatars/prisoner-default.PNG',
+  VISITOR: '/images/avatars/visitor-default.png',
+};
+
+const profileImageFor = (user: AdminUser): string =>
+  user.profilePic?.trim() || fallbackProfileImages[user.role];
+
 export default function AdminUserTable({
   onSelectUser,
   onToggleStatus,
@@ -41,7 +51,7 @@ export default function AdminUserTable({
         <tbody>
           {users.map((user) => (
             <tr key={user.accountReference}>
-              <td><div className={styles.identity}><img alt="" className={styles.avatar} src={user.profilePic || '/images/avatars/visitor-default.png'}/><span>{user.name || 'Not provided'}<small className="d-block text-muted">{user.publicId || user.role}</small></span></div></td>
+              <td><div className={styles.identity}><img alt="" className={styles.avatar} src={profileImageFor(user)} onError={(event) => { if (event.currentTarget.dataset.fallbackApplied === 'true') return; event.currentTarget.dataset.fallbackApplied = 'true'; event.currentTarget.src = fallbackProfileImages[user.role]; }}/><span>{user.name || 'Not provided'}<small className="d-block text-muted">{user.publicId || user.role}</small></span></div></td>
               <td>{user.email || 'No email'}</td>
               <td>{user.role}</td>
               <td><div className={styles.actions}>

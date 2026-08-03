@@ -1,0 +1,18 @@
+.profileImage {
+  display: block;
+  width: 104px;
+  height: 104px;
+  flex: 0 0 104px;
+  border-radius: 22px;
+  background: #f3f4f6;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (max-width: 575px) {
+  .profileImage {
+    width: 92px;
+    height: 92px;
+    flex-basis: 92px;
+  }
+}

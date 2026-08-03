@@ -21,6 +21,7 @@ import AdminFilters from '../../../components/common/AdminFilters';
 import AdminUserTable from '@features/admin-users/components/AdminUserTable';
 import Pagination from '../../../components/common/Pagination';
 import UserStatusModal from '@features/admin-users/components/UserStatusModal';
+import styles from '@features/admin-users/components/AdminLists.module.css';
 
 const roleOptions = [
   { label: 'All Roles', value: '' },
@@ -167,8 +168,8 @@ export default function AdminUsersPage() {
 
 function AdminShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="container" style={{ position: 'absolute', top: '70px' }}>
-      <div className="page-inner">{children}</div>
+    <div className={`container ${styles.pageShell}`}>
+      <div className={`page-inner ${styles.pageInner}`}>{children}</div>
     </div>
   );
 }

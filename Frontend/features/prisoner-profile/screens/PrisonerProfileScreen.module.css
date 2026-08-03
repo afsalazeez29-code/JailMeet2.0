@@ -45,13 +45,15 @@
 }
 
 .profileImage {
-  width: 132px;
-  height: 132px;
+  display: block;
+  width: 144px;
+  height: 144px;
   flex: 0 0 auto;
   border: 4px solid #fff0eb;
-  border-radius: 50%;
+  border-radius: 22px;
   background: #f8fafc;
   object-fit: cover;
+  object-position: center;
 }
 
 .profileSummary {

@@ -13,6 +13,7 @@ import AdminPrisonerTable from '@features/admin-users/components/AdminPrisonerTa
 import Pagination from '../../../components/common/Pagination';
 import UserStatusModal from '@features/admin-users/components/UserStatusModal';
 import { AnimatedButtonText } from '@components/common/AnimatedButtonText';
+import styles from '@features/admin-users/components/AdminLists.module.css';
 
 export default function AdminPrisonersPage() {
   const protectedPage = useProtectedPage();
@@ -34,6 +35,6 @@ export default function AdminPrisonersPage() {
   if (protectedPage.isForbidden || error === 'Access denied') return <Shell><ForbiddenAlert /></Shell>;
   return <Shell><div className="d-flex justify-content-between align-items-center mb-3"><h3 className="fw-bold mb-0">Prisoners</h3><Link className="btn btn-primary" href="/admin/prisoners/new"><AnimatedButtonText>Add Prisoner</AnimatedButtonText></Link></div>{error || protectedPage.error ? <ErrorAlert>{error || protectedPage.error}</ErrorAlert> : null}<AdminFilters search={search} onSearchChange={(value) => { setSearch(value); setPage(1); }} /><div className="card"><div className="card-body"><AdminPrisonerTable prisoners={data?.items ?? []} onToggleStatus={(prisoner) => setModalUser(toUser(prisoner))} />{data ? <Pagination pagination={data.pagination} onPageChange={setPage} /> : null}</div></div><UserStatusModal user={modalUser} processing={processing} onCancel={() => setModalUser(null)} onConfirm={confirm} /></Shell>;
 }
-function Shell({ children }: { children: React.ReactNode }) { return <div className="container" style={{ position: 'absolute', top: '70px' }}><div className="page-inner">{children}</div></div>; }
+function Shell({ children }: { children: React.ReactNode }) { return <div className={`container ${styles.pageShell}`}><div className={`page-inner ${styles.pageInner}`}>{children}</div></div>; }
 
 

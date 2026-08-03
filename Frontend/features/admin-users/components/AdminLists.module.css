@@ -1,5 +1,8 @@
-.wrap { width: 100%; overflow-x: auto; padding: .2rem; }
-.table { min-width: 820px; border-collapse: separate; border-spacing: 0 .55rem; }
+.pageShell { position: static; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; }
+.pageInner { width: 100%; max-width: 100%; min-width: 0; }
+.pageInner :global(.card), .pageInner :global(.card-body) { width: 100%; max-width: 100%; min-width: 0; }
+.wrap { width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; padding: .2rem; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
+.table { width: 100%; min-width: 820px; border-collapse: separate; border-spacing: 0 .55rem; }
 .table thead th { border: 0; color: #4b5563; white-space: nowrap; }
 .table tbody tr { background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.05); transition: transform .18s ease, box-shadow .18s ease; }
 .table tbody tr:hover { transform: translateY(-1px); box-shadow: 0 5px 15px rgba(0,0,0,.09); }

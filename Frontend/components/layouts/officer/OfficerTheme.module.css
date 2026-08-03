@@ -1,4 +1,5 @@
-.shell {
+.shell,
+.dashboardRoot {
   --role-orange: #ff4a17;
   --role-orange-soft: #fff0eb;
   --role-black: #111111;
@@ -70,24 +71,25 @@
 }
 
 .sidebar {
-  position: fixed !important;
-  inset: 0 auto 0 0 !important;
-  z-index: 1040 !important;
+  position: static !important;
+  inset: auto !important;
+  z-index: auto !important;
   width: var(--role-sidebar-width) !important;
   min-width: var(--role-sidebar-width) !important;
   max-width: var(--role-sidebar-width) !important;
-  height: 100vh !important;
-  min-height: 100vh !important;
+  height: auto !important;
+  min-height: auto !important;
   display: flex !important;
   flex-direction: column !important;
   background: var(--role-white);
   color: var(--role-black);
   overflow-x: hidden !important;
-  overflow-y: auto !important;
+  overflow-y: visible !important;
   transform: translateX(0) !important;
   transition: transform var(--role-transition-normal) !important;
   box-sizing: border-box;
 }
+
 
 .sidebarBrand {
   display: flex;
@@ -257,7 +259,7 @@
   align-items: center;
   gap: 10px;
   max-width: 230px;
-  padding: 4px 16px 4px 4px;
+  padding: 1px 16px 1px 1px;
   border: 1px solid #e5e7eb;
   border-radius: 999px;
   background: #ffffff;
@@ -305,8 +307,8 @@
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -357,6 +359,7 @@
     box-shadow 0.25s ease,
     color 0.25s ease;
   cursor: pointer;
+  flex: 0 0 auto;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -384,6 +387,8 @@
 }
 
 .officerNavbar {
+  display: flex !important;
+  align-items: center;
   width: calc(100% - (1.5rem * 2)) !important;
   max-width: calc(100% - (1.5rem * 2)) !important;
   min-width: 0 !important;
@@ -395,7 +400,9 @@
   background: #111111 !important;
   color: #ffffff !important;
   border-color: #111111 !important;
-  position: relative;
+  position: sticky !important;
+  top: 0.75rem;
+  z-index: 1050;
   height: 3.875rem;
   padding: 0 1.5rem;
   flex-wrap: nowrap;
@@ -403,6 +410,7 @@
 }
 
 .mobileLogoButton {
+  flex: 0 0 auto;
   border-radius: 999px;
   cursor: pointer;
   touch-action: manipulation;
@@ -428,7 +436,14 @@
 
 
 .navbarNavRight {
-  flex: 1 1 auto;
+  flex: 0 0 auto !important;
+  min-width: 0;
+  width: auto;
+  margin-left: 0;
+}
+
+.navbarNavRight :global(.navbar-nav) {
+  flex: 0 0 auto;
   min-width: 0;
 }
 
@@ -580,14 +595,14 @@
   }
 
   .profilePill {
-    padding: 3px;
+    padding: 1px;
     gap: 0;
     max-width: none;
   }
 
   .avatar {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
   }
 
   .profileName {
@@ -678,37 +693,101 @@
 }
 
 .dashboardRoot {
-  height: 100dvh;
-  min-height: 100dvh !important;
-  display: grid !important;
-  grid-template-rows: minmax(0, 1fr) auto;
-  overflow: hidden;
+  min-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .dashboardBody {
-  flex: 1 1 auto;
+  flex: 1 0 auto;
   min-width: 0;
-  min-height: 0 !important;
-  overflow: hidden;
+  width: 100%;
+  min-height: 0;
+  display: flex !important;
+  align-items: stretch;
+  overflow: visible;
+}
+
+.dashboardRoot :global(.layout-menu) {
+  position: static !important;
+  inset: auto !important;
+  z-index: auto !important;
+  flex: 0 0 var(--role-sidebar-width) !important;
+  width: var(--role-sidebar-width) !important;
+  min-width: var(--role-sidebar-width) !important;
+  max-width: var(--role-sidebar-width) !important;
+  height: auto !important;
+  min-height: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  transform: translateX(0) !important;
 }
 
 .mainContent {
   flex: 1 1 auto;
   min-width: 0;
+  width: 100%;
   min-height: 0;
   overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  overflow-y: visible;
+  overscroll-behavior: auto;
+}
+
+@media (max-width: 1199.98px) {
+  .dashboardRoot :global(.layout-menu) {
+    position: fixed !important;
+    inset: 0 auto 0 0 !important;
+    z-index: 1040 !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important;
+    transform: translateX(-100%) !important;
+  }
+
+  .dashboardRoot:global(.layout-menu-expanded) :global(.layout-menu) {
+    transform: translateX(0) !important;
+  }
 }
 
 .dashboardRoot :global(.layout-page) {
-  height: 100%;
+  height: auto;
   min-height: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 
 .dashboardRoot :global(.content-wrapper) {
   height: auto;
   min-height: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
+
+@media (max-width: 991px) {
+  .mobileLogoButton {
+    margin-left: 0 !important;
+    margin-right: 0.75rem !important;
+  }
+}
+
+@media (max-width: 575px) {
+  .profileActions {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 430px) {
+  .mobileLogoButton {
+    margin-right: 0.5rem !important;
+  }
+
+  .profileActions {
+    gap: 6px;
+  }
+}
+
+
+
+
+
+

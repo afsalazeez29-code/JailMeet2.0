@@ -1,4 +1,5 @@
-.shell {
+.shell,
+.dashboardRoot {
   --role-orange: #ff4a17;
   --role-orange-soft: #fff0eb;
   --role-black: #111111;
@@ -69,24 +70,25 @@
 }
 
 .sidebar {
-  position: fixed !important;
-  inset: 0 auto 0 0 !important;
-  z-index: 1040 !important;
+  position: static !important;
+  inset: auto !important;
+  z-index: auto !important;
   width: var(--role-sidebar-width) !important;
   min-width: var(--role-sidebar-width) !important;
   max-width: var(--role-sidebar-width) !important;
-  height: 100vh !important;
-  min-height: 100vh !important;
+  height: auto !important;
+  min-height: auto !important;
   display: flex !important;
   flex-direction: column !important;
   background: var(--role-white) !important;
   color: var(--role-black) !important;
   overflow-x: hidden !important;
-  overflow-y: auto !important;
+  overflow-y: visible !important;
   transform: translateX(0) !important;
   transition: transform var(--role-transition-normal) !important;
   box-sizing: border-box;
 }
+
 
 .sidebarBrand {
   display: flex;
@@ -248,7 +250,7 @@
   align-items: center;
   gap: 10px;
   max-width: 230px;
-  padding: 4px 16px 4px 4px;
+  padding: 1px 16px 1px 1px;
   border: 1px solid #e5e7eb;
   border-radius: 999px;
   background: #ffffff;
@@ -295,8 +297,8 @@
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -330,6 +332,8 @@
 }
 
 .adminNavbar {
+  display: flex !important;
+  align-items: center;
   width: calc(100% - (1.5rem * 2)) !important;
   max-width: calc(100% - (1.5rem * 2)) !important;
   min-width: 0 !important;
@@ -341,7 +345,9 @@
   background: #36255C !important;
   color: #ffffff !important;
   border-color: #36255C !important;
-  position: relative;
+  position: sticky !important;
+  top: 0.75rem;
+  z-index: 1050;
   height: 3.875rem;
   padding: 0 1.5rem;
   flex-wrap: nowrap;
@@ -349,6 +355,7 @@
 }
 
 .mobileLogoButton {
+  flex: 0 0 auto;
   border-radius: 999px;
   cursor: pointer;
   touch-action: manipulation;
@@ -407,7 +414,14 @@
 }
 
 .navbarNavRight {
-  flex: 1 1 auto;
+  flex: 0 0 auto !important;
+  min-width: 0;
+  width: auto;
+  margin-left: 0;
+}
+
+.navbarNavRight :global(.navbar-nav) {
+  flex: 0 0 auto;
   min-width: 0;
 }
 
@@ -438,6 +452,7 @@
     box-shadow 0.25s ease,
     color 0.25s ease;
   cursor: pointer;
+  flex: 0 0 auto;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -503,11 +518,11 @@
 
 .statCard {
   height: 100%;
-  border: 1px solid var(--role-border);
+  border: 1px solid #36255C;
   border-radius: var(--role-card-radius);
-  background: var(--role-white);
+  background: #36255C;
   box-shadow: var(--role-card-shadow);
-  color: var(--role-black);
+  color: #ffffff;
   text-decoration: none;
   transition:
     transform var(--role-transition-normal),
@@ -517,14 +532,18 @@
 }
 
 .statCardInteractive:hover {
-  border-color: rgba(255, 74, 23, 0.35);
-  box-shadow: 0 6px 18px rgba(17, 17, 17, 0.1);
+  border-color: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 8px 20px rgba(54, 37, 92, 0.3);
   transform: translateY(-2px);
 }
 
 .statCardBody {
   min-height: 160px;
   padding: 30px;
+}
+
+.statCardBody > svg {
+  color: #ffffff;
 }
 
 .statIconBox {
@@ -540,13 +559,13 @@
 .statTitle {
   display: block;
   margin-bottom: 8px;
-  color: var(--role-black);
+  color: #ffffff;
   font-weight: 600;
 }
 
 .statValue {
   margin: 0;
-  color: var(--role-black);
+  color: #ffffff;
   font-size: 1.75rem;
   font-weight: 700;
 }
@@ -608,14 +627,14 @@
   }
 
   .profilePill {
-    padding: 3px;
+    padding: 1px;
     gap: 0;
     max-width: none;
   }
 
   .avatar {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
   }
 
   .profileName {
@@ -721,30 +740,48 @@
 }
 
 .dashboardRoot {
-  height: 100dvh;
-  min-height: 100dvh !important;
-  display: grid !important;
-  grid-template-rows: minmax(0, 1fr) auto;
-  overflow: hidden;
+  min-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .dashboardBody {
-  flex: 1 1 auto;
+  flex: 1 0 auto;
   min-width: 0;
-  min-height: 0 !important;
-  overflow: hidden;
+  width: 100%;
+  min-height: 0;
+  display: flex !important;
+  align-items: stretch;
+  overflow: visible;
+}
+
+.dashboardRoot :global(.layout-menu) {
+  position: static !important;
+  inset: auto !important;
+  z-index: auto !important;
+  flex: 0 0 var(--role-sidebar-width) !important;
+  width: var(--role-sidebar-width) !important;
+  min-width: var(--role-sidebar-width) !important;
+  max-width: var(--role-sidebar-width) !important;
+  height: auto !important;
+  min-height: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  transform: translateX(0) !important;
 }
 
 .mainContent {
   flex: 1 1 auto;
   min-width: 0;
+  width: 100%;
   min-height: 0;
   overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  overflow-y: visible;
+  overscroll-behavior: auto;
 }
 
-.welcomeCard,
 .summaryCard {
   border: 1px solid var(--role-border);
   border-radius: var(--role-card-radius);
@@ -754,10 +791,37 @@
   padding: 1.25rem;
 }
 
-.welcomeCard h1 { margin: 0 0 .75rem; font-size: clamp(1.35rem, 2vw, 1.8rem); }
-.welcomeCard p { margin: .25rem 0; overflow-wrap: break-word; }
+.welcomeCard {
+  position: relative;
+  border: 0 solid #d9dee3;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12);
+  color: var(--role-black);
+  padding: 1.5rem 5rem 1.5rem 1.5rem;
+}
+
+.welcomeCard h1 {
+  margin: 0 0 1rem;
+  color: var(--role-black);
+  font-size: calc(1.3625rem + 1.35vw);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.welcomeCard p {
+  margin: 0 0 1rem;
+  overflow-wrap: anywhere;
+}
+
+.welcomeCard p:last-of-type {
+  margin-bottom: 0;
+}
 
 .adminIconButton {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
   width: 42px;
   height: 42px;
   display: inline-flex;
@@ -773,14 +837,100 @@
 .adminIconButton:focus-visible { outline: 3px solid rgba(54,37,92,.3); outline-offset: 2px; }
 .adminIconButton:disabled { opacity: .55; cursor: not-allowed; }
 
+.officerIdentity {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.officerWorkloadAvatar {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border: 1px solid var(--role-border);
+  border-radius: 0.5rem;
+  background: #f9fafb;
+  object-fit: cover;
+}
+
+@media (min-width: 1200px) {
+  .welcomeCard h1 {
+    font-size: 2.375rem;
+  }
+}
+
+@media (max-width: 575px) {
+  .welcomeCard {
+    padding: 1.25rem 4.25rem 1.25rem 1.25rem;
+  }
+
+  .adminIconButton {
+    top: 1.25rem;
+    right: 1.25rem;
+  }
+
+  .officerWorkloadAvatar {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+  }
+}
+
+@media (max-width: 1199.98px) {
+  .dashboardRoot :global(.layout-menu) {
+    position: fixed !important;
+    inset: 0 auto 0 0 !important;
+    z-index: 1040 !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important;
+    transform: translateX(-100%) !important;
+  }
+
+  .dashboardRoot:global(.layout-menu-expanded) :global(.layout-menu) {
+    transform: translateX(0) !important;
+  }
+}
+
 .dashboardRoot :global(.layout-page) {
-  height: 100%;
+  height: auto;
   min-height: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 
 .dashboardRoot :global(.content-wrapper) {
   height: auto;
   min-height: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
+
+@media (max-width: 991px) {
+  .mobileLogoButton {
+    margin-left: 0 !important;
+    margin-right: 0.75rem !important;
+  }
+}
+
+@media (max-width: 575px) {
+  .profileActions {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 430px) {
+  .mobileLogoButton {
+    margin-right: 0.5rem !important;
+  }
+
+  .profileActions {
+    gap: 6px;
+  }
+}
+
+
+
+
+
+
